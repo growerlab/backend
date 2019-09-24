@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/growerlab/letsgit/app/controller"
+	"github.com/growerlab/codev-back/app/controller"
 )
 
 func Run(addr string) error {

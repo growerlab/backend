@@ -1,4 +1,4 @@
-module github.com/growerlab/letsgit
+module github.com/growerlab/codev-back
 
 go 1.13
 

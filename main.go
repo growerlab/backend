@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/growerlab/letsgit/app"
+	"github.com/growerlab/codev-back/app"
 )
 
 func main() {
