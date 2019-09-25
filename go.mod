@@ -1,4 +1,4 @@
-module github.com/growerlab/codev-back
+module github.com/growerlab/backend
 
 go 1.13
 

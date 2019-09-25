@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/growerlab/codev-back/app"
+	"github.com/growerlab/backend/app"
 )
 
 func main() {
