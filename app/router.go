@@ -7,6 +7,6 @@ import (
 
 func Run(addr string) error {
 	engine := gin.New()
-	engine.Any("/graphql", controller.GraphQL)
+	engine.POST("/graphql", controller.GraphQL)
 	return engine.Run(addr)
 }
