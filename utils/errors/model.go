@@ -2,7 +2,7 @@ package errors
 
 // 定义Model
 
-// Name
+// User
 const (
-	Name = "name"
+	User = "user"
 )
