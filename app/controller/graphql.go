@@ -17,14 +17,16 @@ func GraphQL(ctx *gin.Context) {
 	}
 	defer body.Close()
 
-	maxFormSize := int64(10 << 20) // 10 MB is a lot of text.
-	b, err := reader.LimitReader(body, maxFormSize+1)
+	b, err := reader.LimitReader(body, MaxGraphQLRequestBody)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
-	result := graphql.Do(string(b))
+	userID, _ := UserID(ctx)
+	session := graphql.NewSession(userID)
+
+	result := graphql.Do(session, string(b))
 	if result.HasErrors() {
 		logger.GraphQLErrors(result.Errors)
 	}

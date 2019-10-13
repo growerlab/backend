@@ -4,7 +4,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/growerlab/backend/utils/errors"
+	"github.com/growerlab/backend/app/common/errors"
 )
 
 func LimitReader(r io.Reader, n int64) ([]byte, error) {

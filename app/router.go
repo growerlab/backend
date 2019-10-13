@@ -7,6 +7,10 @@ import (
 
 func Run(addr string) error {
 	engine := gin.New()
-	engine.POST("/graphql", controller.GraphQL)
+	api := engine.Group("/api", controller.GraphQL)
+	{
+		api.Use(controller.LimitGraphQLRequestBody) // limit request body size
+		api.POST("/graphql", controller.GraphQL)
+	}
 	return engine.Run(addr)
 }
