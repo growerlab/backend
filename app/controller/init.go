@@ -10,9 +10,9 @@ const (
 	userIdKey = "user-id"
 )
 
-func UserID(ctx *gin.Context) (int, error) {
+func UserID(ctx *gin.Context) (int64, error) {
 	id := getValueFromHeaderOrCookie(userIdKey, ctx)
-	userID, err := strconv.Atoi(id)
+	userID, err := strconv.ParseInt(id, 10, 64)
 	return userID, err
 }
 

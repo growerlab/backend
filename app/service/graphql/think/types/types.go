@@ -7,7 +7,7 @@ import (
 
 type Session interface {
 	Env() *env.Environment
-	UserID() int // current user
+	UserID() int64 // current user
 }
 
 type Object interface {

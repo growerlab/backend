@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS "user" (
-  id serial NOT NULL CONSTRAINT user_pkey PRIMARY KEY,
+  id bigserial NOT NULL CONSTRAINT user_pkey PRIMARY KEY,
   email varchar(255) NOT NULL,
   encrypted_password varchar(255) NOT NULL,
   username varchar(255) NOT NULL,
@@ -28,7 +28,7 @@ CREATE INDEX IF NOT EXISTS user_public_email_index ON "user" (public_email);
 CREATE UNIQUE INDEX IF NOT EXISTS user_username_uindex ON "user" (username);
 
 CREATE TABLE IF NOT EXISTS repository (
-  id serial NOT NULL CONSTRAINT repository_pk PRIMARY KEY,
+  id bigserial NOT NULL CONSTRAINT repository_pk PRIMARY KEY,
   uuid varchar(16) NOT NULL,
   path varchar(255) NOT NULL,
   name varchar(255) NOT NULL,
@@ -58,7 +58,7 @@ CREATE INDEX IF NOT EXISTS repository_path_index ON repository (path);
 CREATE INDEX IF NOT EXISTS repository_uuid_index ON repository (uuid);
 
 CREATE TABLE IF NOT EXISTS namespace (
-  id serial NOT NULL CONSTRAINT namespace_pk PRIMARY KEY,
+  id bigserial NOT NULL CONSTRAINT namespace_pk PRIMARY KEY,
   path varchar(255) NOT NULL,
   owner_id integer NOT NULL
 );

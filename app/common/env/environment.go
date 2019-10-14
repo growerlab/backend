@@ -19,7 +19,7 @@ func NewEnvironment() *Environment {
 	}
 }
 
-func (e *Environment) Set(k, v string) {
+func (e *Environment) Set(k string, v interface{}) {
 	e.val[k] = v
 }
 
