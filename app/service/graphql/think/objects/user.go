@@ -35,16 +35,13 @@ func (u *GQLUser) Types() graphql.Fields {
 	return fds
 }
 
-func (u *GQLUser) QueryResolver(fields *graphql.Object) (
-	query *graphql.Field) {
-
+func (u *GQLUser) QueryResolver(fields *graphql.Object) (query *graphql.Field) {
 	query = u.BuildSimpleField(u.Name(), "list users", fields, u.listUsers)
 	return
 }
 
-func (u *GQLUser) MutationResolvers(fields *graphql.Object) (
-	mutations graphql.Fields) {
-
+func (u *GQLUser) MutationResolvers(fields *graphql.Object) (mutations graphql.Fields) {
+	mutations = make(map[string]*graphql.Field)
 	create := u.BuildSimpleField("create", "create user", fields, u.createUser)
 	mutations[create.Name] = create
 	return
