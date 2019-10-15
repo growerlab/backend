@@ -10,7 +10,7 @@ const (
 	userIdKey = "user-id"
 )
 
-func UserID(ctx *gin.Context) (int64, error) {
+func GetUserID(ctx *gin.Context) (int64, error) {
 	id := getValueFromHeaderOrCookie(userIdKey, ctx)
 	userID, err := strconv.ParseInt(id, 10, 64)
 	return userID, err

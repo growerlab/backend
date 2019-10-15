@@ -9,7 +9,7 @@ import (
 )
 
 func InitGraphQL() error {
-	hub.Register(objects.NewGQLUser())
+	_ = hub.Register(objects.NewGQLUser())
 	return nil
 }
 

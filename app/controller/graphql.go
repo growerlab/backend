@@ -23,7 +23,7 @@ func GraphQL(ctx *gin.Context) {
 		return
 	}
 
-	userID, _ := UserID(ctx)
+	userID, _ := GetUserID(ctx)
 	session := graphql.NewSession(userID)
 
 	result := graphql.Do(session, string(b))
