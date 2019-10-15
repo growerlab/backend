@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -38,6 +39,5 @@ func output(prefix string, format string, a ...interface{}) {
 	_, _ = sb.WriteString(fmt.Sprintf(format, a...))
 	_ = sb.WriteByte('\n')
 
-	var w = gin.DefaultWriter
-	_, _ = w.Write([]byte(sb.String()))
+	_, _ = io.WriteString(gin.DefaultWriter, sb.String())
 }
