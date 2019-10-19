@@ -21,9 +21,12 @@ func BuildSchema(session types.Session) graphql.Schema {
 	hub.Each(func(obj types.Object) {
 		typ := buildType(obj.Name(), obj.Types())
 
-		queryFd := buildObject(obj, session)
-		queryFd.Resolve = obj.QueryResolver(typ).Resolve
-		querySet[queryFd.Name] = queryFd
+		queryResolvers := obj.QueryResolvers(typ)
+		for _, rsv := range queryResolvers {
+			queryFd := buildObject(obj, session)
+			queryFd.Resolve = rsv.Resolve
+			querySet[queryFd.Name] = queryFd
+		}
 
 		mutations := obj.MutationResolvers(typ)
 		for mutName, mut := range mutations {

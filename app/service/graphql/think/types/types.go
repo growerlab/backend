@@ -19,12 +19,9 @@ type Object interface {
 	// Fields
 	//
 	Types() graphql.Fields
-	// 查询与创建更新等操作均通过此接口实现
-	//
-	// Resolvers(Session, *graphql.Object) (query graphql.Fields, mutation graphql.Fields)
-	QueryResolver(*graphql.Object) *graphql.Field
+
+	QueryResolvers(*graphql.Object) graphql.Fields
 	MutationResolvers(*graphql.Object) graphql.Fields
 
-	//
 	SetSession(Session)
 }
