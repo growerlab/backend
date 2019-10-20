@@ -10,7 +10,7 @@ import (
 )
 
 func Info(format string, a ...interface{}) {
-	output("[info]", format, a...)
+	output("[Info]", format, a...)
 }
 
 func Warn(format string, a ...interface{}) {
@@ -25,6 +25,7 @@ func Error(format string, a ...interface{}) {
 
 func GraphQLErrors(errs []gqlerrors.FormattedError) {
 	sbErr := strings.Builder{}
+	sbErr.WriteString("[GraphQL] ")
 	for _, e := range errs {
 		sbErr.WriteString(e.Error())
 		sbErr.WriteByte('\n')

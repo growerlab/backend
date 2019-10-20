@@ -13,5 +13,6 @@ const (
 func LimitGraphQLRequestBody(ctx *gin.Context) {
 	if ctx.Request.ContentLength > MaxGraphQLRequestBody {
 		ctx.AbortWithStatus(http.StatusRequestEntityTooLarge)
+		return
 	}
 }

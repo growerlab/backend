@@ -5,7 +5,7 @@ import "github.com/growerlab/backend/app/service/graphql/think"
 // 需要初始化的全局数据放在这里
 //	eg. onStart(job.Work)
 //
-func Init() {
+func init() {
 	onStart(think.InitGraphQL)
 }
 

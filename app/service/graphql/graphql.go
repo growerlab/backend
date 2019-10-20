@@ -6,11 +6,15 @@ import (
 	"github.com/growerlab/backend/app/service/graphql/think/types"
 )
 
-func Do(session types.Session, query string) *graphql.Result {
+type GQLRequest struct {
+	Query string `json:"query,omitempty"`
+}
+
+func Do(session types.Session, req *GQLRequest) *graphql.Result {
 	schema := think.BuildSchema(session)
 	result := graphql.Do(graphql.Params{
 		Schema:        schema,
-		RequestString: query,
+		RequestString: req.Query,
 	})
 	return result
 }

@@ -8,6 +8,8 @@ import (
 	"github.com/growerlab/backend/app/service/graphql/think/types"
 )
 
+const TypeSeq = "_"
+
 func InitGraphQL() error {
 	_ = hub.Register(objects.NewGQLUser())
 	return nil
@@ -25,12 +27,13 @@ func BuildSchema(session types.Session) graphql.Schema {
 		for _, rsv := range queryResolvers {
 			queryFd := buildObject(obj, session)
 			queryFd.Resolve = rsv.Resolve
-			querySet[queryFd.Name] = queryFd
+			action := strings.Join([]string{obj.Name(), rsv.Name}, TypeSeq)
+			querySet[action] = queryFd
 		}
 
 		mutations := obj.MutationResolvers(typ)
 		for mutName, mut := range mutations {
-			action := strings.Join([]string{obj.Name(), mutName}, ".")
+			action := strings.Join([]string{obj.Name(), mutName}, TypeSeq)
 			mutationSet[action] = mut
 		}
 	})

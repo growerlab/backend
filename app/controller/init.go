@@ -7,11 +7,11 @@ import (
 )
 
 const (
-	userIdKey = "user-id"
+	AuthUserId = "auth-user-id"
 )
 
 func GetUserID(ctx *gin.Context) (int64, error) {
-	id := getValueFromHeaderOrCookie(userIdKey, ctx)
+	id := getValueFromHeaderOrCookie(AuthUserId, ctx)
 	userID, err := strconv.ParseInt(id, 10, 64)
 	return userID, err
 }

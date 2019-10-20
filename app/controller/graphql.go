@@ -6,29 +6,27 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/growerlab/backend/app/service/graphql"
 	"github.com/growerlab/backend/utils/logger"
-	"github.com/growerlab/backend/utils/reader"
 )
 
 func GraphQL(ctx *gin.Context) {
-	body := ctx.Request.Body
-	if body == nil {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-	defer body.Close()
-
-	b, err := reader.LimitReader(body, MaxGraphQLRequestBody)
+	var req graphql.GQLRequest
+	err := ctx.BindJSON(&req)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
-	userID, _ := GetUserID(ctx)
-	session := graphql.NewSession(userID)
+	var session *graphql.Session
+	userID, err := GetUserID(ctx)
+	if err == nil {
+		session = graphql.NewSession(userID)
+	}
 
-	result := graphql.Do(session, string(b))
+	result := graphql.Do(session, &req)
 	if result.HasErrors() {
 		logger.GraphQLErrors(result.Errors)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, result)
+		return
 	}
 	ctx.JSON(200, result)
 }

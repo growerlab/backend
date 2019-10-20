@@ -41,7 +41,7 @@ func (u *GQLUser) QueryResolvers(fields *graphql.Object) (query graphql.Fields) 
 	query[list.Name] = list
 
 	me := u.BuildSimpleField("me", "about me", fields, u.me)
-	query[me.Name] = list
+	query[me.Name] = me
 
 	return
 }
@@ -53,8 +53,16 @@ func (u *GQLUser) MutationResolvers(fields *graphql.Object) (mutations graphql.F
 	return
 }
 
+type Test struct {
+	Id    int64  `json:"id,omitempty"`
+	Email string `json:"email,omitempty"`
+}
+
 func (u *GQLUser) me(p graphql.ResolveParams) (interface{}, error) {
-	return nil, nil
+	return &Test{
+		Email: "moli",
+		Id:    20,
+	}, nil
 }
 
 func (u *GQLUser) listUsers(p graphql.ResolveParams) (interface{}, error) {
