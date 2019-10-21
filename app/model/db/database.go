@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"runtime/debug"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/utils/conf"
 	"github.com/growerlab/backend/app/utils/logger"
@@ -23,6 +24,9 @@ func InitDatabase() error {
 	if err != nil {
 		return errors.Sql(err)
 	}
+
+	// pgsql placeholder
+	squirrel.StatementBuilder = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 	return nil
 }
 
