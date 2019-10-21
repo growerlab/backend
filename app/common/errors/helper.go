@@ -6,4 +6,5 @@ var (
 	P                     = invalidParameterError
 	InvalidParameterError = invalidParameterError
 	Trace                 = trace
+	Sql                   = sqlError
 )

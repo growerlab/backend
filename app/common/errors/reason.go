@@ -5,4 +5,5 @@ package errors
 const (
 	InvalidParameter = "InvalidParameter"
 	NotFoundField    = "NotFoundField"
+	SqlError         = "SqlError"
 )

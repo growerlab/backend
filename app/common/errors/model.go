@@ -4,5 +4,5 @@ package errors
 
 // User
 const (
-	User = "user"
+	User = "User"
 )

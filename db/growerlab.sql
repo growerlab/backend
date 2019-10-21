@@ -1,10 +1,13 @@
-CREATE TABLE IF NOT EXISTS "user" (
+-- auto-generated definition
+CREATE TABLE "user" (
   id bigserial NOT NULL CONSTRAINT user_pkey PRIMARY KEY,
   email varchar(255) NOT NULL,
   encrypted_password varchar(255) NOT NULL,
   username varchar(255) NOT NULL,
   name varchar(255) NOT NULL,
-  public_email varchar(255)
+  public_email varchar(255),
+  created_at timestamp,
+  deleted_at timestamp
 );
 
 COMMENT ON TABLE "user" IS '用户表';
@@ -19,13 +22,17 @@ COMMENT ON COLUMN "user".name IS '用户昵称';
 
 COMMENT ON COLUMN "user".public_email IS '公开的邮箱地址';
 
+COMMENT ON COLUMN "user".created_at IS '创建的时间';
+
+COMMENT ON COLUMN "user".deleted_at IS '删除的时间';
+
 ALTER TABLE "user" OWNER TO growerlab;
 
-CREATE UNIQUE INDEX IF NOT EXISTS user_email_uindex ON "user" (email);
+CREATE UNIQUE INDEX user_email_uindex ON "user" (email);
 
-CREATE INDEX IF NOT EXISTS user_public_email_index ON "user" (public_email);
+CREATE INDEX user_public_email_index ON "user" (public_email);
 
-CREATE UNIQUE INDEX IF NOT EXISTS user_username_uindex ON "user" (username);
+CREATE UNIQUE INDEX user_username_uindex ON "user" (username);
 
 CREATE TABLE IF NOT EXISTS repository (
   id bigserial NOT NULL CONSTRAINT repository_pk PRIMARY KEY,

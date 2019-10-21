@@ -34,17 +34,25 @@ func mustCode(parts []string) string {
 	return strings.Join(parts, ".")
 }
 
-var trace = func(other error) error {
-	if other == nil {
-		return nil
-	}
-	e := New().(*Err)
-	e.Err = jujuerr.Trace(other).(*jujuerr.Err)
-	e.code = other.Error()
-	e.SetLocation(1)
-	return e
+func trace(other error) error {
+	return wrapError(other, other.Error())
 }
 
-var invalidParameterError = func(model, field, reason string) error {
+func invalidParameterError(model, field, reason string) error {
 	return New(InvalidParameter, model, field, reason)
+}
+
+func sqlError(sqlErr error) error {
+	return wrapError(sqlErr, SqlError)
+}
+
+func wrapError(err error, code string) error {
+	if err == nil {
+		return nil
+	}
+	e := New(SqlError).(*Err)
+	e.Err = jujuerr.Trace(err).(*jujuerr.Err)
+	e.code = err.Error()
+	e.SetLocation(1)
+	return e
 }

@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/growerlab/backend/app/service/graphql"
-	"github.com/growerlab/backend/utils/logger"
+	"github.com/growerlab/backend/app/utils/logger"
 )
 
 func GraphQL(ctx *gin.Context) {
