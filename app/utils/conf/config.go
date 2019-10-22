@@ -18,11 +18,11 @@ var (
 )
 
 type DB struct {
-	URL string `yaml:"url,omitempty"`
+	URL string `yaml:"url"`
 }
 
 type Config struct {
-	Database *DB `yaml:"db,omitempty"`
+	Database *DB `yaml:"db"`
 }
 
 func GetConf() *Config {
@@ -35,7 +35,7 @@ func LoadConfig() error {
 	if err != nil {
 		return errors.Trace(err)
 	}
-	err = yaml.Unmarshal(confBody, config)
+	err = yaml.Unmarshal(confBody, &config)
 	if err != nil {
 		return errors.Trace(err)
 	}
