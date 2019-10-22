@@ -1,86 +1,342 @@
--- auto-generated definition
-CREATE TABLE "user" (
-  id bigserial NOT NULL CONSTRAINT user_pkey PRIMARY KEY,
-  email varchar(255) NOT NULL,
-  encrypted_password varchar(255) NOT NULL,
-  username varchar(255) NOT NULL,
-  name varchar(255) NOT NULL,
-  public_email varchar(255),
-  created_at timestamp,
-  deleted_at timestamp
+--
+-- PostgreSQL database dump
+--
+-- Dumped from database version 12.0
+-- Dumped by pg_dump version 12.0
+
+SET statement_timeout = 0;
+
+SET lock_timeout = 0;
+
+SET idle_in_transaction_session_timeout = 0;
+
+SET client_encoding = 'UTF8';
+
+SET standard_conforming_strings = ON;
+
+SELECT
+  pg_catalog.set_config('search_path', '', FALSE);
+
+SET check_function_bodies = FALSE;
+
+SET xmloption = content;
+
+SET client_min_messages = warning;
+
+SET row_security = OFF;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: namespace; Type: TABLE; Schema: public; Owner: growerlab
+--
+
+CREATE TABLE public.namespace (
+  id bigint NOT NULL,
+  path character varying(255) NOT NULL,
+  owner_id integer NOT NULL
 );
 
-COMMENT ON TABLE "user" IS '用户表';
+ALTER TABLE public.namespace OWNER TO growerlab;
 
-COMMENT ON COLUMN "user".email IS '用户邮箱';
+--
+-- Name: TABLE namespace; Type: COMMENT; Schema: public; Owner: growerlab
+--
 
-COMMENT ON COLUMN "user".encrypted_password IS '用户密码';
+COMMENT ON TABLE public.namespace IS ' 命名空间';
 
-COMMENT ON COLUMN "user".username IS '唯一性用户名（将用在url中）';
+--
+-- Name: COLUMN namespace.path; Type: COMMENT; Schema: public; Owner: growerlab
+--
 
-COMMENT ON COLUMN "user".name IS '用户昵称';
+COMMENT ON COLUMN public.namespace.path IS '路径';
 
-COMMENT ON COLUMN "user".public_email IS '公开的邮箱地址';
+--
+-- Name: COLUMN namespace.owner_id; Type: COMMENT; Schema: public; Owner: growerlab
+--
 
-COMMENT ON COLUMN "user".created_at IS '创建的时间';
+COMMENT ON COLUMN public.namespace.owner_id IS '所有者';
 
-COMMENT ON COLUMN "user".deleted_at IS '删除的时间';
+--
+-- Name: namespace_id_seq; Type: SEQUENCE; Schema: public; Owner: growerlab
+--
 
-ALTER TABLE "user" OWNER TO growerlab;
+CREATE SEQUENCE public.namespace_id_seq
+  AS integer START WITH 1
+  INCREMENT BY 1
+  NO MINVALUE
+  NO MAXVALUE
+  CACHE 1;
 
-CREATE UNIQUE INDEX user_email_uindex ON "user" (email);
+ALTER TABLE public.namespace_id_seq OWNER TO growerlab;
 
-CREATE INDEX user_public_email_index ON "user" (public_email);
+--
+-- Name: namespace_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: growerlab
+--
 
-CREATE UNIQUE INDEX user_username_uindex ON "user" (username);
+ALTER SEQUENCE public.namespace_id_seq OWNED BY public.namespace.id;
 
-CREATE TABLE IF NOT EXISTS repository (
-  id bigserial NOT NULL CONSTRAINT repository_pk PRIMARY KEY,
-  uuid varchar(16) NOT NULL,
-  path varchar(255) NOT NULL,
-  name varchar(255) NOT NULL,
+--
+-- Name: repository; Type: TABLE; Schema: public; Owner: growerlab
+--
+
+CREATE TABLE public.repository (
+  id bigint NOT NULL,
+  uuid character varying(16) NOT NULL,
+  path character varying(255) NOT NULL,
+  name character varying(255) NOT NULL,
   namespace_id integer NOT NULL,
   creator_id integer NOT NULL,
   description text
 );
 
-COMMENT ON TABLE repository IS '仓库表';
+ALTER TABLE public.repository OWNER TO growerlab;
 
-COMMENT ON COLUMN repository.uuid IS '仓库uuid（fork仓库相同）';
+--
+-- Name: TABLE repository; Type: COMMENT; Schema: public; Owner: growerlab
+--
 
-COMMENT ON COLUMN repository.path IS '仓库路径';
+COMMENT ON TABLE public.repository IS '仓库表';
 
-COMMENT ON COLUMN repository.name IS '仓库名';
+--
+-- Name: COLUMN repository.uuid; Type: COMMENT; Schema: public; Owner: growerlab
+--
 
-COMMENT ON COLUMN repository.namespace_id IS '命名空间id';
+COMMENT ON COLUMN public.repository.uuid IS '仓库uuid（fork仓库相同）';
 
-COMMENT ON COLUMN repository.creator_id IS '仓库创建者';
+--
+-- Name: COLUMN repository.path; Type: COMMENT; Schema: public; Owner: growerlab
+--
 
-COMMENT ON COLUMN repository.description IS '仓库描述';
+COMMENT ON COLUMN public.repository.path IS '仓库路径';
 
-ALTER TABLE repository OWNER TO growerlab;
+--
+-- Name: COLUMN repository.name; Type: COMMENT; Schema: public; Owner: growerlab
+--
 
-CREATE INDEX IF NOT EXISTS repository_path_index ON repository (path);
+COMMENT ON COLUMN public.repository.name IS '仓库名';
 
-CREATE INDEX IF NOT EXISTS repository_uuid_index ON repository (uuid);
+--
+-- Name: COLUMN repository.namespace_id; Type: COMMENT; Schema: public; Owner: growerlab
+--
 
-CREATE TABLE IF NOT EXISTS namespace (
-  id bigserial NOT NULL CONSTRAINT namespace_pk PRIMARY KEY,
-  path varchar(255) NOT NULL,
-  owner_id integer NOT NULL
+COMMENT ON COLUMN public.repository.namespace_id IS '命名空间id';
+
+--
+-- Name: COLUMN repository.creator_id; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.repository.creator_id IS '仓库创建者';
+
+--
+-- Name: COLUMN repository.description; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.repository.description IS '仓库描述';
+
+--
+-- Name: repository_id_seq; Type: SEQUENCE; Schema: public; Owner: growerlab
+--
+
+CREATE SEQUENCE public.repository_id_seq
+  AS integer START WITH 1
+  INCREMENT BY 1
+  NO MINVALUE
+  NO MAXVALUE
+  CACHE 1;
+
+ALTER TABLE public.repository_id_seq OWNER TO growerlab;
+
+--
+-- Name: repository_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: growerlab
+--
+
+ALTER SEQUENCE public.repository_id_seq OWNED BY public.repository.id;
+
+--
+-- Name: user; Type: TABLE; Schema: public; Owner: growerlab
+--
+
+CREATE TABLE public. "user" (
+  id bigint NOT NULL,
+  email character varying(255) NOT NULL,
+  encrypted_password character varying(255) NOT NULL,
+  username character varying(255) NOT NULL,
+  name character varying(255) NOT NULL,
+  public_email character varying(255),
+  created_at timestamp without time zone,
+  deleted_at timestamp without time zone
 );
 
-COMMENT ON TABLE namespace IS ' 命名空间';
+ALTER TABLE public. "user" OWNER TO growerlab;
 
-COMMENT ON COLUMN namespace.path IS '路径';
+--
+-- Name: TABLE "user"; Type: COMMENT; Schema: public; Owner: growerlab
+--
 
-COMMENT ON COLUMN namespace.owner_id IS '所有者';
+COMMENT ON TABLE public. "user" IS '用户表';
 
-ALTER TABLE namespace OWNER TO growerlab;
+--
+-- Name: COLUMN "user".email; Type: COMMENT; Schema: public; Owner: growerlab
+--
 
-CREATE UNIQUE INDEX IF NOT EXISTS namespace_id_uindex ON namespace (id);
+COMMENT ON COLUMN public. "user".email IS '用户邮箱';
 
-CREATE INDEX IF NOT EXISTS namespace_owner_id_index ON namespace (owner_id);
+--
+-- Name: COLUMN "user".encrypted_password; Type: COMMENT; Schema: public; Owner: growerlab
+--
 
-CREATE INDEX IF NOT EXISTS namespace_path_index ON namespace (path);
+COMMENT ON COLUMN public. "user".encrypted_password IS '用户密码';
 
+--
+-- Name: COLUMN "user".username; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public. "user".username IS '唯一性用户名（将用在url中）';
+
+--
+-- Name: COLUMN "user".name; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public. "user".name IS '用户昵称';
+
+--
+-- Name: COLUMN "user".public_email; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public. "user".public_email IS '公开的邮箱地址';
+
+--
+-- Name: COLUMN "user".created_at; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public. "user".created_at IS '创建的时间';
+
+--
+-- Name: COLUMN "user".deleted_at; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public. "user".deleted_at IS '删除的时间';
+
+--
+-- Name: user_id_seq; Type: SEQUENCE; Schema: public; Owner: growerlab
+--
+
+CREATE SEQUENCE public.user_id_seq
+  START WITH 1
+  INCREMENT BY 1
+  NO MINVALUE
+  NO MAXVALUE
+  CACHE 1;
+
+ALTER TABLE public.user_id_seq OWNER TO growerlab;
+
+--
+-- Name: user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: growerlab
+--
+
+ALTER SEQUENCE public.user_id_seq OWNED BY public. "user".id;
+
+--
+-- Name: namespace id; Type: DEFAULT; Schema: public; Owner: growerlab
+--
+
+ALTER TABLE ONLY public.namespace
+  ALTER COLUMN id SET DEFAULT nextval('public.namespace_id_seq'::regclass);
+
+--
+-- Name: repository id; Type: DEFAULT; Schema: public; Owner: growerlab
+--
+
+ALTER TABLE ONLY public.repository
+  ALTER COLUMN id SET DEFAULT nextval('public.repository_id_seq'::regclass);
+
+--
+-- Name: user id; Type: DEFAULT; Schema: public; Owner: growerlab
+--
+
+ALTER TABLE ONLY public. "user"
+  ALTER COLUMN id SET DEFAULT nextval('public.user_id_seq'::regclass);
+
+--
+-- Name: namespace namespace_pk; Type: CONSTRAINT; Schema: public; Owner: growerlab
+--
+
+ALTER TABLE ONLY public.namespace
+  ADD CONSTRAINT namespace_pk PRIMARY KEY (id);
+
+--
+-- Name: repository repository_pk; Type: CONSTRAINT; Schema: public; Owner: growerlab
+--
+
+ALTER TABLE ONLY public.repository
+  ADD CONSTRAINT repository_pk PRIMARY KEY (id);
+
+--
+-- Name: user user_pkey; Type: CONSTRAINT; Schema: public; Owner: growerlab
+--
+
+ALTER TABLE ONLY public. "user"
+  ADD CONSTRAINT user_pkey PRIMARY KEY (id);
+
+--
+-- Name: namespace_id_uindex; Type: INDEX; Schema: public; Owner: growerlab
+--
+
+CREATE UNIQUE INDEX namespace_id_uindex ON public.namespace
+USING btree (id);
+
+--
+-- Name: namespace_owner_id_index; Type: INDEX; Schema: public; Owner: growerlab
+--
+
+CREATE INDEX namespace_owner_id_index ON public.namespace
+USING btree (owner_id);
+
+--
+-- Name: namespace_path_index; Type: INDEX; Schema: public; Owner: growerlab
+--
+
+CREATE INDEX namespace_path_index ON public.namespace
+USING btree (path);
+
+--
+-- Name: repository_path_index; Type: INDEX; Schema: public; Owner: growerlab
+--
+
+CREATE INDEX repository_path_index ON public.repository
+USING btree (path);
+
+--
+-- Name: repository_uuid_index; Type: INDEX; Schema: public; Owner: growerlab
+--
+
+CREATE INDEX repository_uuid_index ON public.repository
+USING btree (uuid);
+
+--
+-- Name: user_email_uindex; Type: INDEX; Schema: public; Owner: growerlab
+--
+
+CREATE UNIQUE INDEX user_email_uindex ON public. "user"
+USING btree (email);
+
+--
+-- Name: user_public_email_index; Type: INDEX; Schema: public; Owner: growerlab
+--
+
+CREATE INDEX user_public_email_index ON public. "user"
+USING btree (public_email);
+
+--
+-- Name: user_username_uindex; Type: INDEX; Schema: public; Owner: growerlab
+--
+
+CREATE UNIQUE INDEX user_username_uindex ON public. "user"
+USING btree (username);
+
+--
+-- PostgreSQL database dump complete
+--
