@@ -9,13 +9,14 @@ import (
 )
 
 var (
-	NormalUser = sq.NotEq{"deleted_at": nil}
+	NormalUser = sq.Eq{"deleted_at": nil}
 )
 
 func AddUser(tx sqlx.Execer, user *User) error {
 	user.CreatedAt = time.Now().UTC()
 
-	sql, _, _ := sq.Insert("user").Columns(columns...).
+	sql, _, _ := sq.Insert("user").
+		Columns(columns...).
 		Values(
 			user.Email,
 			user.EncryptedPassword,
