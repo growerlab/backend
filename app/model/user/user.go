@@ -8,6 +8,10 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+var (
+	NormalUser = sq.NotEq{"deleted_at": nil}
+)
+
 func AddUser(tx sqlx.Execer, user *User) error {
 	user.CreatedAt = time.Now().UTC()
 
@@ -31,6 +35,7 @@ func ListUsers(src sqlx.Queryer, page, per uint64) ([]*User, error) {
 	// TODO 如果用户量很大的时候，这样分页会有性能问题
 	sql, _, _ := sq.Select(columns...).
 		From("user").
+		Where(NormalUser).
 		Limit(per).
 		Offset(page * per).
 		ToSql()
