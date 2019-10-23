@@ -167,7 +167,8 @@ CREATE TABLE public. "user" (
   name character varying(255) NOT NULL,
   public_email character varying(255),
   created_at timestamp without time zone,
-  deleted_at timestamp without time zone
+  deleted_at timestamp without time zone,
+  verified_at timestamp without time zone
 );
 
 ALTER TABLE public. "user" OWNER TO growerlab;
@@ -219,6 +220,12 @@ COMMENT ON COLUMN public. "user".created_at IS '创建的时间';
 --
 
 COMMENT ON COLUMN public. "user".deleted_at IS '删除的时间';
+
+--
+-- Name: COLUMN "user".verified_at; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public. "user".verified_at IS '邮箱通过验证的时间';
 
 --
 -- Name: user_id_seq; Type: SEQUENCE; Schema: public; Owner: growerlab

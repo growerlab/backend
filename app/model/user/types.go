@@ -11,6 +11,7 @@ var columns = []string{
 	"public_email",
 	"created_at",
 	"deleted_at",
+	"verified_at",
 }
 
 type User struct {
@@ -22,4 +23,5 @@ type User struct {
 	PublicEmail       *string    `db:"public_email,omitempty"`
 	CreatedAt         time.Time  `db:"created_at,omitempty"`
 	DeletedAt         *time.Time `db:"deleted_at,omitempty"`
+	VerifiedAt        *time.Time `db:"verified_at,omitempty"`
 }
