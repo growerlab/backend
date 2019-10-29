@@ -1,0 +1,25 @@
+# .gqlgen.yml example
+#
+# Refer to https://gqlgen.com/config/
+# for detailed .gqlgen.yml documentation.
+
+schema:
+  - "app/service/graphql/schema/*.graphql"
+exec:
+  filename: "app/service/graphql/resolver/generated.go"
+
+# 生成的文件地址
+model:
+  filename: "app/service/gql_models.go"
+
+struct_tag: db
+
+models:
+  User:
+    model: github.com/growerlab/backend/app/model/user.User
+  Namespace:
+    model: github.com/growerlab/backend/app/model/namespace.Namespace
+
+resolver:
+  filename: app/service/graphql/resolver/resolver.go
+  type: Resolver

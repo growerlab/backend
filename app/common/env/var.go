@@ -1,5 +1,5 @@
 package env
 
 const (
-	VarUserID = "user-id"
+	VarUserToken = "user-token"
 )

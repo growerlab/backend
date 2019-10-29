@@ -8,9 +8,9 @@ type Session struct {
 	e *env.Environment
 }
 
-func NewSession(userID int64) *Session {
+func NewSession(userToken string) *Session {
 	e := env.NewEnvironment()
-	e.Set(env.VarUserID, userID)
+	e.Set(env.VarUserToken, userToken)
 	return &Session{
 		e: e,
 	}
@@ -20,7 +20,12 @@ func (s *Session) Env() *env.Environment {
 	return s.e
 }
 
-func (s *Session) UserID() int64 { // current user
-	userID, _ := s.e.MustInt64(env.VarUserID)
+func (s *Session) UserToken() string { // current user
+	userID, _ := s.e.MustString(env.VarUserToken)
 	return userID
+}
+
+func (s *Session) IsGuest() bool {
+	token := s.UserToken()
+	return len(token) == 0
 }

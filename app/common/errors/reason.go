@@ -4,6 +4,7 @@ package errors
 
 const (
 	InvalidParameter = "InvalidParameter"
+	NotFound         = "NotFound"
 	NotFoundField    = "NotFoundField"
 	SqlError         = "SqlError"
 )

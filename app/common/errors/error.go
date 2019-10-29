@@ -46,6 +46,10 @@ func sqlError(sqlErr error) error {
 	return wrapError(sqlErr, SqlError)
 }
 
+func notFoundError(model, field string) error {
+	return New(NotFound, model, field)
+}
+
 func wrapError(err error, code string) error {
 	if err == nil {
 		return nil

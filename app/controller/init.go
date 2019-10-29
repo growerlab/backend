@@ -1,19 +1,16 @@
 package controller
 
 import (
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 )
 
 const (
-	AuthUserId = "auth-user-id"
+	AuthUserToken = "auth-user-token"
 )
 
-func GetUserID(ctx *gin.Context) (int64, error) {
-	id := getValueFromHeaderOrCookie(AuthUserId, ctx)
-	userID, err := strconv.ParseInt(id, 10, 64)
-	return userID, err
+func GetUserToken(ctx *gin.Context) string {
+	token := getValueFromHeaderOrCookie(AuthUserToken, ctx)
+	return token
 }
 
 func getValueFromHeaderOrCookie(k string, ctx *gin.Context) string {

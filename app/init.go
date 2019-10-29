@@ -2,7 +2,6 @@ package app
 
 import (
 	"github.com/growerlab/backend/app/model/db"
-	"github.com/growerlab/backend/app/service/graphql/think"
 	"github.com/growerlab/backend/app/utils/conf"
 )
 
@@ -12,7 +11,6 @@ import (
 func init() {
 	onStart(conf.LoadConfig)
 	onStart(db.InitDatabase)
-	onStart(think.InitGraphQL)
 }
 
 func onStart(fn func() error) {

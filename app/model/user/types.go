@@ -1,6 +1,10 @@
 package user
 
-import "time"
+import (
+	"time"
+
+	"github.com/growerlab/backend/app/model/namespace"
+)
 
 var columns = []string{
 	"id",
@@ -15,13 +19,17 @@ var columns = []string{
 }
 
 type User struct {
-	ID                int64      `db:"id,omitempty"`
-	Email             string     `db:"email,omitempty"`
-	EncryptedPassword string     `db:"encrypted_password,omitempty"`
-	Username          string     `db:"username,omitempty"`
-	Name              string     `db:"name,omitempty"`
-	PublicEmail       *string    `db:"public_email,omitempty"`
-	CreatedAt         time.Time  `db:"created_at,omitempty"`
-	DeletedAt         *time.Time `db:"deleted_at,omitempty"`
-	VerifiedAt        *time.Time `db:"verified_at,omitempty"`
+	ID                int        `db:"id"`
+	Email             string     `db:"email"`
+	EncryptedPassword string     `db:"encrypted_password"`
+	Username          string     `db:"username"`
+	Name              string     `db:"name"`
+	PublicEmail       string     `db:"public_email"`
+	CreatedAt         time.Time  `db:"created_at"`
+	DeletedAt         *time.Time `db:"deleted_at"`
+	VerifiedAt        *time.Time `db:"verified_at"`
+}
+
+func (u *User) Namespace() *namespace.Namespace {
+	return &namespace.Namespace{}
 }

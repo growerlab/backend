@@ -1,0 +1,26 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+scalar Time
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  encryptedPassword: String!
+  username: String!
+  publicEmail: String!
+  createdAt: Time!
+  deletedAt: Time
+  verifiedAt: Time
+  namespace: Namespace!
+}
+
+input NewUserPayload {
+  email: String!
+  password: String!
+  confirmPassword: String!
+  username: String!
+  name: String!
+}

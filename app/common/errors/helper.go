@@ -7,4 +7,5 @@ var (
 	InvalidParameterError = invalidParameterError
 	Trace                 = trace
 	Sql                   = sqlError
+	NotFoundError         = notFoundError
 )

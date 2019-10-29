@@ -1,32 +1,27 @@
 package controller
 
 import (
-	"net/http"
+	"context"
 
+	"github.com/99designs/gqlgen/handler"
 	"github.com/gin-gonic/gin"
 	"github.com/growerlab/backend/app/service/graphql"
-	"github.com/growerlab/backend/app/utils/logger"
+	"github.com/growerlab/backend/app/service/graphql/resolver"
 )
 
 func GraphQL(ctx *gin.Context) {
-	var req graphql.GQLRequest
-	err := ctx.BindJSON(&req)
-	if err != nil {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-
 	var session *graphql.Session
-	userID, err := GetUserID(ctx)
-	if err == nil {
-		session = graphql.NewSession(userID)
-	}
+	userToken := GetUserToken(ctx)
+	session = graphql.NewSession(userToken)
 
-	result := graphql.Do(session, &req)
-	if result.HasErrors() {
-		logger.GraphQLErrors(result.Errors)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, result)
-		return
-	}
-	ctx.JSON(200, result)
+	sessionCtx := context.WithValue(ctx.Request.Context(), "session", session)
+	ctx.Request = ctx.Request.WithContext(sessionCtx)
+
+	fn := handler.GraphQL(resolver.NewExecutableSchema(resolver.Config{Resolvers: &resolver.Resolver{}}))
+	fn.ServeHTTP(ctx.Writer, ctx.Request)
+}
+
+func GraphQLPlayground(ctx *gin.Context) {
+	fn := handler.Playground("GraphQL playground", "/playground")
+	fn.ServeHTTP(ctx.Writer, ctx.Request)
 }
