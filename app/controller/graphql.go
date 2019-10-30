@@ -12,7 +12,7 @@ import (
 func GraphQL(ctx *gin.Context) {
 	var session *graphql.Session
 	userToken := GetUserToken(ctx)
-	session = graphql.NewSession(userToken)
+	session = graphql.NewSession(userToken, ctx)
 
 	sessionCtx := context.WithValue(ctx.Request.Context(), "session", session)
 	ctx.Request = ctx.Request.WithContext(sessionCtx)

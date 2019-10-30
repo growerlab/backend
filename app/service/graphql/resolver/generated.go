@@ -61,16 +61,15 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		CreatedAt         func(childComplexity int) int
-		DeletedAt         func(childComplexity int) int
-		Email             func(childComplexity int) int
-		EncryptedPassword func(childComplexity int) int
-		ID                func(childComplexity int) int
-		Name              func(childComplexity int) int
-		Namespace         func(childComplexity int) int
-		PublicEmail       func(childComplexity int) int
-		Username          func(childComplexity int) int
-		VerifiedAt        func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		DeletedAt   func(childComplexity int) int
+		Email       func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Name        func(childComplexity int) int
+		Namespace   func(childComplexity int) int
+		PublicEmail func(childComplexity int) int
+		Username    func(childComplexity int) int
+		VerifiedAt  func(childComplexity int) int
 	}
 }
 
@@ -156,13 +155,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.Email(childComplexity), true
-
-	case "User.encryptedPassword":
-		if e.complexity.User.EncryptedPassword == nil {
-			break
-		}
-
-		return e.complexity.User.EncryptedPassword(childComplexity), true
 
 	case "User.id":
 		if e.complexity.User.ID == nil {
@@ -292,7 +284,6 @@ type User {
   id: ID!
   name: String!
   email: String!
-  encryptedPassword: String!
   username: String!
   publicEmail: String!
   createdAt: Time!
@@ -740,43 +731,6 @@ func (ec *executionContext) _User_email(ctx context.Context, field graphql.Colle
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Email, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _User_encryptedPassword(ctx context.Context, field graphql.CollectedField, obj *user.User) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "User",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.EncryptedPassword, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2346,11 +2300,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "email":
 			out.Values[i] = ec._User_email(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "encryptedPassword":
-			out.Values[i] = ec._User_encryptedPassword(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
