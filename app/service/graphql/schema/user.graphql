@@ -19,7 +19,5 @@ type User {
 input NewUserPayload {
   email: String!
   password: String!
-  confirmPassword: String!
   username: String!
-  name: String!
 }

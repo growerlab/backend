@@ -8,26 +8,46 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+var columns = []string{
+	"id",
+	"email",
+	"encrypted_password",
+	"username",
+	"name",
+	"public_email",
+	"created_at",
+	"deleted_at",
+	"verified_at",
+}
+
 var (
-	NormalUser = sq.Eq{"deleted_at": nil}
+	NormalUser     = sq.And{sq.Eq{"deleted_at": nil}, sq.NotEq{"verified_at": nil}}
+	InactivateUser = sq.Eq{"verified_at": nil}
+	DeletedUser    = sq.NotEq{"deleted_at": nil}
 )
 
 func AddUser(tx sqlx.Execer, user *User) error {
 	user.CreatedAt = time.Now().UTC()
 
 	sql, _, _ := sq.Insert("user").
-		Columns(columns...).
+		Columns(columns[1:]...).
 		Values(
 			user.Email,
 			user.EncryptedPassword,
+			user.Username,
 			user.Name,
 			user.PublicEmail,
 			user.CreatedAt,
+			nil,
 			nil,
 		).ToSql()
 
 	_, err := tx.Exec(sql)
 	return errors.Sql(err)
+}
+
+func ActivateUser(tx sqlx.Execer, activateToken string) error {
+	return nil
 }
 
 func ListUsers(src sqlx.Queryer, page, per uint64) ([]*User, error) {

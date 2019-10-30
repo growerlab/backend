@@ -7,4 +7,6 @@ const (
 	NotFound         = "NotFound"
 	NotFoundField    = "NotFoundField"
 	SqlError         = "SqlError"
+	InvalidPassword  = "InvalidPassword"
+	NotEqual         = "NotEqual"
 )

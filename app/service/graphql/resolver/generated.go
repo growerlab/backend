@@ -295,9 +295,7 @@ type User {
 input NewUserPayload {
   email: String!
   password: String!
-  confirmPassword: String!
   username: String!
-  name: String!
 }
 `},
 )
@@ -2133,21 +2131,9 @@ func (ec *executionContext) unmarshalInputNewUserPayload(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
-		case "confirmPassword":
-			var err error
-			it.ConfirmPassword, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "username":
 			var err error
 			it.Username, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "name":
-			var err error
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}

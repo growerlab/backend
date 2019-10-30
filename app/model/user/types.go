@@ -6,18 +6,6 @@ import (
 	"github.com/growerlab/backend/app/model/namespace"
 )
 
-var columns = []string{
-	"id",
-	"email",
-	"encrypted_password",
-	"username",
-	"name",
-	"public_email",
-	"created_at",
-	"deleted_at",
-	"verified_at",
-}
-
 type User struct {
 	ID                int        `db:"id"`
 	Email             string     `db:"email"`

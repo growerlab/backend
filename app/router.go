@@ -12,7 +12,7 @@ func Run(addr string) error {
 	graphql := api.Group("/graphql")
 	{
 		graphql.Use(controller.LimitGraphQLRequestBody) // limit request body size
-		graphql.POST("/", controller.GraphQL)
+		graphql.POST("", controller.GraphQL)
 		graphql.GET("/playground", controller.GraphQLPlayground())
 	}
 

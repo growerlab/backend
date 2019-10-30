@@ -1,7 +1,6 @@
 package db
 
 import (
-	"database/sql"
 	"fmt"
 	"runtime/debug"
 
@@ -30,9 +29,9 @@ func InitDatabase() error {
 	return nil
 }
 
-func Transaction(txFn func(tx *sql.Tx) error) (err error) {
-	var tx *sql.Tx
-	tx, err = DB.Begin()
+func Transaction(txFn func(tx *sqlx.Tx) error) (err error) {
+	var tx *sqlx.Tx
+	tx, err = DB.Beginx()
 	if err != nil {
 		return errors.Sql(err)
 	}

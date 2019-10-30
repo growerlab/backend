@@ -3,9 +3,7 @@
 package service
 
 type NewUserPayload struct {
-	Email           string `json:"email"`
-	Password        string `json:"password"`
-	ConfirmPassword string `json:"confirmPassword"`
-	Username        string `json:"username"`
-	Name            string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Username string `json:"username"`
 }
