@@ -1,19 +1,26 @@
 package graphql
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/growerlab/backend/app/common/env"
 )
 
 type Session struct {
-	e *env.Environment
+	e   *env.Environment
+	ctx *gin.Context
 }
 
-func NewSession(userToken string) *Session {
+func NewSession(userToken string, ctx *gin.Context) *Session {
 	e := env.NewEnvironment()
 	e.Set(env.VarUserToken, userToken)
 	return &Session{
-		e: e,
+		e:   e,
+		ctx: ctx,
 	}
+}
+
+func (s *Session) GetContext() *gin.Context {
+	return s.ctx
 }
 
 func (s *Session) Env() *env.Environment {
