@@ -21,7 +21,9 @@ func GraphQL(ctx *gin.Context) {
 	fn.ServeHTTP(ctx.Writer, ctx.Request)
 }
 
-func GraphQLPlayground(ctx *gin.Context) {
-	fn := handler.Playground("GraphQL playground", "/playground")
-	fn.ServeHTTP(ctx.Writer, ctx.Request)
+func GraphQLPlayground() gin.HandlerFunc {
+	fn := handler.Playground("GraphQL playground", "/api/graphql")
+	return func(ctx *gin.Context) {
+		fn.ServeHTTP(ctx.Writer, ctx.Request)
+	}
 }
