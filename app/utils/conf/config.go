@@ -2,10 +2,8 @@ package conf
 
 import (
 	"io/ioutil"
-	"path/filepath"
 
 	"github.com/growerlab/backend/app/common/errors"
-	"github.com/growerlab/backend/app/utils"
 	"gopkg.in/yaml.v2"
 )
 
@@ -30,8 +28,7 @@ func GetConf() *Config {
 }
 
 func LoadConfig() error {
-	path := filepath.Join(utils.BasePath(), DefaultConfigPath)
-	confBody, err := ioutil.ReadFile(path)
+	confBody, err := ioutil.ReadFile(DefaultConfigPath)
 	if err != nil {
 		return errors.Trace(err)
 	}

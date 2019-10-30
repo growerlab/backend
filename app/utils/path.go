@@ -1,12 +1,11 @@
 package utils
 
 import (
-	"os"
 	"path/filepath"
 )
 
 func BasePath() string {
-	dir, err := filepath.Abs(os.Args[0])
+	dir, err := filepath.Abs("./")
 	if err != nil {
 		panic(err)
 	}
