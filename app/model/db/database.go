@@ -29,7 +29,7 @@ func InitDatabase() error {
 	return nil
 }
 
-func Transaction(txFn func(tx *sqlx.Tx) error) (err error) {
+func Transact(txFn func(tx *sqlx.Tx) error) (err error) {
 	var tx *sqlx.Tx
 	tx, err = DB.Beginx()
 	if err != nil {

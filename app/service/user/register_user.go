@@ -58,7 +58,7 @@ func RegisterUser(payload *service.NewUserPayload) (*userModel.User, error) {
 		return nil, errors.Trace(err)
 	}
 
-	err = db.Transaction(func(tx *sqlx.Tx) error {
+	err = db.Transact(func(tx *sqlx.Tx) error {
 		newUser, err := buildUser(payload)
 		if err != nil {
 			return errors.Trace(err)
