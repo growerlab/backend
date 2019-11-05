@@ -6,6 +6,7 @@ import (
 	userModel "github.com/growerlab/backend/app/model/user"
 	"github.com/growerlab/backend/app/service"
 	"github.com/growerlab/backend/app/utils/pwd"
+	"github.com/growerlab/backend/app/utils/regex"
 	"github.com/jmoiron/sqlx"
 	"gopkg.in/asaskevich/govalidator.v9"
 )
@@ -27,6 +28,12 @@ func validateRegisterUser(payload *service.NewUserPayload) error {
 	}
 	if !govalidator.IsByteLength(payload.Username, UsernameLenMin, UsernameLenMax) {
 		return errors.InvalidParameterError(errors.User, errors.Username, errors.InvalidParameter)
+	}
+	if !regex.Match(payload.Username, regex.UsernameRegex) {
+		return errors.InvalidParameterError(errors.User, errors.Username, errors.InvalidParameter)
+	}
+	if !regex.Match(payload.Password, regex.PasswordRegex) {
+		return errors.InvalidParameterError(errors.User, errors.Password, errors.InvalidParameter)
 	}
 
 	return nil

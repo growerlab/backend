@@ -163,7 +163,7 @@ CREATE TABLE public. "user" (
   id bigint NOT NULL,
   email character varying(255) NOT NULL,
   encrypted_password character varying(255) NOT NULL,
-  username character varying(255) NOT NULL,
+  username character varying(40) NOT NULL,
   name character varying(255) NOT NULL,
   public_email character varying(255),
   created_at timestamp without time zone,
