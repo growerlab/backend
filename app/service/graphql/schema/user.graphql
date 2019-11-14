@@ -5,11 +5,10 @@
 scalar Time
 
 type User {
-  id: ID!
   name: String!
   email: String!
   username: String!
-  publicEmail: String!
+  public_email: String!
   createdAt: Time!
   deletedAt: Time
   verifiedAt: Time

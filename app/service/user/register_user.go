@@ -58,22 +58,21 @@ func buildUser(payload *service.NewUserPayload) (*userModel.User, error) {
 // 2. 发送验证邮件（这里可以考虑使用KeyDB来建立邮件发送队列，避免重启进程后，发送任务丢失）
 // 3. Done
 //
-func RegisterUser(payload *service.NewUserPayload) (*userModel.User, error) {
-	var err error
+func RegisterUser(payload *service.NewUserPayload) (user *userModel.User, err error) {
 	err = validateRegisterUser(payload)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
 	err = db.Transact(func(tx *sqlx.Tx) error {
-		newUser, err := buildUser(payload)
+		user, err := buildUser(payload)
 		if err != nil {
 			return errors.Trace(err)
 		}
 
-		err = userModel.AddUser(tx, newUser)
+		err = userModel.AddUser(tx, user)
 		// TODO 发送激活邮件
 		return errors.Trace(err)
 	})
-	return nil, errors.Trace(err)
+	return user, errors.Trace(err)
 }
