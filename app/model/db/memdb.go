@@ -9,6 +9,7 @@ import (
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/growerlab/backend/app/utils/conf"
+	"github.com/growerlab/backend/app/utils/logger"
 )
 
 var CacheDB *redis.Pool
@@ -18,7 +19,26 @@ func InitMemDB() error {
 	var config = conf.GetConf().Redis
 	CacheDB = newPool(config, config.CacheDB)
 	QueueDB = newPool(config, config.QueueDB)
+
+	// Test
+	MemConn(CacheDB, func(conn redis.Conn) error {
+		reply, err := redis.String(conn.Do("PING"))
+		if reply != "PONG" {
+			panic(err)
+		}
+		return nil
+	})
 	return nil
+}
+
+func MemConn(pool *redis.Pool, callback func(redis.Conn) error) {
+	conn := pool.Get()
+	defer conn.Close()
+
+	err := callback(conn)
+	if err != nil {
+		logger.Error("mem db callback() has err: %v", err)
+	}
 }
 
 func newPool(cfg *conf.Redis, db int) *redis.Pool {

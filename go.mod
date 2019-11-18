@@ -8,6 +8,7 @@ require (
 	github.com/garyburd/redigo v1.6.0
 	github.com/gin-gonic/gin v1.4.0
 	github.com/graphql-go/graphql v0.7.8
+	github.com/ivpusic/grpool v1.0.0
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/juju/errors v0.0.0-20190930114154-d42613fe1ab9
 	github.com/juju/loggo v0.0.0-20190526231331-6e530bcce5d8 // indirect
