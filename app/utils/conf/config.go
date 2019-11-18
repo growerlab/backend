@@ -19,8 +19,20 @@ type DB struct {
 	URL string `yaml:"url"`
 }
 
+type Redis struct {
+	Host        string `yaml:"host"`
+	Port        int    `yaml:"port"`
+	CacheDB     int    `yaml:"cache_db"`
+	QueueDB     int    `yaml:"queue_db"`
+	MaxIdle     int    `yaml:"max_idle"`
+	MaxActive   int    `yaml:"max_active"`
+	IdleTimeout int    `yaml:"idle_timeout"`
+}
+
 type Config struct {
-	Database *DB `yaml:"db"`
+	Database   *DB    `yaml:"db"`
+	Redis      *Redis `yaml:"redis"`
+	WebsiteURL string `yaml:"website_url"`
 }
 
 func GetConf() *Config {

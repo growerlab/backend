@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/99designs/gqlgen v0.10.1
 	github.com/Masterminds/squirrel v1.1.0
+	github.com/garyburd/redigo v1.6.0
 	github.com/gin-gonic/gin v1.4.0
 	github.com/graphql-go/graphql v0.7.8
 	github.com/jmoiron/sqlx v1.2.0

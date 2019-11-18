@@ -1,2 +1,11 @@
+website_url: http://localhost:8000
 db:
   url: postgresql://growerlab:growerlab@127.0.0.1:5432/growerlab?sslmode=disable
+redis:
+  host: 127.0.0.1
+  port: 6479
+  max_idle: 10
+  max_active: 512
+  idle_timeout: 120
+  cache_db: 10
+  queue_db: 11

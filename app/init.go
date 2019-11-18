@@ -10,6 +10,7 @@ import (
 //
 func init() {
 	onStart(conf.LoadConfig)
+	onStart(db.InitMemDB)
 	onStart(db.InitDatabase)
 }
 
