@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/growerlab/backend/app/common/notify"
 	"github.com/growerlab/backend/app/common/queue/job"
 	"github.com/growerlab/backend/app/model/db"
 	"github.com/growerlab/backend/app/utils/logger"
@@ -46,10 +45,6 @@ func NewQueue() *Queue {
 	workerCount := len(q.jobsSet) * 2 // 每个jobs至少分配2个worker
 	jobCount := 2                     // 每个worker的待处理容器，多出来的会被阻塞
 	q.workerPool = grpool.NewPool(workerCount, jobCount)
-
-	notify.Subscribe(func() {
-		q.Release()
-	})
 
 	return q
 }
