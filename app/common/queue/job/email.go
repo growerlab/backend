@@ -1,6 +1,10 @@
 package job
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/growerlab/backend/app/common/queue/common"
+)
 
 type EmailPayload struct {
 	From   string
@@ -9,16 +13,16 @@ type EmailPayload struct {
 	IsHtml bool
 }
 
-type PushPayloadFunc func(jobName string, payload []byte) error
-
-func NewEmail(pushFunc PushPayloadFunc) *Email {
-	return &Email{
-		pushPayloadFunc: pushFunc,
-	}
+func NewEmail() *Email {
+	return &Email{}
 }
 
 type Email struct {
-	pushPayloadFunc PushPayloadFunc
+	pushPayloadFunc common.PushPayloadFunc
+}
+
+func (e *Email) SetPushable(push common.PushPayloadFunc) {
+	e.pushPayloadFunc = push
 }
 
 func (e *Email) Name() string {

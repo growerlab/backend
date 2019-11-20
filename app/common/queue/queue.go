@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/growerlab/backend/app/common/queue/job"
-	"github.com/growerlab/backend/app/model/db"
+	"github.com/growerlab/backend/app/common/queue/common"
 	"github.com/growerlab/backend/app/utils/logger"
 	"github.com/ivpusic/grpool"
 )
@@ -23,29 +22,25 @@ type Job interface {
 	// 获取payload并执行
 	// 当requeue返回true，则payload将重新入队，下次将继续执行
 	Eval(payload []byte) (requeue bool, err error)
+	// 设置队列的推送方法
+	SetPushable(push common.PushPayloadFunc)
 	// TODO 超时时间、重试次数 等等
 }
 
-type Queuer interface {
+type Listable interface {
 	// 排队（入队）
 	Push(key string, payload []byte) (err error)
 	// 出队
 	Pop(key string) (payload []byte, err error)
 }
 
-func NewQueue() *Queue {
+func NewQueue(list Listable, workerCount, jobCount int) *Queue {
 	q := &Queue{
-		jobsSet:   make(map[string]Job),
-		done:      make(chan struct{}),
-		srcQueuer: NewList(db.QueueDB),
+		jobsSet:     make(map[string]Job),
+		done:        make(chan struct{}),
+		srcListable: list,
 	}
-
-	q.AddJob(job.NewEmail(q.onEnter))
-
-	workerCount := len(q.jobsSet) * 2 // 每个jobs至少分配2个worker
-	jobCount := 2                     // 每个worker的待处理容器，多出来的会被阻塞
 	q.workerPool = grpool.NewPool(workerCount, jobCount)
-
 	return q
 }
 
@@ -57,7 +52,7 @@ type Queue struct {
 	done chan struct{}
 
 	// 元队列
-	srcQueuer Queuer
+	srcListable Listable
 
 	// workers
 	workerPool *grpool.Pool
@@ -65,7 +60,7 @@ type Queue struct {
 
 func (q *Queue) onEnter(jobName string, payload []byte) (err error) {
 	key := q.jobKey(jobName)
-	err = q.srcQueuer.Push(key, payload)
+	err = q.srcListable.Push(key, payload)
 	if err != nil {
 		logger.Error("has err on push: %v", err)
 		return err
@@ -74,6 +69,8 @@ func (q *Queue) onEnter(jobName string, payload []byte) (err error) {
 }
 
 func (q *Queue) AddJob(w Job) error {
+	w.SetPushable(q.onEnter)
+
 	if _, ok := q.jobsSet[w.Name()]; ok {
 		return ErrExists
 	}
@@ -87,7 +84,7 @@ func (q *Queue) Start() {
 		for jobName, _ := range q.jobsSet {
 			var payload []byte
 			key := q.jobKey(jobName)
-			payload, err = q.srcQueuer.Pop(key)
+			payload, err = q.srcListable.Pop(key)
 			if err != nil {
 				logger.Error("pop job has err: %v", err)
 				continue
