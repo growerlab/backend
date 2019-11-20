@@ -16,7 +16,7 @@ type List struct {
 }
 
 func (l *List) Push(key string, payload []byte) (err error) {
-	db.MemConn(l.queuePool, func(conn redis.Conn) error {
+	err = db.MemConn(l.queuePool, func(conn redis.Conn) error {
 		_, err = conn.Do("LPUSH", key, payload)
 		return err
 	})
@@ -24,7 +24,7 @@ func (l *List) Push(key string, payload []byte) (err error) {
 }
 
 func (l *List) Pop(key string) (payload []byte, err error) {
-	db.MemConn(l.queuePool, func(conn redis.Conn) error {
+	err = db.MemConn(l.queuePool, func(conn redis.Conn) error {
 		payload, err = redis.Bytes(conn.Do("RPOP", key))
 		if err == redis.ErrNil {
 			err = nil
@@ -33,4 +33,11 @@ func (l *List) Pop(key string) (payload []byte, err error) {
 		return err
 	})
 	return
+}
+
+func (l *List) Release(key string) {
+	_ = db.MemConn(l.queuePool, func(conn redis.Conn) error {
+		_, err := conn.Do("DEL", key)
+		return err
+	})
 }

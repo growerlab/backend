@@ -3,13 +3,13 @@
 package db
 
 import (
+	"errors"
 	"net"
 	"strconv"
 	"time"
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/growerlab/backend/app/utils/conf"
-	"github.com/growerlab/backend/app/utils/logger"
 )
 
 var CacheDB *redis.Pool
@@ -21,24 +21,21 @@ func InitMemDB() error {
 	QueueDB = newPool(config, config.QueueDB)
 
 	// Test
-	MemConn(CacheDB, func(conn redis.Conn) error {
+	err := MemConn(CacheDB, func(conn redis.Conn) error {
 		reply, err := redis.String(conn.Do("PING"))
 		if reply != "PONG" {
-			panic(err)
+			return errors.New("memdb not ready")
 		}
-		return nil
+		return err
 	})
-	return nil
+	return err
 }
 
-func MemConn(pool *redis.Pool, callback func(redis.Conn) error) {
+func MemConn(pool *redis.Pool, callback func(redis.Conn) error) error {
 	conn := pool.Get()
 	defer conn.Close()
 
-	err := callback(conn)
-	if err != nil {
-		logger.Error("mem db callback() has err: %v", err)
-	}
+	return callback(conn)
 }
 
 func newPool(cfg *conf.Redis, db int) *redis.Pool {
