@@ -17,7 +17,10 @@ type List struct {
 
 func (l *List) Push(key string, payload []byte) (err error) {
 	err = db.MemConn(l.queuePool, func(conn redis.Conn) error {
-		_, err = conn.Do("LPUSH", key, payload)
+		_ = conn.Send("MULTI")
+		_ = conn.Send("LPUSH", key, payload)
+		_ = conn.Send("EXPIRE", key, 24*60*60) // 24h
+		_, err = conn.Do("EXEC")
 		return err
 	})
 	return
