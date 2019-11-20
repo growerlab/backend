@@ -1,16 +1,16 @@
-package job
+package queue
 
 import (
 	"encoding/json"
-
-	"github.com/growerlab/backend/app/common/queue/common"
 )
 
+const EmailUUID = "send_email"
+
 type EmailPayload struct {
-	From   string
-	To     string
-	Body   string
-	IsHtml bool
+	From   string `json:"from,omitempty"`
+	To     string `json:"to,omitempty"`
+	Body   string `json:"body,omitempty"`
+	IsHtml bool   `json:"is_html,omitempty"`
 }
 
 func NewEmail() *Email {
@@ -18,15 +18,10 @@ func NewEmail() *Email {
 }
 
 type Email struct {
-	pushPayloadFunc common.PushPayloadFunc
-}
-
-func (e *Email) SetPushable(push common.PushPayloadFunc) {
-	e.pushPayloadFunc = push
 }
 
 func (e *Email) Name() string {
-	return "send_email"
+	return EmailUUID
 }
 
 func (e *Email) Eval(payload []byte) (requeue bool, err error) {
@@ -39,10 +34,6 @@ func (e *Email) Eval(payload []byte) (requeue bool, err error) {
 }
 
 func (e *Email) Send(payload *EmailPayload) error {
-	// TODO 发送邮件的具体逻辑
-	return nil
-}
-
-func SendEmail(payload *EmailPayload) error {
+	// TODO 发送邮件的具体逻辑(调用其他的smtp发送库)
 	return nil
 }

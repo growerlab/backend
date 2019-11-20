@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/growerlab/backend/app/common/queue/common"
 	"github.com/growerlab/backend/app/utils/logger"
 	"github.com/ivpusic/grpool"
 )
@@ -22,8 +21,6 @@ type Job interface {
 	// 获取payload并执行
 	// 当requeue返回true，则payload将重新入队，下次将继续执行
 	Eval(payload []byte) (requeue bool, err error)
-	// 设置队列的推送方法
-	SetPushable(push common.PushPayloadFunc)
 	// TODO 超时时间、重试次数 等等
 }
 
@@ -34,7 +31,7 @@ type Listable interface {
 	Pop(key string) (payload []byte, err error)
 }
 
-func NewQueue(list Listable, workerCount, jobCount int) *Queue {
+func New(list Listable, workerCount, jobCount int) *Queue {
 	q := &Queue{
 		jobsSet:     make(map[string]Job),
 		done:        make(chan struct{}),
@@ -58,7 +55,7 @@ type Queue struct {
 	workerPool *grpool.Pool
 }
 
-func (q *Queue) onEnter(jobName string, payload []byte) (err error) {
+func (q *Queue) PushPayload(jobName string, payload []byte) (err error) {
 	key := q.jobKey(jobName)
 	err = q.srcListable.Push(key, payload)
 	if err != nil {
@@ -69,8 +66,6 @@ func (q *Queue) onEnter(jobName string, payload []byte) (err error) {
 }
 
 func (q *Queue) AddJob(w Job) error {
-	w.SetPushable(q.onEnter)
-
 	if _, ok := q.jobsSet[w.Name()]; ok {
 		return ErrExists
 	}
@@ -128,7 +123,7 @@ func (q *Queue) callEval(jobName string, payload []byte) {
 			logger.Error("queue has err on running: %v", err)
 		}
 		if requeue {
-			err = q.onEnter(jobName, payload)
+			err = q.PushPayload(jobName, payload)
 			if err != nil {
 				logger.Error("has err on requeue: %v payload: %v", err, payload)
 				return
