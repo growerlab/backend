@@ -8,6 +8,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+var tableName = "user"
 var columns = []string{
 	"id",
 	"email",
@@ -29,7 +30,7 @@ var (
 func AddUser(tx sqlx.Execer, user *User) error {
 	user.CreatedAt = time.Now().UTC()
 
-	sql, _, _ := sq.Insert("user").
+	sql, args, _ := sq.Insert(tableName).
 		Columns(columns[1:]...).
 		Values(
 			user.Email,
@@ -42,7 +43,7 @@ func AddUser(tx sqlx.Execer, user *User) error {
 			nil,
 		).ToSql()
 
-	_, err := tx.Exec(sql)
+	_, err := tx.Exec(sql, args...)
 	return errors.Sql(err)
 }
 
@@ -55,7 +56,7 @@ func ListUsers(src sqlx.Queryer, page, per uint64) ([]*User, error) {
 
 	// TODO 如果用户量很大的时候，这样分页会有性能问题
 	sql, _, _ := sq.Select(columns...).
-		From("user").
+		From(tableName).
 		Where(NormalUser).
 		Limit(per).
 		Offset(page * per).

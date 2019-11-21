@@ -71,7 +71,15 @@ func RegisterUser(payload *service.NewUserPayload) (user *userModel.User, err er
 		}
 
 		err = userModel.AddUser(tx, user)
-		// TODO 发送激活邮件
+		if err != nil {
+			return errors.Trace(err)
+		}
+
+		// 激活用户
+		err = DoPreActivateUser(tx, user.ID)
+		if err != nil {
+			return errors.Trace(err)
+		}
 		return errors.Trace(err)
 	})
 	return user, errors.Trace(err)
