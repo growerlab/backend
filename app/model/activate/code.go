@@ -38,3 +38,33 @@ func AddCode(tx sqlx.Execer, code *ActivateCode) error {
 	}
 	return nil
 }
+
+func GetCode(src sqlx.Queryer, code string) (*ActivateCode, error) {
+	sql, args, _ := sq.Select(columns...).
+		From(tableName).
+		Where(sq.Eq{"code": code}).
+		Limit(1).
+		ToSql()
+
+	var result = new(ActivateCode)
+	err := sqlx.Get(src, &result, sql, args...)
+	if err != nil {
+		return nil, errors.Sql(err)
+	}
+	return result, nil
+}
+
+// 修改code状态
+//
+func UpdateCodeUsed(tx sqlx.Execer, code string) error {
+	sql, args, _ := sq.Update(tableName).
+		Set("used", time.Now().UTC()).
+		Where(sq.Eq{"code": code}).
+		ToSql()
+
+	_, err := tx.Exec(sql, args...)
+	if err != nil {
+		return errors.Sql(err)
+	}
+	return nil
+}

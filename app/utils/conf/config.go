@@ -30,6 +30,7 @@ type Redis struct {
 }
 
 type Config struct {
+	Debug      bool   `yaml:"debug"`
 	Database   *DB    `yaml:"db"`
 	Redis      *Redis `yaml:"redis"`
 	WebsiteURL string `yaml:"website_url"`

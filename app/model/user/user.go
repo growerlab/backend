@@ -47,14 +47,23 @@ func AddUser(tx sqlx.Execer, user *User) error {
 	return errors.Sql(err)
 }
 
-func ActivateUser(tx sqlx.Execer, activateToken string) error {
+func ActivateUser(tx sqlx.Execer, userID int64) error {
+	sql, args, _ := sq.Update(tableName).
+		Set("verified_at", time.Now().UTC()).
+		Where(sq.Eq{"id": userID}).
+		ToSql()
+
+	_, err := tx.Exec(sql, args...)
+	if err != nil {
+		return errors.Trace(err)
+	}
 	return nil
 }
 
 func ListUsers(src sqlx.Queryer, page, per uint64) ([]*User, error) {
 	users := make([]*User, 0)
 
-	// TODO 如果用户量很大的时候，这样分页会有性能问题
+	// TODO 如果用户量很大的时候，这样分页会有性能问题.. 希望能碰到那一天👀
 	sql, _, _ := sq.Select(columns...).
 		From(tableName).
 		Where(NormalUser).

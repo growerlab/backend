@@ -9,4 +9,5 @@ const (
 	Email           = "Email"
 	Password        = "Password"
 	ConfirmPassword = "ConfirmPassword"
+	Code            = "Code"
 )
