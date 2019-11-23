@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/growerlab/backend/app/common/errors"
+	activateModel "github.com/growerlab/backend/app/model/activate"
 	"github.com/growerlab/backend/app/model/db"
 	userModel "github.com/growerlab/backend/app/model/user"
 	"github.com/growerlab/backend/app/service"
@@ -83,4 +84,23 @@ func RegisterUser(payload *service.NewUserPayload) (user *userModel.User, err er
 		return errors.Trace(err)
 	})
 	return user, errors.Trace(err)
+}
+
+// 激活用户
+func ActivateUser(payload *service.AcitvateCodePayload) (bool, error) {
+	err := db.Transact(func(tx *sqlx.Tx) error {
+		code, err := activateModel.GetCode(tx, payload.Code)
+		if err != nil {
+			return errors.Trace(err)
+		}
+		err = userModel.ActivateUser(tx, code.UserID)
+		if err != nil {
+			return errors.Trace(err)
+		}
+		return nil
+	})
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

@@ -12,6 +12,10 @@ func (r *mutationResolver) RegisterUser(ctx context.Context, input service.NewUs
 	return user.RegisterUser(&input)
 }
 
+func (r *mutationResolver) ActivateUser(ctx context.Context, input service.AcitvateCodePayload) (bool, error) {
+	return user.ActivateUser(&input)
+}
+
 func (r *queryResolver) Users(ctx context.Context) ([]*userModel.User, error) {
 
 	// fmt.Println("---- ", currentID)

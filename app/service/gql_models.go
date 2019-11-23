@@ -2,6 +2,10 @@
 
 package service
 
+type AcitvateCodePayload struct {
+	Code string `json:"code"`
+}
+
 type NewUserPayload struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`

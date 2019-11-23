@@ -14,6 +14,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// 激活账号的前期准备
 // 生成code
 // 生成url
 // 生成模版
@@ -65,7 +66,7 @@ func DoActivateUser(tx *sqlx.Tx, code string) (bool, error) {
 
 func buildActivateURL(code string) string {
 	baseURL := conf.GetConf().WebsiteURL
-	partURL := fmt.Sprintf("activate?code=%s", code)
+	partURL := fmt.Sprintf("activate_user?code=%s", code)
 	if !strings.HasSuffix(baseURL, "/") {
 		baseURL = baseURL + "/"
 	}

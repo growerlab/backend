@@ -47,6 +47,7 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
+		ActivateUser func(childComplexity int, input service.AcitvateCodePayload) int
 		RegisterUser func(childComplexity int, input service.NewUserPayload) int
 	}
 
@@ -64,7 +65,6 @@ type ComplexityRoot struct {
 		CreatedAt   func(childComplexity int) int
 		DeletedAt   func(childComplexity int) int
 		Email       func(childComplexity int) int
-		ID          func(childComplexity int) int
 		Name        func(childComplexity int) int
 		Namespace   func(childComplexity int) int
 		PublicEmail func(childComplexity int) int
@@ -75,6 +75,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	RegisterUser(ctx context.Context, input service.NewUserPayload) (*user.User, error)
+	ActivateUser(ctx context.Context, input service.AcitvateCodePayload) (bool, error)
 }
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*user.User, error)
@@ -94,6 +95,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Mutation.activateUser":
+		if e.complexity.Mutation.ActivateUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_activateUser_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ActivateUser(childComplexity, args["input"].(service.AcitvateCodePayload)), true
 
 	case "Mutation.registerUser":
 		if e.complexity.Mutation.RegisterUser == nil {
@@ -156,13 +169,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Email(childComplexity), true
 
-	case "User.id":
-		if e.complexity.User.ID == nil {
-			break
-		}
-
-		return e.complexity.User.ID(childComplexity), true
-
 	case "User.name":
 		if e.complexity.User.Name == nil {
 			break
@@ -177,7 +183,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Namespace(childComplexity), true
 
-	case "User.publicEmail":
+	case "User.public_email":
 		if e.complexity.User.PublicEmail == nil {
 			break
 		}
@@ -272,6 +278,7 @@ var parsedSchema = gqlparser.MustLoadSchema(
 
 type Mutation {
   registerUser(input: NewUserPayload!): User!
+  activateUser(input: AcitvateCodePayload!): Boolean!
 }
 `},
 	&ast.Source{Name: "app/service/graphql/schema/user.graphql", Input: `# GraphQL schema example
@@ -281,11 +288,10 @@ type Mutation {
 scalar Time
 
 type User {
-  id: ID!
   name: String!
   email: String!
   username: String!
-  publicEmail: String!
+  public_email: String!
   createdAt: Time!
   deletedAt: Time
   verifiedAt: Time
@@ -297,12 +303,30 @@ input NewUserPayload {
   password: String!
   username: String!
 }
+
+input AcitvateCodePayload {
+  Code: String!
+}
 `},
 )
 
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_activateUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 service.AcitvateCodePayload
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNAcitvateCodePayload2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐAcitvateCodePayload(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_registerUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -410,6 +434,50 @@ func (ec *executionContext) _Mutation_registerUser(ctx context.Context, field gr
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNUser2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋmodelᚋuserᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_activateUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_activateUser_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ActivateUser(rctx, args["input"].(service.AcitvateCodePayload))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Namespace_id(ctx context.Context, field graphql.CollectedField, obj *namespace.Namespace) (ret graphql.Marshaler) {
@@ -635,43 +703,6 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *user.User) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "User",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNID2int(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _User_name(ctx context.Context, field graphql.CollectedField, obj *user.User) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -783,7 +814,7 @@ func (ec *executionContext) _User_username(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _User_publicEmail(ctx context.Context, field graphql.CollectedField, obj *user.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_public_email(ctx context.Context, field graphql.CollectedField, obj *user.User) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -2113,6 +2144,24 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAcitvateCodePayload(ctx context.Context, obj interface{}) (service.AcitvateCodePayload, error) {
+	var it service.AcitvateCodePayload
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "Code":
+			var err error
+			it.Code, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewUserPayload(ctx context.Context, obj interface{}) (service.NewUserPayload, error) {
 	var it service.NewUserPayload
 	var asMap = obj.(map[string]interface{})
@@ -2168,6 +2217,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "registerUser":
 			out.Values[i] = ec._Mutation_registerUser(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "activateUser":
+			out.Values[i] = ec._Mutation_activateUser(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2274,11 +2328,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("User")
-		case "id":
-			out.Values[i] = ec._User_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "name":
 			out.Values[i] = ec._User_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -2294,8 +2343,8 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "publicEmail":
-			out.Values[i] = ec._User_publicEmail(ctx, field, obj)
+		case "public_email":
+			out.Values[i] = ec._User_public_email(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2568,6 +2617,10 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
+
+func (ec *executionContext) unmarshalNAcitvateCodePayload2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐAcitvateCodePayload(ctx context.Context, v interface{}) (service.AcitvateCodePayload, error) {
+	return ec.unmarshalInputAcitvateCodePayload(ctx, v)
+}
 
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
