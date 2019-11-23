@@ -87,20 +87,14 @@ func RegisterUser(payload *service.NewUserPayload) (user *userModel.User, err er
 }
 
 // 激活用户
-func ActivateUser(payload *service.AcitvateCodePayload) (bool, error) {
-	err := db.Transact(func(tx *sqlx.Tx) error {
-		code, err := activateModel.GetCode(tx, payload.Code)
-		if err != nil {
-			return errors.Trace(err)
-		}
-		err = userModel.ActivateUser(tx, code.UserID)
-		if err != nil {
-			return errors.Trace(err)
-		}
-		return nil
-	})
-	if err != nil {
-		return false, err
+func ActivateUser(payload *service.AcitvateCodePayload) (result bool, err error) {
+	if !govalidator.IsByteLength(payload.Code, activateModel.CodeMaxLen, activateModel.CodeMaxLen) {
+		return false, errors.P(errors.ActivateCode, errors.Code, errors.InvalidParameter)
 	}
-	return true, nil
+
+	err = db.Transact(func(tx *sqlx.Tx) error {
+		result, err = DoActivateUser(tx, payload.Code)
+		return err
+	})
+	return
 }

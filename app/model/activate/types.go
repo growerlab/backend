@@ -2,6 +2,8 @@ package activate
 
 import "time"
 
+const CodeMaxLen = 16
+
 type ActivateCode struct {
 	ID        int64      `db:"id"`
 	UserID    int64      `db:"user_id"`
