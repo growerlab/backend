@@ -10,8 +10,8 @@ import (
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/utils/conf"
 	"github.com/growerlab/backend/app/utils/logger"
+	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
 )
 
 var (
@@ -24,7 +24,7 @@ func InitDatabase() error {
 	var err error
 	var sqlxDB *sqlx.DB
 
-	sqlxDB, err = sqlx.Connect("postgres", config.Database.URL)
+	sqlxDB, err = sqlx.Connect("pgx", config.Database.URL)
 	if err != nil {
 		return errors.Sql(err)
 	}
@@ -41,9 +41,8 @@ func InitDatabase() error {
 	return nil
 }
 
-func Transact(txFn func(tx *DBTx) error) (err error) {
-	var tx *DBTx
-	tx = DB.Begin()
+func Transact(txFn func(*DBTx) error) (err error) {
+	tx := DB.Begin()
 
 	defer func() {
 		if p := recover(); p != nil {
@@ -56,7 +55,7 @@ func Transact(txFn func(tx *DBTx) error) (err error) {
 			}
 		}
 		if err != nil {
-			logger.Error("%+v: %s", err, debug.Stack())
+			logger.Error("%+v", err)
 			_ = tx.Rollback()
 			return
 		}
@@ -107,27 +106,29 @@ func (d *DBQuery) Exec(query string, args ...interface{}) (sql.Result, error) {
 
 func (d *DBQuery) Begin() *DBTx {
 	d.Println("BEGIN")
-	tx, err := d.sqlxDB.Begin()
-	if err != nil {
-		panic(err)
-	}
+	tx := d.sqlxDB.MustBegin()
 	return &DBTx{
-		DBQuery: d,
+		Execer:  tx,
+		Queryer: tx,
 		tx:      tx,
+		logger:  d.logger,
 	}
 }
 
 type DBTx struct {
-	*DBQuery
-	tx *sql.Tx
+	sqlx.Execer
+	sqlx.Queryer
+
+	tx     *sqlx.Tx
+	logger io.Writer
 }
 
 func (d *DBTx) Rollback() error {
-	d.Println("ROLLBACK")
+	fmt.Fprintln(d.logger, "ROLLBACK")
 	return d.tx.Rollback()
 }
 
 func (d *DBTx) Commit() error {
-	d.Println("COMMIT")
+	fmt.Fprintln(d.logger, "COMMIT")
 	return d.tx.Commit()
 }
