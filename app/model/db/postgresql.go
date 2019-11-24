@@ -141,11 +141,11 @@ var _ sqlx.Queryer = (*DBTx)(nil)
 var _ sqlx.Execer = (*DBTx)(nil)
 
 func (d *DBTx) Rollback() error {
-	fmt.Fprintln(d.dbBase.logger, "ROLLBACK")
+	d.Println("ROLLBACK")
 	return d.Transaction.Rollback()
 }
 
 func (d *DBTx) Commit() error {
-	fmt.Fprintln(d.dbBase.logger, "COMMIT")
+	d.Println("COMMIT")
 	return d.Transaction.Commit()
 }
