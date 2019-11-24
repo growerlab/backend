@@ -3,7 +3,7 @@
     "SourceDir": [
         "{GOPATH}/src/github.com/growerlab/backend"
     ],
-    "SourceExt": [".go"],
+    "SourceExt": [".go", ".graphql"],
     "BuildCmd": "go build main.go",
     "RunCmd": "main",
     "Decreasing": 1,

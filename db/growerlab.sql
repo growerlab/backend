@@ -197,8 +197,8 @@ CREATE TABLE public."user" (
     encrypted_password character varying(255) NOT NULL,
     username character varying(40) NOT NULL,
     name character varying(255) NOT NULL,
-    public_email character varying(255),
-    created_at timestamp without time zone,
+    public_email character varying(255) NOT NULL,
+    created_at timestamp without time zone NOT NULL,
     deleted_at timestamp without time zone,
     verified_at timestamp without time zone
 );

@@ -9,6 +9,8 @@ import (
 	"github.com/graphql-go/graphql/gqlerrors"
 )
 
+var LogWriter = gin.DefaultWriter
+
 func Info(format string, a ...interface{}) {
 	output("[Info]", format, a...)
 }
@@ -40,5 +42,5 @@ func output(prefix string, format string, a ...interface{}) {
 	_, _ = sb.WriteString(fmt.Sprintf(format, a...))
 	_ = sb.WriteByte('\n')
 
-	_, _ = io.WriteString(gin.DefaultWriter, sb.String())
+	_, _ = io.WriteString(LogWriter, sb.String())
 }

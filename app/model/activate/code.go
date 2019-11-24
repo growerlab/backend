@@ -22,9 +22,8 @@ func AddCode(tx sqlx.Execer, code *ActivateCode) error {
 	code.CreatedAt = time.Now().UTC()
 
 	sql, args, _ := sq.Insert(tableName).
-		Columns(columns...).
+		Columns(columns[1:]...).
 		Values(
-			nil,
 			code.UserID,
 			code.Code,
 			code.CreatedAt,

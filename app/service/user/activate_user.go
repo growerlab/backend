@@ -7,11 +7,11 @@ import (
 
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/model/activate"
+	"github.com/growerlab/backend/app/model/db"
 	"github.com/growerlab/backend/app/model/user"
 	"github.com/growerlab/backend/app/utils/conf"
 	"github.com/growerlab/backend/app/utils/logger"
 	"github.com/growerlab/backend/app/utils/uuid"
-	"github.com/jmoiron/sqlx"
 )
 
 // 激活账号的前期准备
@@ -20,7 +20,7 @@ import (
 // 生成模版
 // 发送邮件
 //
-func DoPreActivateUser(tx *sqlx.Tx, userID int64) error {
+func DoPreActivateUser(tx *db.DBTx, userID int64) error {
 	code := buildActivateCode(userID)
 	err := activate.AddCode(tx, code)
 	if err != nil {
@@ -38,7 +38,7 @@ func DoPreActivateUser(tx *sqlx.Tx, userID int64) error {
 
 // 验证用户邮箱激活码
 //
-func DoActivateUser(tx *sqlx.Tx, code string) (bool, error) {
+func DoActivateUser(tx *db.DBTx, code string) (bool, error) {
 	acode, err := activate.GetCode(tx, code)
 	if err != nil {
 		return false, errors.Trace(err)

@@ -61,6 +61,10 @@ type ComplexityRoot struct {
 		Users func(childComplexity int) int
 	}
 
+	Result struct {
+		Ok func(childComplexity int) int
+	}
+
 	User struct {
 		CreatedAt   func(childComplexity int) int
 		DeletedAt   func(childComplexity int) int
@@ -74,8 +78,8 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	RegisterUser(ctx context.Context, input service.NewUserPayload) (*user.User, error)
-	ActivateUser(ctx context.Context, input service.AcitvateCodePayload) (bool, error)
+	RegisterUser(ctx context.Context, input service.NewUserPayload) (*service.Result, error)
+	ActivateUser(ctx context.Context, input service.AcitvateCodePayload) (*service.Result, error)
 }
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*user.User, error)
@@ -147,6 +151,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Users(childComplexity), true
+
+	case "Result.OK":
+		if e.complexity.Result.Ok == nil {
+			break
+		}
+
+		return e.complexity.Result.Ok(childComplexity), true
 
 	case "User.createdAt":
 		if e.complexity.User.CreatedAt == nil {
@@ -276,9 +287,13 @@ var parsedSchema = gqlparser.MustLoadSchema(
   users: [User!]!
 }
 
+type Result {
+  OK: Boolean!
+}
+
 type Mutation {
-  registerUser(input: NewUserPayload!): User!
-  activateUser(input: AcitvateCodePayload!): Boolean!
+  registerUser(input: NewUserPayload!): Result!
+  activateUser(input: AcitvateCodePayload!): Result!
 }
 `},
 	&ast.Source{Name: "app/service/graphql/schema/user.graphql", Input: `# GraphQL schema example
@@ -430,10 +445,10 @@ func (ec *executionContext) _Mutation_registerUser(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*user.User)
+	res := resTmp.(*service.Result)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNUser2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋmodelᚋuserᚐUser(ctx, field.Selections, res)
+	return ec.marshalNResult2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐResult(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_activateUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -474,10 +489,10 @@ func (ec *executionContext) _Mutation_activateUser(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(*service.Result)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNResult2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐResult(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Namespace_id(ctx context.Context, field graphql.CollectedField, obj *namespace.Namespace) (ret graphql.Marshaler) {
@@ -701,6 +716,43 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Result_OK(ctx context.Context, field graphql.CollectedField, obj *service.Result) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Result",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Ok, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_name(ctx context.Context, field graphql.CollectedField, obj *user.User) (ret graphql.Marshaler) {
@@ -2317,6 +2369,33 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
+var resultImplementors = []string{"Result"}
+
+func (ec *executionContext) _Result(ctx context.Context, sel ast.SelectionSet, obj *service.Result) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, resultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Result")
+		case "OK":
+			out.Values[i] = ec._Result_OK(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var userImplementors = []string{"User"}
 
 func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *user.User) graphql.Marshaler {
@@ -2680,6 +2759,20 @@ func (ec *executionContext) marshalNNamespace2ᚖgithubᚗcomᚋgrowerlabᚋback
 
 func (ec *executionContext) unmarshalNNewUserPayload2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐNewUserPayload(ctx context.Context, v interface{}) (service.NewUserPayload, error) {
 	return ec.unmarshalInputNewUserPayload(ctx, v)
+}
+
+func (ec *executionContext) marshalNResult2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐResult(ctx context.Context, sel ast.SelectionSet, v service.Result) graphql.Marshaler {
+	return ec._Result(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNResult2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐResult(ctx context.Context, sel ast.SelectionSet, v *service.Result) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Result(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

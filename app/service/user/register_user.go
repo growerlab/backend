@@ -8,7 +8,6 @@ import (
 	"github.com/growerlab/backend/app/service"
 	"github.com/growerlab/backend/app/utils/pwd"
 	"github.com/growerlab/backend/app/utils/regex"
-	"github.com/jmoiron/sqlx"
 	"gopkg.in/asaskevich/govalidator.v9"
 )
 
@@ -59,13 +58,14 @@ func buildUser(payload *service.NewUserPayload) (*userModel.User, error) {
 // 2. 发送验证邮件（这里可以考虑使用KeyDB来建立邮件发送队列，避免重启进程后，发送任务丢失）
 // 3. Done
 //
-func RegisterUser(payload *service.NewUserPayload) (user *userModel.User, err error) {
+func RegisterUser(payload *service.NewUserPayload) (bool, error) {
+	var err error
 	err = validateRegisterUser(payload)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return false, errors.Trace(err)
 	}
 
-	err = db.Transact(func(tx *sqlx.Tx) error {
+	err = db.Transact(func(tx *db.DBTx) error {
 		user, err := buildUser(payload)
 		if err != nil {
 			return errors.Trace(err)
@@ -76,14 +76,19 @@ func RegisterUser(payload *service.NewUserPayload) (user *userModel.User, err er
 			return errors.Trace(err)
 		}
 
+		// TODO 创建namespace
+
 		// 激活用户
 		err = DoPreActivateUser(tx, user.ID)
 		if err != nil {
 			return errors.Trace(err)
 		}
-		return errors.Trace(err)
+		return nil
 	})
-	return user, errors.Trace(err)
+	if err != nil {
+		return false, errors.Trace(err)
+	}
+	return true, nil
 }
 
 // 激活用户
@@ -92,7 +97,7 @@ func ActivateUser(payload *service.AcitvateCodePayload) (result bool, err error)
 		return false, errors.P(errors.ActivateCode, errors.Code, errors.InvalidParameter)
 	}
 
-	err = db.Transact(func(tx *sqlx.Tx) error {
+	err = db.Transact(func(tx *db.DBTx) error {
 		result, err = DoActivateUser(tx, payload.Code)
 		return err
 	})

@@ -2,7 +2,11 @@ type Query {
   users: [User!]!
 }
 
+type Result {
+  OK: Boolean!
+}
+
 type Mutation {
-  registerUser(input: NewUserPayload!): User!
-  activateUser(input: AcitvateCodePayload!): Boolean!
+  registerUser(input: NewUserPayload!): Result!
+  activateUser(input: AcitvateCodePayload!): Result!
 }

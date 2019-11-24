@@ -9,6 +9,8 @@ import (
 )
 
 var tableName = "user"
+var tableNameMark = `"user"` // user 是 pgsql中的保留关键字，所以加上引号
+
 var columns = []string{
 	"id",
 	"email",
@@ -30,7 +32,7 @@ var (
 func AddUser(tx sqlx.Execer, user *User) error {
 	user.CreatedAt = time.Now().UTC()
 
-	sql, args, _ := sq.Insert(tableName).
+	sql, args, _ := sq.Insert(tableNameMark).
 		Columns(columns[1:]...).
 		Values(
 			user.Email,
@@ -48,7 +50,7 @@ func AddUser(tx sqlx.Execer, user *User) error {
 }
 
 func ActivateUser(tx sqlx.Execer, userID int64) error {
-	sql, args, _ := sq.Update(tableName).
+	sql, args, _ := sq.Update(tableNameMark).
 		Set("verified_at", time.Now().UTC()).
 		Where(sq.Eq{"id": userID}).
 		ToSql()
@@ -65,7 +67,7 @@ func ListUsers(src sqlx.Queryer, page, per uint64) ([]*User, error) {
 
 	// TODO 如果用户量很大的时候，这样分页会有性能问题.. 希望能碰到那一天👀
 	sql, _, _ := sq.Select(columns...).
-		From(tableName).
+		From(tableNameMark).
 		Where(NormalUser).
 		Limit(per).
 		Offset(page * per).
