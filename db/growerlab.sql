@@ -44,6 +44,27 @@ COMMENT ON TABLE public.activate_code IS '用户激活码';
 
 
 --
+-- Name: activate_code_id_seq; Type: SEQUENCE; Schema: public; Owner: growerlab
+--
+
+CREATE SEQUENCE public.activate_code_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.activate_code_id_seq OWNER TO growerlab;
+
+--
+-- Name: activate_code_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: growerlab
+--
+
+ALTER SEQUENCE public.activate_code_id_seq OWNED BY public.activate_code.id;
+
+
+--
 -- Name: namespace; Type: TABLE; Schema: public; Owner: growerlab
 --
 
@@ -288,6 +309,13 @@ ALTER TABLE public.user_id_seq OWNER TO growerlab;
 --
 
 ALTER SEQUENCE public.user_id_seq OWNED BY public."user".id;
+
+
+--
+-- Name: activate_code id; Type: DEFAULT; Schema: public; Owner: growerlab
+--
+
+ALTER TABLE ONLY public.activate_code ALTER COLUMN id SET DEFAULT nextval('public.activate_code_id_seq'::regclass);
 
 
 --
