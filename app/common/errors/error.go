@@ -54,9 +54,8 @@ func wrapError(err error, code string) error {
 	if err == nil {
 		return nil
 	}
-	e := New(SqlError).(*Err)
+	e := New(code).(*Err)
 	e.Err = jujuerr.Trace(err).(*jujuerr.Err)
-	e.code = err.Error()
 	e.SetLocation(1)
 	return e
 }

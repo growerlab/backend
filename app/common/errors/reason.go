@@ -10,7 +10,7 @@ const (
 	// 无法找到属性（字段）
 	NotFoundField = "NotFoundField"
 	// sql错误
-	SqlError = "SqlError"
+	SqlError = "SQLError"
 	// 非法密码
 	InvalidPassword = "InvalidPassword"
 	// 不等于
