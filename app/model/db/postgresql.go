@@ -30,9 +30,11 @@ func InitDatabase() error {
 	}
 
 	DB = &DBQuery{
-		sqlxDB: sqlxDB,
-		debug:  config.Debug,
-		logger: logger.LogWriter,
+		dbBase: &dbBase{
+			debug:  config.Debug,
+			logger: logger.LogWriter,
+		},
+		db: sqlxDB,
 	}
 
 	// pgsql placeholder
@@ -65,15 +67,20 @@ func Transact(txFn func(*DBTx) error) (err error) {
 	return txFn(tx)
 }
 
-// 带日志输出的db封装
-type DBQuery struct {
-	sqlxDB *sqlx.DB
+type Transaction interface {
+	Rollback() error
+	Commit() error
+}
+
+type dbBase struct {
+	sqlx.Queryer
+	sqlx.Execer
 
 	debug  bool
 	logger io.Writer
 }
 
-func (d *DBQuery) Println(query string, args ...interface{}) {
+func (d *dbBase) Println(query string, args ...interface{}) {
 	if d.debug {
 		fmt.Fprint(d.logger, fmt.Sprintf("%c[%d;%d;%dm%s%c[0m ", 0x1B, 1, 0, 36, query, 0x1B))
 		if len(args) > 0 {
@@ -84,51 +91,61 @@ func (d *DBQuery) Println(query string, args ...interface{}) {
 	}
 }
 
-func (d *DBQuery) Query(query string, args ...interface{}) (*sql.Rows, error) {
+func (d *dbBase) Query(query string, args ...interface{}) (*sql.Rows, error) {
 	d.Println(query, args...)
-	return d.sqlxDB.Query(query, args...)
+	return d.Queryer.Query(query, args...)
 }
 
-func (d *DBQuery) Queryx(query string, args ...interface{}) (*sqlx.Rows, error) {
+func (d *dbBase) Queryx(query string, args ...interface{}) (*sqlx.Rows, error) {
 	d.Println(query, args...)
-	return d.sqlxDB.Queryx(query, args...)
+	return d.Queryer.Queryx(query, args...)
 }
 
-func (d *DBQuery) QueryRowx(query string, args ...interface{}) *sqlx.Row {
+func (d *dbBase) QueryRowx(query string, args ...interface{}) *sqlx.Row {
 	d.Println(query, args...)
-	return d.sqlxDB.QueryRowx(query, args...)
+	return d.Queryer.QueryRowx(query, args...)
 }
 
-func (d *DBQuery) Exec(query string, args ...interface{}) (sql.Result, error) {
+func (d *dbBase) Exec(query string, args ...interface{}) (sql.Result, error) {
 	d.Println(query, args...)
-	return d.sqlxDB.Exec(query, args...)
+	return d.Execer.Exec(query, args...)
+}
+
+// 带日志输出的db封装
+type DBQuery struct {
+	*dbBase
+	db *sqlx.DB
 }
 
 func (d *DBQuery) Begin() *DBTx {
 	d.Println("BEGIN")
-	tx := d.sqlxDB.MustBegin()
+	tx := d.db.MustBegin()
+
 	return &DBTx{
-		Execer:  tx,
-		Queryer: tx,
-		tx:      tx,
-		logger:  d.logger,
+		dbBase: &dbBase{
+			Queryer: tx,
+			Execer:  tx,
+			debug:   d.dbBase.debug,
+			logger:  d.dbBase.logger,
+		},
+		Transaction: tx,
 	}
 }
 
 type DBTx struct {
-	sqlx.Execer
-	sqlx.Queryer
-
-	tx     *sqlx.Tx
-	logger io.Writer
+	Transaction
+	*dbBase
 }
 
+var _ sqlx.Queryer = (*DBTx)(nil)
+var _ sqlx.Execer = (*DBTx)(nil)
+
 func (d *DBTx) Rollback() error {
-	fmt.Fprintln(d.logger, "ROLLBACK")
-	return d.tx.Rollback()
+	fmt.Fprintln(d.dbBase.logger, "ROLLBACK")
+	return d.Transaction.Rollback()
 }
 
 func (d *DBTx) Commit() error {
-	fmt.Fprintln(d.logger, "COMMIT")
-	return d.tx.Commit()
+	fmt.Fprintln(d.dbBase.logger, "COMMIT")
+	return d.Transaction.Commit()
 }
