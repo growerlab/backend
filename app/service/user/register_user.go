@@ -4,6 +4,7 @@ import (
 	"github.com/growerlab/backend/app/common/errors"
 	activateModel "github.com/growerlab/backend/app/model/activate"
 	"github.com/growerlab/backend/app/model/db"
+	nsModel "github.com/growerlab/backend/app/model/namespace"
 	userModel "github.com/growerlab/backend/app/model/user"
 	"github.com/growerlab/backend/app/service"
 	"github.com/growerlab/backend/app/utils/pwd"
@@ -36,6 +37,19 @@ func validateRegisterUser(payload *service.NewUserPayload) error {
 		return errors.InvalidParameterError(errors.User, errors.Password, errors.InvalidParameter)
 	}
 
+	// 不允许使用的关键字
+	if _, invalidUsername := userModel.InvalidUsernameSet[payload.Username]; invalidUsername {
+		return errors.AlreadyExistsError(errors.User, "")
+	}
+
+	// email, username是否已经存在
+	exists, err := userModel.AreEmailOrUsernameInUser(db.DB, payload.Username, payload.Email)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	if exists {
+		return errors.AlreadyExistsError(errors.User, "")
+	}
 	return nil
 }
 
@@ -51,6 +65,13 @@ func buildUser(payload *service.NewUserPayload) (*userModel.User, error) {
 		Name:              payload.Username,
 		PublicEmail:       payload.Email,
 	}, nil
+}
+
+func buildNamespace(user *userModel.User) *nsModel.Namespace {
+	return &nsModel.Namespace{
+		Path:    user.Username,
+		OwnerId: user.ID,
+	}
 }
 
 // 用户注册
@@ -76,7 +97,12 @@ func RegisterUser(payload *service.NewUserPayload) (bool, error) {
 			return errors.Trace(err)
 		}
 
-		// TODO 创建namespace
+		// 创建namespace
+		ns := buildNamespace(user)
+		err = nsModel.AddNamespace(tx, ns)
+		if err != nil {
+			return errors.Trace(err)
+		}
 
 		// 激活用户
 		err = DoPreActivateUser(tx, user.ID)

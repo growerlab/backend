@@ -19,4 +19,6 @@ const (
 	Expired = "Expired"
 	// 已被使用过
 	Used = "Used"
+	// 已存在
+	Existed = "Existed"
 )

@@ -421,13 +421,6 @@ CREATE UNIQUE INDEX user_email_uindex ON public."user" USING btree (email);
 
 
 --
--- Name: user_public_email_index; Type: INDEX; Schema: public; Owner: growerlab
---
-
-CREATE INDEX user_public_email_index ON public."user" USING btree (public_email);
-
-
---
 -- Name: user_username_uindex; Type: INDEX; Schema: public; Owner: growerlab
 --
 

@@ -50,6 +50,10 @@ func notFoundError(model, field string) error {
 	return New(NotFound, model, field)
 }
 
+func alreadyExistsError(model, reason string) error {
+	return New(Existed, model, reason)
+}
+
 func wrapError(err error, code string) error {
 	if err == nil {
 		return nil

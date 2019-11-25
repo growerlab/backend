@@ -8,4 +8,5 @@ var (
 	Trace                 = trace
 	Sql                   = sqlError
 	NotFoundError         = notFoundError
+	AlreadyExistsError    = alreadyExistsError
 )

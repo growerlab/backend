@@ -45,8 +45,52 @@ func AddUser(tx sqlx.Execer, user *User) error {
 			nil,
 		).ToSql()
 
-	_, err := tx.Exec(sql, args...)
-	return errors.Sql(err)
+	ret, err := tx.Exec(sql, args...)
+	if err != nil {
+		return errors.Sql(err)
+	}
+	user.ID, err = ret.LastInsertId()
+	return errors.Trace(err)
+}
+
+func AreEmailOrUsernameInUser(src sqlx.Queryer, username, email string) (bool, error) {
+	if len(username) > 0 {
+		user, err := getUser(src, sq.Eq{"username": username})
+		if err != nil {
+			return false, errors.Trace(err)
+		}
+		if user != nil {
+			return true, nil
+		}
+	}
+	if len(email) > 0 {
+		user, err := getUser(src, sq.Eq{"email": email})
+		if err != nil {
+			return false, errors.Trace(err)
+		}
+		if user != nil {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func getUser(src sqlx.Queryer, cond sq.Sqlizer) (*User, error) {
+	sql, args, _ := sq.Select(columns...).
+		From(tableNameMark).
+		Where(cond).
+		Limit(1).
+		ToSql()
+
+	result := make([]*User, 0)
+	err := sqlx.Select(src, &result, sql, args...)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	if len(result) > 0 {
+		return result[0], nil
+	}
+	return nil, nil
 }
 
 func ActivateUser(tx sqlx.Execer, userID int64) error {
