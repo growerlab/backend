@@ -15,6 +15,7 @@ var (
 	ErrExists = errors.New("exists job")
 )
 
+// TODO Job应该有多少worker来进行消费，应该由Job来提供方法告诉Queue
 type Job interface {
 	// 唯一性名称
 	Name() string
