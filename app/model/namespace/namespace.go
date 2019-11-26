@@ -24,8 +24,8 @@ func AddNamespace(tx sqlx.Execer, ns *Namespace) error {
 
 	ret, err := tx.Exec(sql, args)
 	if err != nil {
-		return errors.Sql(err)
+		return errors.Wrap(err, errors.SqlError)
 	}
 	ns.ID, err = ret.LastInsertId()
-	return errors.Trace(err)
+	return errors.WithStack(err)
 }

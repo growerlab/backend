@@ -1,8 +1,9 @@
 package env
 
 import (
-	"errors"
 	"strconv"
+
+	"github.com/growerlab/backend/app/common/errors"
 )
 
 var (
@@ -37,7 +38,7 @@ func (e *Environment) MustString(k string) (v string, err error) {
 	if ok {
 		return v, nil
 	}
-	return "", ErrNotExists
+	return "", errors.WithStack(ErrNotExists)
 }
 
 func (e *Environment) Int64(k string) (int64, bool) {
@@ -65,5 +66,5 @@ func (e *Environment) MustInt64(k string) (v int64, err error) {
 	if ok {
 		return v, nil
 	}
-	return 0, ErrNotExists
+	return 0, errors.WithStack(ErrNotExists)
 }

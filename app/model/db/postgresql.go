@@ -6,7 +6,7 @@ import (
 	"io"
 	"runtime/debug"
 
-	"github.com/Masterminds/squirrel"
+	sq "github.com/Masterminds/squirrel"
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/utils/conf"
 	"github.com/growerlab/backend/app/utils/logger"
@@ -26,7 +26,7 @@ func InitDatabase() error {
 
 	sqlxDB, err = sqlx.Connect("pgx", config.Database.URL)
 	if err != nil {
-		return errors.Sql(err)
+		return errors.Wrap(err, errors.SqlError)
 	}
 
 	DB = &DBQuery{
@@ -38,7 +38,7 @@ func InitDatabase() error {
 	}
 
 	// pgsql placeholder
-	squirrel.StatementBuilder = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
+	sq.StatementBuilder = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 
 	return nil
 }
@@ -57,11 +57,10 @@ func Transact(txFn func(*DBTx) error) (err error) {
 			}
 		}
 		if err != nil {
-			logger.Error("%+v", err)
 			_ = tx.Rollback()
 			return
 		}
-		err = errors.Sql(tx.Commit())
+		err = errors.WithStack(tx.Commit())
 	}()
 
 	return txFn(tx)

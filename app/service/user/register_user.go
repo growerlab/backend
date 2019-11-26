@@ -22,33 +22,33 @@ const (
 
 func validateRegisterUser(payload *service.NewUserPayload) error {
 	if !govalidator.IsEmail(payload.Email) {
-		return errors.InvalidParameterError(errors.User, errors.Email, errors.InvalidParameter)
+		return errors.New(errors.P(errors.User, errors.Email, errors.InvalidParameter))
 	}
 	if !govalidator.IsByteLength(payload.Password, PasswordLenMin, PasswordLenMax) {
-		return errors.InvalidParameterError(errors.User, errors.Password, errors.InvalidPassword)
+		return errors.New(errors.P(errors.User, errors.Password, errors.InvalidLength))
 	}
 	if !govalidator.IsByteLength(payload.Username, UsernameLenMin, UsernameLenMax) {
-		return errors.InvalidParameterError(errors.User, errors.Username, errors.InvalidParameter)
+		return errors.New(errors.P(errors.User, errors.Username, errors.InvalidLength))
 	}
 	if !regex.Match(payload.Username, regex.UsernameRegex) {
-		return errors.InvalidParameterError(errors.User, errors.Username, errors.InvalidParameter)
+		return errors.New(errors.P(errors.User, errors.Username, errors.InvalidParameter))
 	}
 	if !regex.Match(payload.Password, regex.PasswordRegex) {
-		return errors.InvalidParameterError(errors.User, errors.Password, errors.InvalidParameter)
+		return errors.New(errors.P(errors.User, errors.Password, errors.InvalidParameter))
 	}
 
 	// 不允许使用的关键字
 	if _, invalidUsername := userModel.InvalidUsernameSet[payload.Username]; invalidUsername {
-		return errors.AlreadyExistsError(errors.User, "")
+		return errors.New(errors.AlreadyExistsError(errors.User, ""))
 	}
 
 	// email, username是否已经存在
 	exists, err := userModel.AreEmailOrUsernameInUser(db.DB, payload.Username, payload.Email)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	if exists {
-		return errors.AlreadyExistsError(errors.User, "")
+		return errors.New(errors.AlreadyExistsError(errors.User, ""))
 	}
 	return nil
 }
@@ -56,7 +56,7 @@ func validateRegisterUser(payload *service.NewUserPayload) error {
 func buildUser(payload *service.NewUserPayload) (*userModel.User, error) {
 	password, err := pwd.GeneratePassword(payload.Password)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	return &userModel.User{
 		Email:             payload.Email,
@@ -83,36 +83,36 @@ func RegisterUser(payload *service.NewUserPayload) (bool, error) {
 	var err error
 	err = validateRegisterUser(payload)
 	if err != nil {
-		return false, errors.Trace(err)
+		return false, errors.WithStack(err)
 	}
 
 	err = db.Transact(func(tx *db.DBTx) error {
 		user, err := buildUser(payload)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 
 		err = userModel.AddUser(tx, user)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 
 		// 创建namespace
 		ns := buildNamespace(user)
 		err = nsModel.AddNamespace(tx, ns)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 
 		// 激活用户
 		err = DoPreActivateUser(tx, user.ID)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 		return nil
 	})
 	if err != nil {
-		return false, errors.Trace(err)
+		return false, errors.WithStack(err)
 	}
 	return true, nil
 }
@@ -120,7 +120,7 @@ func RegisterUser(payload *service.NewUserPayload) (bool, error) {
 // 激活用户
 func ActivateUser(payload *service.AcitvateCodePayload) (result bool, err error) {
 	if !govalidator.IsByteLength(payload.Code, activateModel.CodeMaxLen, activateModel.CodeMaxLen) {
-		return false, errors.P(errors.ActivateCode, errors.Code, errors.InvalidParameter)
+		return false, errors.New(errors.P(errors.ActivateCode, errors.Code, errors.InvalidParameter))
 	}
 
 	err = db.Transact(func(tx *db.DBTx) error {

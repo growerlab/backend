@@ -3,63 +3,60 @@ package errors
 import (
 	"strings"
 
-	jujuerr "github.com/juju/errors"
+	pkgerr "github.com/pkg/errors"
 )
 
-// 定义错误类型
+// 定义Reason
+const (
+	// 非法参数
+	InvalidParameter = "InvalidParameter"
+	// 无法找到
+	NotFound = "NotFound"
+	// 无法找到属性（字段）
+	NotFoundField = "NotFoundField"
+	// sql错误
+	SqlError = "SQLError"
+	// 非法长度
+	InvalidLength = "InvalidLength"
+	// 不等于
+	NotEqual = "NotEqual"
+	// 失效，过期
+	Expired = "Expired"
+	// 已被使用过
+	Used = "Used"
+	// 已存在
+	AlreadyExists = "AlreadyExists"
+)
 
-type Err struct {
-	*jujuerr.Err
-	code string
+var P = InvalidParameterError
+
+func InvalidParameterError(model, field, reason string) string {
+	return mustCode(InvalidParameter, model, field, reason)
 }
 
-func (e *Err) Error() string {
-	return e.code
+func NotFoundError(model, field string) string {
+	return mustCode(NotFound, model, field)
 }
 
-func New(parts ...string) error {
-	code := mustCode(parts)
-	err := jujuerr.NewErr(code)
-	err.SetLocation(1)
-	return &Err{
-		code: code,
-		Err:  &err,
-	}
+func AlreadyExistsError(model, reason string) string {
+	return mustCode(AlreadyExists, model, reason)
 }
 
-func mustCode(parts []string) string {
+func mustCode(parts ...string) string {
 	if len(parts) == 0 {
 		panic("parts is required")
 	}
 	return strings.Join(parts, ".")
 }
 
-func trace(other error) error {
-	return wrapError(other, other.Error())
-}
-
-func invalidParameterError(model, field, reason string) error {
-	return New(InvalidParameter, model, field, reason)
-}
-
-func sqlError(sqlErr error) error {
-	return wrapError(sqlErr, SqlError)
-}
-
-func notFoundError(model, field string) error {
-	return New(NotFound, model, field)
-}
-
-func alreadyExistsError(model, reason string) error {
-	return New(Existed, model, reason)
-}
-
-func wrapError(err error, code string) error {
-	if err == nil {
-		return nil
-	}
-	e := New(code).(*Err)
-	e.Err = jujuerr.Trace(err).(*jujuerr.Err)
-	e.SetLocation(1)
-	return e
-}
+// 封装（避免在项目中使用时，引用多个包）
+var (
+	Wrap         = pkgerr.Wrap
+	Wrapf        = pkgerr.Wrapf
+	WithMessage  = pkgerr.WithMessage
+	WithMessagef = pkgerr.WithMessagef
+	WithStack    = pkgerr.WithStack
+	Cause        = pkgerr.Cause
+	Errorf       = pkgerr.Errorf
+	New          = pkgerr.New
+)

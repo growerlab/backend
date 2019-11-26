@@ -1,10 +1,10 @@
 package queue
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
+	"github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/utils/logger"
 	"github.com/ivpusic/grpool"
 )
@@ -68,7 +68,7 @@ func (q *Queue) PushPayload(jobName string, payload []byte) (err error) {
 
 func (q *Queue) AddJob(w Job) error {
 	if _, ok := q.jobsSet[w.Name()]; ok {
-		return ErrExists
+		return errors.WithStack(ErrExists)
 	}
 	q.jobsSet[w.Name()] = w
 	return nil

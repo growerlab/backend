@@ -9,7 +9,7 @@ import (
 func PushSendEmail(payload *EmailPayload) error {
 	body, err := json.Marshal(payload)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	return queueInstance.PushPayload(EmailUUID, body)
 }

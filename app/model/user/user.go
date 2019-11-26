@@ -47,17 +47,17 @@ func AddUser(tx sqlx.Execer, user *User) error {
 
 	ret, err := tx.Exec(sql, args...)
 	if err != nil {
-		return errors.Sql(err)
+		return errors.Wrap(err, errors.SqlError)
 	}
 	user.ID, err = ret.LastInsertId()
-	return errors.Trace(err)
+	return errors.WithStack(err)
 }
 
 func AreEmailOrUsernameInUser(src sqlx.Queryer, username, email string) (bool, error) {
 	if len(username) > 0 {
 		user, err := getUser(src, sq.Eq{"username": username})
 		if err != nil {
-			return false, errors.Trace(err)
+			return false, errors.WithStack(err)
 		}
 		if user != nil {
 			return true, nil
@@ -66,7 +66,7 @@ func AreEmailOrUsernameInUser(src sqlx.Queryer, username, email string) (bool, e
 	if len(email) > 0 {
 		user, err := getUser(src, sq.Eq{"email": email})
 		if err != nil {
-			return false, errors.Trace(err)
+			return false, errors.WithStack(err)
 		}
 		if user != nil {
 			return true, nil
@@ -85,7 +85,7 @@ func getUser(src sqlx.Queryer, cond sq.Sqlizer) (*User, error) {
 	result := make([]*User, 0)
 	err := sqlx.Select(src, &result, sql, args...)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	if len(result) > 0 {
 		return result[0], nil
@@ -101,7 +101,7 @@ func ActivateUser(tx sqlx.Execer, userID int64) error {
 
 	_, err := tx.Exec(sql, args...)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	return nil
 }
@@ -116,6 +116,7 @@ func ListUsers(src sqlx.Queryer, page, per uint64) ([]*User, error) {
 		Limit(per).
 		Offset(page * per).
 		ToSql()
+
 	err := sqlx.Select(src, &users, sql)
-	return users, errors.Sql(err)
+	return users, errors.Wrap(err, errors.SqlError)
 }
