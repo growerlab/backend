@@ -11,7 +11,7 @@ func LimitReader(r io.Reader, n int64) ([]byte, error) {
 	lr := io.LimitReader(r, n)
 	result, err := ioutil.ReadAll(lr)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, errors.Trace(err)
 	}
 	return result, nil
 }

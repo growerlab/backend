@@ -27,5 +27,5 @@ func AddNamespace(tx sqlx.Execer, ns *Namespace) error {
 		return errors.Wrap(err, errors.SqlError)
 	}
 	ns.ID, err = ret.LastInsertId()
-	return errors.WithStack(err)
+	return errors.Trace(err)
 }

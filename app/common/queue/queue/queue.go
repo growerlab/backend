@@ -68,7 +68,7 @@ func (q *Queue) PushPayload(jobName string, payload []byte) (err error) {
 
 func (q *Queue) AddJob(w Job) error {
 	if _, ok := q.jobsSet[w.Name()]; ok {
-		return errors.WithStack(ErrExists)
+		return errors.Trace(ErrExists)
 	}
 	q.jobsSet[w.Name()] = w
 	return nil

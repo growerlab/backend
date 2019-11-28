@@ -60,7 +60,7 @@ func Transact(txFn func(*DBTx) error) (err error) {
 			_ = tx.Rollback()
 			return
 		}
-		err = errors.WithStack(tx.Commit())
+		err = errors.Trace(tx.Commit())
 	}()
 
 	return txFn(tx)

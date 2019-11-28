@@ -24,7 +24,7 @@ func DoPreActivateUser(tx *db.DBTx, userID int64) error {
 	code := buildActivateCode(userID)
 	err := activate.AddCode(tx, code)
 	if err != nil {
-		return errors.WithStack(err)
+		return errors.Trace(err)
 	}
 
 	activateURL := buildActivateURL(code.Code)
@@ -41,7 +41,7 @@ func DoPreActivateUser(tx *db.DBTx, userID int64) error {
 func DoActivateUser(tx *db.DBTx, code string) (bool, error) {
 	acode, err := activate.GetCode(tx, code)
 	if err != nil {
-		return false, errors.WithStack(err)
+		return false, errors.Trace(err)
 	}
 	// 是否已使用过
 	if acode.UsedAt != nil {
@@ -54,12 +54,12 @@ func DoActivateUser(tx *db.DBTx, code string) (bool, error) {
 	// 将code改成已使用
 	err = activate.UpdateCodeUsed(tx, code)
 	if err != nil {
-		return false, errors.WithStack(err)
+		return false, errors.Trace(err)
 	}
 	// 激活用户状态
 	err = user.ActivateUser(tx, acode.UserID)
 	if err != nil {
-		return false, errors.WithStack(err)
+		return false, errors.Trace(err)
 	}
 	return true, nil
 }

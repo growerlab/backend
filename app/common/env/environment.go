@@ -38,7 +38,7 @@ func (e *Environment) MustString(k string) (v string, err error) {
 	if ok {
 		return v, nil
 	}
-	return "", errors.WithStack(ErrNotExists)
+	return "", errors.Trace(ErrNotExists)
 }
 
 func (e *Environment) Int64(k string) (int64, bool) {
@@ -66,5 +66,5 @@ func (e *Environment) MustInt64(k string) (v int64, err error) {
 	if ok {
 		return v, nil
 	}
-	return 0, errors.WithStack(ErrNotExists)
+	return 0, errors.Trace(ErrNotExists)
 }

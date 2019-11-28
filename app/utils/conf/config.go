@@ -43,11 +43,11 @@ func GetConf() *Config {
 func LoadConfig() error {
 	confBody, err := ioutil.ReadFile(DefaultConfigPath)
 	if err != nil {
-		return errors.WithStack(err)
+		return errors.Trace(err)
 	}
 	err = yaml.Unmarshal(confBody, &config)
 	if err != nil {
-		return errors.WithStack(err)
+		return errors.Trace(err)
 	}
 	return nil
 }

@@ -50,14 +50,14 @@ func AddUser(tx sqlx.Execer, user *User) error {
 		return errors.Wrap(err, errors.SqlError)
 	}
 	user.ID, err = ret.LastInsertId()
-	return errors.WithStack(err)
+	return errors.Trace(err)
 }
 
 func AreEmailOrUsernameInUser(src sqlx.Queryer, username, email string) (bool, error) {
 	if len(username) > 0 {
 		user, err := getUser(src, sq.Eq{"username": username})
 		if err != nil {
-			return false, errors.WithStack(err)
+			return false, errors.Trace(err)
 		}
 		if user != nil {
 			return true, nil
@@ -66,7 +66,7 @@ func AreEmailOrUsernameInUser(src sqlx.Queryer, username, email string) (bool, e
 	if len(email) > 0 {
 		user, err := getUser(src, sq.Eq{"email": email})
 		if err != nil {
-			return false, errors.WithStack(err)
+			return false, errors.Trace(err)
 		}
 		if user != nil {
 			return true, nil
@@ -85,7 +85,7 @@ func getUser(src sqlx.Queryer, cond sq.Sqlizer) (*User, error) {
 	result := make([]*User, 0)
 	err := sqlx.Select(src, &result, sql, args...)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, errors.Trace(err)
 	}
 	if len(result) > 0 {
 		return result[0], nil
@@ -101,7 +101,7 @@ func ActivateUser(tx sqlx.Execer, userID int64) error {
 
 	_, err := tx.Exec(sql, args...)
 	if err != nil {
-		return errors.WithStack(err)
+		return errors.Trace(err)
 	}
 	return nil
 }

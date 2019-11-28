@@ -51,12 +51,12 @@ func mustCode(parts ...string) string {
 
 // 封装（避免在项目中使用时，引用多个包）
 var (
-	Wrap         = pkgerr.Wrap
-	Wrapf        = pkgerr.Wrapf
-	WithMessage  = pkgerr.WithMessage
-	WithMessagef = pkgerr.WithMessagef
-	WithStack    = pkgerr.WithStack
-	Cause        = pkgerr.Cause
-	Errorf       = pkgerr.Errorf
-	New          = pkgerr.New
+	Wrap     = pkgerr.Wrap
+	Wrapf    = pkgerr.Wrapf
+	Message  = pkgerr.WithMessage
+	Messagef = pkgerr.WithMessagef
+	Trace    = pkgerr.WithStack
+	Cause    = pkgerr.Cause
+	Errorf   = pkgerr.Errorf
+	New      = pkgerr.New
 )
