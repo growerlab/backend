@@ -42,6 +42,10 @@ func AlreadyExistsError(model, reason string) string {
 	return mustCode(AlreadyExists, model, reason)
 }
 
+func GraphQLError(reason string) string {
+	return mustCode(GraphQL, reason)
+}
+
 func mustCode(parts ...string) string {
 	if len(parts) == 0 {
 		panic("parts is required")
