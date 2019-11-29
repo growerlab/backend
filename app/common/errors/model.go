@@ -6,5 +6,4 @@ package errors
 const (
 	User         = "User"
 	ActivateCode = "ActivateCode"
-	GraphQL      = "GraphQL"
 )

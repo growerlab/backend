@@ -85,7 +85,7 @@ func getUser(src sqlx.Queryer, cond sq.Sqlizer) (*User, error) {
 	result := make([]*User, 0)
 	err := sqlx.Select(src, &result, sql, args...)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.Wrap(err, errors.SqlError)
 	}
 	if len(result) > 0 {
 		return result[0], nil
@@ -101,7 +101,7 @@ func ActivateUser(tx sqlx.Execer, userID int64) error {
 
 	_, err := tx.Exec(sql, args...)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.Wrap(err, errors.SqlError)
 	}
 	return nil
 }

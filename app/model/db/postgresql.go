@@ -31,8 +31,10 @@ func InitDatabase() error {
 
 	DB = &DBQuery{
 		dbBase: &dbBase{
-			debug:  config.Debug,
-			logger: logger.LogWriter,
+			Queryer: sqlxDB,
+			Execer:  sqlxDB,
+			debug:   config.Debug,
+			logger:  logger.LogWriter,
 		},
 		db: sqlxDB,
 	}
