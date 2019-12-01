@@ -2,8 +2,13 @@
 
 package service
 
-type AcitvateCodePayload struct {
-	Code string `json:"Code"`
+type ActivateCodePayload struct {
+	Code string `json:"code"`
+}
+
+type LoginUserPayload struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type NewUserPayload struct {
@@ -14,4 +19,8 @@ type NewUserPayload struct {
 
 type Result struct {
 	Ok bool `json:"OK"`
+}
+
+type UserToken struct {
+	Token string `json:"token"`
 }

@@ -7,6 +7,8 @@ import (
 	pkgerr "github.com/pkg/errors"
 )
 
+// TODO 目前有一些错误不应该在后端输出错误，例如 NotFound， 此类错误是没有必要的
+
 // 定义错误
 const (
 	// 非法参数

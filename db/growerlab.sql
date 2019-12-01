@@ -221,7 +221,8 @@ CREATE TABLE public."user" (
     public_email character varying(255) NOT NULL,
     created_at timestamp without time zone NOT NULL,
     deleted_at timestamp without time zone,
-    verified_at timestamp without time zone
+    verified_at timestamp without time zone,
+    last_login_at timestamp without time zone
 );
 
 
@@ -288,6 +289,13 @@ COMMENT ON COLUMN public."user".deleted_at IS '删除的时间';
 --
 
 COMMENT ON COLUMN public."user".verified_at IS '邮箱通过验证的时间';
+
+
+--
+-- Name: COLUMN "user".last_login_at; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public."user".last_login_at IS '最后登录时间';
 
 
 --

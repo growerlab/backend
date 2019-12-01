@@ -6,7 +6,12 @@ type Result {
   OK: Boolean!
 }
 
+type UserToken {
+  token: String!
+}
+
 type Mutation {
   registerUser(input: NewUserPayload!): Result!
-  activateUser(input: AcitvateCodePayload!): Result!
+  activateUser(input: ActivateCodePayload!): Result!
+  loginUser(input: LoginUserPayload!): UserToken!
 }

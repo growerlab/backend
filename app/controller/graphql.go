@@ -40,10 +40,13 @@ func GraphQL(ctx *gin.Context) {
 
 		retErr := gql.DefaultErrorPresenter(gqlCtx, err)
 		retErr.Message = err.Error()
+
+		// 只返回错误码，而不返回具体的错误信息
 		msgParts := strings.Split(retErr.Message, ": ")
 		if len(msgParts) > 0 {
 			retErr.Message = msgParts[0]
 		}
+
 		return retErr
 	})
 	graphqlOpts = append(graphqlOpts, errorOpt)

@@ -21,3 +21,10 @@ grant all privileges on database growerlab to growerlab;
 使用 `db/growerlab.sql` 文件初始化表结构
 
 如果有种子数据，应该放入 `db/seed.sql` 文件中
+
+
+#### GraphQL
+
+基于 `gqlgen` 通过自动化生成GraphQL的基础代码
+
+如果有修改 `*.graphql` 应该使用 `gqlgen` 工具生成代码

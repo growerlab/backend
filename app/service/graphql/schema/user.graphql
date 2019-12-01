@@ -8,10 +8,11 @@ type User {
   name: String!
   email: String!
   username: String!
-  public_email: String!
+  publicEmail: String!
   createdAt: Time!
   deletedAt: Time
   verifiedAt: Time
+  lastLoginAt: Time
   namespace: Namespace!
 }
 
@@ -21,6 +22,11 @@ input NewUserPayload {
   username: String!
 }
 
-input AcitvateCodePayload {
-  Code: String!
+input ActivateCodePayload {
+  code: String!
+}
+
+input LoginUserPayload {
+  email: String!
+  password: String!
 }

@@ -2,7 +2,6 @@ package user
 
 import (
 	"github.com/growerlab/backend/app/common/errors"
-	activateModel "github.com/growerlab/backend/app/model/activate"
 	"github.com/growerlab/backend/app/model/db"
 	nsModel "github.com/growerlab/backend/app/model/namespace"
 	userModel "github.com/growerlab/backend/app/model/user"
@@ -79,7 +78,7 @@ func buildNamespace(user *userModel.User) *nsModel.Namespace {
 // 2. 发送验证邮件（这里可以考虑使用KeyDB来建立邮件发送队列，避免重启进程后，发送任务丢失）
 // 3. Done
 //
-func RegisterUser(payload *service.NewUserPayload) (bool, error) {
+func Register(payload *service.NewUserPayload) (bool, error) {
 	var err error
 	err = validateRegisterUser(payload)
 	if err != nil {
@@ -105,7 +104,7 @@ func RegisterUser(payload *service.NewUserPayload) (bool, error) {
 		}
 
 		// 激活用户
-		err = DoPreActivateUser(tx, user.ID)
+		err = DoPreActivate(tx, user.ID)
 		if err != nil {
 			return errors.Trace(err)
 		}
@@ -115,17 +114,4 @@ func RegisterUser(payload *service.NewUserPayload) (bool, error) {
 		return false, errors.Trace(err)
 	}
 	return true, nil
-}
-
-// 激活用户
-func ActivateUser(payload *service.AcitvateCodePayload) (result bool, err error) {
-	if !govalidator.IsByteLength(payload.Code, activateModel.CodeMaxLen, activateModel.CodeMaxLen) {
-		return false, errors.New(errors.P(errors.ActivateCode, errors.Code, errors.Invalid))
-	}
-
-	err = db.Transact(func(tx *db.DBTx) error {
-		result, err = DoActivateUser(tx, payload.Code)
-		return err
-	})
-	return
 }

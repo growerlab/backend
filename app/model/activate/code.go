@@ -45,19 +45,22 @@ func GetCode(src sqlx.Queryer, code string) (*ActivateCode, error) {
 		Limit(1).
 		ToSql()
 
-	var result = new(ActivateCode)
-	err := sqlx.Get(src, &result, sql, args...)
+	var data = make([]*ActivateCode, 0)
+	err := sqlx.Select(src, &data, sql, args...)
 	if err != nil {
 		return nil, errors.Wrap(err, errors.SQLError())
 	}
-	return result, nil
+	if len(data) > 0 {
+		return data[0], nil
+	}
+	return nil, nil
 }
 
 // 修改code状态
 //
 func UpdateCodeUsed(tx sqlx.Execer, code string) error {
 	sql, args, _ := sq.Update(tableName).
-		Set("used", time.Now().UTC()).
+		Set("used_at", time.Now().UTC()).
 		Where(sq.Eq{"code": code}).
 		ToSql()
 

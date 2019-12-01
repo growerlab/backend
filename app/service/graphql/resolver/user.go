@@ -9,13 +9,18 @@ import (
 )
 
 func (r *mutationResolver) RegisterUser(ctx context.Context, input service.NewUserPayload) (*service.Result, error) {
-	ok, err := user.RegisterUser(&input)
+	ok, err := user.Register(&input)
 	return &service.Result{Ok: ok}, err
 }
 
-func (r *mutationResolver) ActivateUser(ctx context.Context, input service.AcitvateCodePayload) (*service.Result, error) {
-	ok, err := user.ActivateUser(&input)
+func (r *mutationResolver) ActivateUser(ctx context.Context, input service.ActivateCodePayload) (*service.Result, error) {
+	ok, err := user.Activate(&input)
 	return &service.Result{Ok: ok}, err
+}
+
+func (r *mutationResolver) LoginUser(ctx context.Context, input service.LoginUserPayload) (*service.UserToken, error) {
+	token, err := user.Login(&input)
+	return &service.UserToken{Token: token}, err
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*userModel.User, error) {
