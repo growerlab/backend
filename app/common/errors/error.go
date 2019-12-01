@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"fmt"
 	"strings"
 
 	pkgerr "github.com/pkg/errors"
@@ -9,21 +10,22 @@ import (
 // 定义错误
 const (
 	// 非法参数
-	InvalidParameter = "InvalidParameter"
+	invalidParameter = "InvalidParameter"
 	// 无法找到
-	NotFound = "NotFound"
+	notFound = "NotFound"
 	// GraphQLError
-	GraphQLError = "GraphQLError"
+	graphQLError = "GraphQLError"
 	// 已存在
-	AlreadyExists = "AlreadyExists"
+	alreadyExists = "AlreadyExists"
 	// AccessDenied
-	AccessDenied = "AccessDenied"
+	accessDenied = "AccessDenied"
 	// sql错误
-	SqlError = "SQLError"
+	sqlError = "SQLError"
 )
 
 // 定义错误原因
 const (
+	Invalid = "Invalid"
 	// 无法找到属性（字段）
 	NotFoundField = "NotFoundField"
 	// 非法长度
@@ -37,22 +39,31 @@ const (
 var P = InvalidParameterError
 
 func InvalidParameterError(model, field, reason string) string {
-	return mustCode(InvalidParameter, model, field, reason)
+	return mustCode(invalidParameter, model, field, reason)
 }
 
 func NotFoundError(model string) string {
-	return mustCode(NotFound, model)
+	return mustCode(notFound, model)
 }
 
 func AlreadyExistsError(model, reason string) string {
-	return mustCode(AlreadyExists, model, reason)
+	return mustCode(alreadyExists, model, reason)
 }
 
+func SQLError() string {
+	return mustCode(sqlError)
+}
+
+func GraphQLError() string {
+	return mustCode(graphQLError)
+}
+
+// 必须调用该方法生成<xxx>字符串，便于前端解析数据
 func mustCode(parts ...string) string {
 	if len(parts) == 0 {
 		panic("parts is required")
 	}
-	return strings.Join(parts, ".")
+	return fmt.Sprintf("<%s>", strings.Join(parts, "."))
 }
 
 // 封装（避免在项目中使用时，引用多个包）

@@ -50,7 +50,7 @@ func GraphQL(ctx *gin.Context) {
 
 	recoverOpt := handler.RecoverFunc(func(ctx context.Context, err interface{}) (userMessage error) {
 		logger.Error("graphql recover err: %v\n%+v", err, string(debug.Stack()))
-		return errors.New(errors.GraphQLError)
+		return errors.New(errors.GraphQLError())
 	})
 	graphqlOpts = append(graphqlOpts, recoverOpt)
 

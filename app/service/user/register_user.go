@@ -22,7 +22,7 @@ const (
 
 func validateRegisterUser(payload *service.NewUserPayload) error {
 	if !govalidator.IsEmail(payload.Email) {
-		return errors.New(errors.P(errors.User, errors.Email, errors.InvalidParameter))
+		return errors.New(errors.P(errors.User, errors.Email, errors.Invalid))
 	}
 	if !govalidator.IsByteLength(payload.Password, PasswordLenMin, PasswordLenMax) {
 		return errors.New(errors.P(errors.User, errors.Password, errors.InvalidLength))
@@ -31,10 +31,10 @@ func validateRegisterUser(payload *service.NewUserPayload) error {
 		return errors.New(errors.P(errors.User, errors.Username, errors.InvalidLength))
 	}
 	if !regex.Match(payload.Username, regex.UsernameRegex) {
-		return errors.New(errors.P(errors.User, errors.Username, errors.InvalidParameter))
+		return errors.New(errors.P(errors.User, errors.Username, errors.Invalid))
 	}
 	if !regex.Match(payload.Password, regex.PasswordRegex) {
-		return errors.New(errors.P(errors.User, errors.Password, errors.InvalidParameter))
+		return errors.New(errors.P(errors.User, errors.Password, errors.Invalid))
 	}
 
 	// 不允许使用的关键字
@@ -120,7 +120,7 @@ func RegisterUser(payload *service.NewUserPayload) (bool, error) {
 // 激活用户
 func ActivateUser(payload *service.AcitvateCodePayload) (result bool, err error) {
 	if !govalidator.IsByteLength(payload.Code, activateModel.CodeMaxLen, activateModel.CodeMaxLen) {
-		return false, errors.New(errors.P(errors.ActivateCode, errors.Code, errors.InvalidParameter))
+		return false, errors.New(errors.P(errors.ActivateCode, errors.Code, errors.Invalid))
 	}
 
 	err = db.Transact(func(tx *db.DBTx) error {

@@ -33,7 +33,7 @@ func AddCode(tx sqlx.Execer, code *ActivateCode) error {
 
 	_, err := tx.Exec(sql, args...)
 	if err != nil {
-		return errors.Wrap(err, errors.SqlError)
+		return errors.Wrap(err, errors.SQLError())
 	}
 	return nil
 }
@@ -48,7 +48,7 @@ func GetCode(src sqlx.Queryer, code string) (*ActivateCode, error) {
 	var result = new(ActivateCode)
 	err := sqlx.Get(src, &result, sql, args...)
 	if err != nil {
-		return nil, errors.Wrap(err, errors.SqlError)
+		return nil, errors.Wrap(err, errors.SQLError())
 	}
 	return result, nil
 }
@@ -63,7 +63,7 @@ func UpdateCodeUsed(tx sqlx.Execer, code string) error {
 
 	_, err := tx.Exec(sql, args...)
 	if err != nil {
-		return errors.Wrap(err, errors.SqlError)
+		return errors.Wrap(err, errors.SQLError())
 	}
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/growerlab/backend/app/common/errors"
+	"github.com/growerlab/backend/app/model/utils"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -29,7 +30,7 @@ var (
 	DeletedUser    = sq.NotEq{"deleted_at": nil}
 )
 
-func AddUser(tx sqlx.Execer, user *User) error {
+func AddUser(tx sqlx.Queryer, user *User) error {
 	user.CreatedAt = time.Now().UTC()
 
 	sql, args, _ := sq.Insert(tableNameMark).
@@ -43,13 +44,14 @@ func AddUser(tx sqlx.Execer, user *User) error {
 			user.CreatedAt,
 			nil,
 			nil,
-		).ToSql()
+		).
+		Suffix(utils.Returning("id")).
+		ToSql()
 
-	ret, err := tx.Exec(sql, args...)
+	err := tx.QueryRowx(sql, args...).Scan(&user.ID)
 	if err != nil {
-		return errors.Wrap(err, errors.SqlError)
+		return errors.Wrap(err, errors.SQLError())
 	}
-	user.ID, err = ret.LastInsertId()
 	return errors.Trace(err)
 }
 
@@ -85,7 +87,7 @@ func getUser(src sqlx.Queryer, cond sq.Sqlizer) (*User, error) {
 	result := make([]*User, 0)
 	err := sqlx.Select(src, &result, sql, args...)
 	if err != nil {
-		return nil, errors.Wrap(err, errors.SqlError)
+		return nil, errors.Wrap(err, errors.SQLError())
 	}
 	if len(result) > 0 {
 		return result[0], nil
@@ -101,7 +103,7 @@ func ActivateUser(tx sqlx.Execer, userID int64) error {
 
 	_, err := tx.Exec(sql, args...)
 	if err != nil {
-		return errors.Wrap(err, errors.SqlError)
+		return errors.Wrap(err, errors.SQLError())
 	}
 	return nil
 }
@@ -118,5 +120,5 @@ func ListUsers(src sqlx.Queryer, page, per uint64) ([]*User, error) {
 		ToSql()
 
 	err := sqlx.Select(src, &users, sql)
-	return users, errors.Wrap(err, errors.SqlError)
+	return users, errors.Wrap(err, errors.SQLError())
 }

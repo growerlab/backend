@@ -26,7 +26,7 @@ func InitDatabase() error {
 
 	sqlxDB, err = sqlx.Connect("pgx", config.Database.URL)
 	if err != nil {
-		return errors.Wrap(err, errors.SqlError)
+		return errors.Wrap(err, errors.SQLError())
 	}
 
 	DB = &DBQuery{
