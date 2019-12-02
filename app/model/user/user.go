@@ -27,14 +27,13 @@ var columns = []string{
 }
 
 var (
-	NormalUser     = sq.And{sq.Eq{"deleted_at": nil}, sq.NotEq{"verified_at": nil}}
-	InactivateUser = sq.Eq{"verified_at": nil}
-	DeletedUser    = sq.NotEq{"deleted_at": nil}
+	NormalUser          = sq.Eq{"deleted_at": nil}
+	NormalActivatedUser = sq.And{sq.Eq{"deleted_at": nil}, sq.NotEq{"verified_at": nil}}
+	InactivateUser      = sq.Eq{"verified_at": nil}
+	DeletedUser         = sq.NotEq{"deleted_at": nil}
 )
 
 func AddUser(tx sqlx.Queryer, user *User) error {
-	user.CreatedAt = time.Now().UTC()
-
 	sql, args, _ := sq.Insert(tableNameMark).
 		Columns(columns[1:]...).
 		Values(
@@ -81,10 +80,18 @@ func AreEmailOrUsernameInUser(src sqlx.Queryer, username, email string) (bool, e
 	return false, nil
 }
 
+func GetUserByEmail(src sqlx.Queryer, email string) (*User, error) {
+	user, err := getUser(src, sq.Eq{"email": email})
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return user, nil
+}
+
 func getUser(src sqlx.Queryer, cond sq.Sqlizer) (*User, error) {
 	sql, args, _ := sq.Select(columns...).
 		From(tableNameMark).
-		Where(cond).
+		Where(sq.And{cond, NormalUser}).
 		Limit(1).
 		ToSql()
 
@@ -102,7 +109,7 @@ func getUser(src sqlx.Queryer, cond sq.Sqlizer) (*User, error) {
 func ActivateUser(tx sqlx.Execer, userID int64) error {
 	sql, args, _ := sq.Update(tableNameMark).
 		Set("verified_at", time.Now().UTC()).
-		Where(sq.Eq{"id": userID}).
+		Where(sq.And{sq.Eq{"id": userID}, InactivateUser}).
 		ToSql()
 
 	_, err := tx.Exec(sql, args...)
@@ -112,7 +119,7 @@ func ActivateUser(tx sqlx.Execer, userID int64) error {
 	return nil
 }
 
-func ListUsers(src sqlx.Queryer, page, per uint64) ([]*User, error) {
+func ListAllUsers(src sqlx.Queryer, page, per uint64) ([]*User, error) {
 	users := make([]*User, 0)
 
 	// TODO 如果用户量很大的时候，这样分页会有性能问题.. 希望能碰到那一天👀
@@ -125,4 +132,20 @@ func ListUsers(src sqlx.Queryer, page, per uint64) ([]*User, error) {
 
 	err := sqlx.Select(src, &users, sql)
 	return users, errors.Wrap(err, errors.SQLError())
+}
+
+func UpdateLogin(tx sqlx.Execer, userID int64, clientIP string) error {
+	sql, args, _ := sq.Update(tableNameMark).
+		SetMap(map[string]interface{}{
+			"last_login_at": time.Now().UTC(),
+			"last_login_ip": clientIP,
+		}).
+		Where(sq.Eq{"id": userID}).
+		ToSql()
+
+	_, err := tx.Exec(sql, args...)
+	if err != nil {
+		return errors.Wrap(err, errors.SQLError())
+	}
+	return nil
 }

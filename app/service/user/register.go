@@ -1,6 +1,8 @@
 package user
 
 import (
+	"time"
+
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/model/db"
 	nsModel "github.com/growerlab/backend/app/model/namespace"
@@ -63,6 +65,7 @@ func buildUser(payload *service.NewUserPayload) (*userModel.User, error) {
 		Username:          payload.Username,
 		Name:              payload.Username,
 		PublicEmail:       payload.Email,
+		CreatedAt:         time.Now().UTC(),
 	}, nil
 }
 

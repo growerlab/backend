@@ -1,8 +1,10 @@
 package uuid
 
-import "github.com/google/uuid"
+import (
+	"strings"
 
-import "strings"
+	"github.com/google/uuid"
+)
 
 func UUID() string {
 	return string(fullUUID()[:8])
@@ -10,6 +12,10 @@ func UUID() string {
 
 func UUIDv16() string {
 	return string(fullUUID()[:16])
+}
+
+func BuildToken() string {
+	return uuid.New().String()
 }
 
 func fullUUID() string {

@@ -36,6 +36,8 @@ const (
 	Expired = "Expired"
 	// 已被使用过
 	Used = "Used"
+	// 不匹配
+	NotEqual = "NotEqual"
 )
 
 var P = InvalidParameterError
