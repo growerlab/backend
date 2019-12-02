@@ -66,6 +66,7 @@ func DoActivate(tx *db.DBTx, code string) (bool, error) {
 		return false, errors.New(errors.P(errors.ActivateCode, errors.Code, errors.Used))
 	}
 	// 是否过期
+	// TODO 对于已经过期的激活码，应当在前端允许再次发送激活码（目前这块前后端还未开发）
 	if acode.ExpiredAt.Unix() < time.Now().Unix() {
 		return false, errors.New(errors.P(errors.ActivateCode, errors.Code, errors.Expired))
 	}

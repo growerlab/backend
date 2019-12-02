@@ -22,6 +22,8 @@ var columns = []string{
 	"created_at",
 	"deleted_at",
 	"verified_at",
+	"last_login_at",
+	"last_login_ip",
 }
 
 var (
@@ -42,6 +44,8 @@ func AddUser(tx sqlx.Queryer, user *User) error {
 			user.Name,
 			user.PublicEmail,
 			user.CreatedAt,
+			nil,
+			nil,
 			nil,
 			nil,
 		).

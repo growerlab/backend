@@ -222,7 +222,8 @@ CREATE TABLE public."user" (
     created_at timestamp without time zone NOT NULL,
     deleted_at timestamp without time zone,
     verified_at timestamp without time zone,
-    last_login_at timestamp without time zone
+    last_login_at timestamp without time zone,
+    last_login_ip character varying(46)
 );
 
 
@@ -296,6 +297,13 @@ COMMENT ON COLUMN public."user".verified_at IS '邮箱通过验证的时间';
 --
 
 COMMENT ON COLUMN public."user".last_login_at IS '最后登录时间';
+
+
+--
+-- Name: COLUMN "user".last_login_ip; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public."user".last_login_ip IS '最后的登录ip（兼容ipv6长度）';
 
 
 --

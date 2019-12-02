@@ -17,6 +17,7 @@ type User struct {
 	DeletedAt         *time.Time `db:"deleted_at"`
 	VerifiedAt        *time.Time `db:"verified_at"`
 	LastLoginAt       *time.Time `db:"last_login_at"`
+	LastLoginIP       string     `db:"last_login_ip"`
 }
 
 func (u *User) Namespace() *namespace.Namespace {

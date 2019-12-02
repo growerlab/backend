@@ -1,7 +1,14 @@
 package user
 
-import "github.com/growerlab/backend/app/service"
+import (
+	"github.com/growerlab/backend/app/service"
+)
 
-func Login(input *service.LoginUserPayload) (token string, err error) {
+// 用户登录
+//  用户邮箱是否已验证
+//	更新用户最后的登录时间/IP
+//
+func Login(input *service.LoginUserPayload, clientIP string) (token string, err error) {
+
 	return "", nil
 }
