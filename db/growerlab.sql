@@ -28,9 +28,9 @@ CREATE TABLE public.activate_code (
     id integer NOT NULL,
     user_id integer NOT NULL,
     code character varying(16) NOT NULL,
-    created_at timestamp without time zone NOT NULL,
-    used_at timestamp without time zone,
-    expired_at timestamp without time zone NOT NULL
+    created_at bigint NOT NULL,
+    used_at bigint,
+    expired_at bigint NOT NULL
 );
 
 
@@ -129,9 +129,10 @@ CREATE TABLE public.repository (
     uuid character varying(16) NOT NULL,
     path character varying(255) NOT NULL,
     name character varying(255) NOT NULL,
-    namespace_id integer NOT NULL,
-    creator_id integer NOT NULL,
-    description text
+    namespace_id bigint NOT NULL,
+    creator_id bigint NOT NULL,
+    description text,
+    created_at bigint NOT NULL
 );
 
 
@@ -209,6 +210,43 @@ ALTER SEQUENCE public.repository_id_seq OWNED BY public.repository.id;
 
 
 --
+-- Name: session; Type: TABLE; Schema: public; Owner: growerlab
+--
+
+CREATE TABLE public.session (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    token character varying(36) NOT NULL,
+    created_at bigint NOT NULL,
+    expired_at bigint NOT NULL
+);
+
+
+ALTER TABLE public.session OWNER TO growerlab;
+
+--
+-- Name: session_id_seq; Type: SEQUENCE; Schema: public; Owner: growerlab
+--
+
+CREATE SEQUENCE public.session_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.session_id_seq OWNER TO growerlab;
+
+--
+-- Name: session_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: growerlab
+--
+
+ALTER SEQUENCE public.session_id_seq OWNED BY public.session.id;
+
+
+--
 -- Name: user; Type: TABLE; Schema: public; Owner: growerlab
 --
 
@@ -219,11 +257,11 @@ CREATE TABLE public."user" (
     username character varying(40) NOT NULL,
     name character varying(255) NOT NULL,
     public_email character varying(255) NOT NULL,
-    created_at timestamp without time zone NOT NULL,
-    deleted_at timestamp without time zone,
-    verified_at timestamp without time zone,
-    last_login_at timestamp without time zone,
-    last_login_ip character varying(46)
+    last_login_ip character varying(46),
+    created_at bigint NOT NULL,
+    deleted_at bigint,
+    verified_at bigint,
+    last_login_at bigint
 );
 
 
@@ -269,34 +307,6 @@ COMMENT ON COLUMN public."user".name IS '用户昵称';
 --
 
 COMMENT ON COLUMN public."user".public_email IS '公开的邮箱地址';
-
-
---
--- Name: COLUMN "user".created_at; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public."user".created_at IS '创建的时间';
-
-
---
--- Name: COLUMN "user".deleted_at; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public."user".deleted_at IS '删除的时间';
-
-
---
--- Name: COLUMN "user".verified_at; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public."user".verified_at IS '邮箱通过验证的时间';
-
-
---
--- Name: COLUMN "user".last_login_at; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public."user".last_login_at IS '最后登录时间';
 
 
 --
@@ -349,6 +359,13 @@ ALTER TABLE ONLY public.repository ALTER COLUMN id SET DEFAULT nextval('public.r
 
 
 --
+-- Name: session id; Type: DEFAULT; Schema: public; Owner: growerlab
+--
+
+ALTER TABLE ONLY public.session ALTER COLUMN id SET DEFAULT nextval('public.session_id_seq'::regclass);
+
+
+--
 -- Name: user id; Type: DEFAULT; Schema: public; Owner: growerlab
 --
 
@@ -377,6 +394,14 @@ ALTER TABLE ONLY public.namespace
 
 ALTER TABLE ONLY public.repository
     ADD CONSTRAINT repository_pk PRIMARY KEY (id);
+
+
+--
+-- Name: session session_pk; Type: CONSTRAINT; Schema: public; Owner: growerlab
+--
+
+ALTER TABLE ONLY public.session
+    ADD CONSTRAINT session_pk PRIMARY KEY (id);
 
 
 --
@@ -427,6 +452,13 @@ CREATE INDEX repository_path_index ON public.repository USING btree (path);
 --
 
 CREATE INDEX repository_uuid_index ON public.repository USING btree (uuid);
+
+
+--
+-- Name: session_user_id_token_uniq; Type: INDEX; Schema: public; Owner: growerlab
+--
+
+CREATE UNIQUE INDEX session_user_id_token_uniq ON public.session USING btree (user_id, token);
 
 
 --
