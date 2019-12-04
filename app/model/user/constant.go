@@ -3,6 +3,11 @@ package user
 // 不允许用户注册的关键字
 //
 var InvalidUsernameList = []string{
+	"user",
+	"create",
+	"update",
+	"post",
+	"get",
 	"admin",
 	"username",
 	"udmin",
