@@ -130,7 +130,7 @@ CREATE TABLE public.repository (
     path character varying(255) NOT NULL,
     name character varying(255) NOT NULL,
     namespace_id bigint NOT NULL,
-    creator_id bigint NOT NULL,
+    owner_id bigint NOT NULL,
     description text,
     created_at bigint NOT NULL
 );
@@ -174,10 +174,10 @@ COMMENT ON COLUMN public.repository.namespace_id IS '命名空间id';
 
 
 --
--- Name: COLUMN repository.creator_id; Type: COMMENT; Schema: public; Owner: growerlab
+-- Name: COLUMN repository.owner_id; Type: COMMENT; Schema: public; Owner: growerlab
 --
 
-COMMENT ON COLUMN public.repository.creator_id IS '仓库创建者';
+COMMENT ON COLUMN public.repository.owner_id IS '仓库创建者,fork后不变';
 
 
 --

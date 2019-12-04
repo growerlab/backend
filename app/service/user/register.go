@@ -65,7 +65,7 @@ func buildUser(payload *service.NewUserPayload) (*userModel.User, error) {
 		Username:          payload.Username,
 		Name:              payload.Username,
 		PublicEmail:       payload.Email,
-		CreatedAt:         time.Now().UTC(),
+		CreatedAt:         time.Now().Unix(),
 	}, nil
 }
 

@@ -19,7 +19,7 @@ var columns = []string{
 }
 
 func AddCode(tx sqlx.Execer, code *ActivateCode) error {
-	code.CreatedAt = time.Now().UTC()
+	code.CreatedAt = time.Now().Unix()
 
 	sql, args, _ := sq.Insert(tableName).
 		Columns(columns[1:]...).

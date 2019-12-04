@@ -56,7 +56,7 @@ func buildSession(userID int64) *sessionModel.Session {
 	return &sessionModel.Session{
 		UserID:    userID,
 		Token:     uuid.UUID(),
-		CreatedAt: time.Now().UTC(),
-		ExpiredAt: time.Now().UTC().Add(TokenExpiredTime),
+		CreatedAt: time.Now().Unix(),
+		ExpiredAt: time.Now().Add(TokenExpiredTime).Unix(),
 	}
 }
