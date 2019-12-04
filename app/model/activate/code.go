@@ -60,7 +60,7 @@ func GetCode(src sqlx.Queryer, code string) (*ActivateCode, error) {
 //
 func UpdateCodeUsed(tx sqlx.Execer, code string) error {
 	sql, args, _ := sq.Update(tableName).
-		Set("used_at", time.Now().UTC()).
+		Set("used_at", time.Now().Unix()).
 		Where(sq.Eq{"code": code}).
 		ToSql()
 

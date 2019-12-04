@@ -45,11 +45,10 @@ func Login(input *service.LoginUserPayload, clientIP string) (token string, err 
 		token = sess.Token
 		return err
 	})
-
 	if err != nil {
 		return "", err
 	}
-	return "", nil
+	return
 }
 
 func buildSession(userID int64) *sessionModel.Session {

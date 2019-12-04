@@ -108,7 +108,7 @@ func getUser(src sqlx.Queryer, cond sq.Sqlizer) (*User, error) {
 
 func ActivateUser(tx sqlx.Execer, userID int64) error {
 	sql, args, _ := sq.Update(tableNameMark).
-		Set("verified_at", time.Now().UTC()).
+		Set("verified_at", time.Now().Unix()).
 		Where(sq.And{sq.Eq{"id": userID}, InactivateUser}).
 		ToSql()
 
@@ -137,7 +137,7 @@ func ListAllUsers(src sqlx.Queryer, page, per uint64) ([]*User, error) {
 func UpdateLogin(tx sqlx.Execer, userID int64, clientIP string) error {
 	sql, args, _ := sq.Update(tableNameMark).
 		SetMap(map[string]interface{}{
-			"last_login_at": time.Now().UTC(),
+			"last_login_at": time.Now().Unix(),
 			"last_login_ip": clientIP,
 		}).
 		Where(sq.Eq{"id": userID}).
