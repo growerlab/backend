@@ -16,6 +16,8 @@ import (
 	"gopkg.in/asaskevich/govalidator.v9"
 )
 
+const ActivateExpiredTime = 24 * time.Hour
+
 // 激活用户
 func Activate(payload *service.ActivateCodePayload) (result bool, err error) {
 	if !govalidator.IsByteLength(payload.Code, activate.CodeMaxLen, activate.CodeMaxLen) {
@@ -39,7 +41,7 @@ func DoPreActivate(tx *db.DBTx, userID int64) error {
 	code := buildActivateCode(userID)
 	err := activate.AddCode(tx, code)
 	if err != nil {
-		return errors.Trace(err)
+		return err
 	}
 
 	activateURL := buildActivateURL(code.Code)
@@ -56,7 +58,7 @@ func DoPreActivate(tx *db.DBTx, userID int64) error {
 func DoActivate(tx *db.DBTx, code string) (bool, error) {
 	acode, err := activate.GetCode(tx, code)
 	if err != nil {
-		return false, errors.Trace(err)
+		return false, err
 	}
 	if acode == nil {
 		return false, errors.New(errors.NotFoundError(errors.ActivateCode))
@@ -73,12 +75,12 @@ func DoActivate(tx *db.DBTx, code string) (bool, error) {
 	// 将code改成已使用
 	err = activate.UpdateCodeUsed(tx, code)
 	if err != nil {
-		return false, errors.Trace(err)
+		return false, err
 	}
 	// 激活用户状态
 	err = user.ActivateUser(tx, acode.UserID)
 	if err != nil {
-		return false, errors.Trace(err)
+		return false, err
 	}
 	return true, nil
 }
@@ -96,6 +98,6 @@ func buildActivateCode(userID int64) *activate.ActivateCode {
 	code := new(activate.ActivateCode)
 	code.UserID = userID
 	code.Code = uuid.UUIDv16()
-	code.ExpiredAt = time.Now().UTC().Add(24 * time.Hour)
+	code.ExpiredAt = time.Now().UTC().Add(ActivateExpiredTime)
 	return code
 }

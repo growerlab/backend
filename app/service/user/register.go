@@ -46,7 +46,7 @@ func validateRegisterUser(payload *service.NewUserPayload) error {
 	// email, username是否已经存在
 	exists, err := userModel.AreEmailOrUsernameInUser(db.DB, payload.Username, payload.Email)
 	if err != nil {
-		return errors.Trace(err)
+		return err
 	}
 	if exists {
 		return errors.New(errors.AlreadyExistsError(errors.User, ""))
@@ -57,7 +57,7 @@ func validateRegisterUser(payload *service.NewUserPayload) error {
 func buildUser(payload *service.NewUserPayload) (*userModel.User, error) {
 	password, err := pwd.GeneratePassword(payload.Password)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, err
 	}
 	return &userModel.User{
 		Email:             payload.Email,
@@ -85,36 +85,36 @@ func Register(payload *service.NewUserPayload) (bool, error) {
 	var err error
 	err = validateRegisterUser(payload)
 	if err != nil {
-		return false, errors.Trace(err)
+		return false, err
 	}
 
 	err = db.Transact(func(tx *db.DBTx) error {
 		user, err := buildUser(payload)
 		if err != nil {
-			return errors.Trace(err)
+			return err
 		}
 
 		err = userModel.AddUser(tx, user)
 		if err != nil {
-			return errors.Trace(err)
+			return err
 		}
 
 		// 创建namespace
 		ns := buildNamespace(user)
 		err = nsModel.AddNamespace(tx, ns)
 		if err != nil {
-			return errors.Trace(err)
+			return err
 		}
 
 		// 激活用户
 		err = DoPreActivate(tx, user.ID)
 		if err != nil {
-			return errors.Trace(err)
+			return err
 		}
 		return nil
 	})
 	if err != nil {
-		return false, errors.Trace(err)
+		return false, err
 	}
 	return true, nil
 }

@@ -28,5 +28,5 @@ func AddNamespace(tx sqlx.Queryer, ns *Namespace) error {
 	if err != nil {
 		return errors.Wrap(err, errors.SQLError())
 	}
-	return errors.Trace(err)
+	return nil
 }

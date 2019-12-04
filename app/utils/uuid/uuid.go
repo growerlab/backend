@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func UUID() string {
+func UUIDv8() string {
 	return string(fullUUID()[:8])
 }
 
@@ -14,7 +14,7 @@ func UUIDv16() string {
 	return string(fullUUID()[:16])
 }
 
-func BuildToken() string {
+func UUID() string {
 	return uuid.New().String()
 }
 

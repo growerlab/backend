@@ -55,14 +55,14 @@ func AddUser(tx sqlx.Queryer, user *User) error {
 	if err != nil {
 		return errors.Wrap(err, errors.SQLError())
 	}
-	return errors.Trace(err)
+	return nil
 }
 
 func AreEmailOrUsernameInUser(src sqlx.Queryer, username, email string) (bool, error) {
 	if len(username) > 0 {
 		user, err := getUser(src, sq.Eq{"username": username})
 		if err != nil {
-			return false, errors.Trace(err)
+			return false, err
 		}
 		if user != nil {
 			return true, nil
@@ -71,7 +71,7 @@ func AreEmailOrUsernameInUser(src sqlx.Queryer, username, email string) (bool, e
 	if len(email) > 0 {
 		user, err := getUser(src, sq.Eq{"email": email})
 		if err != nil {
-			return false, errors.Trace(err)
+			return false, err
 		}
 		if user != nil {
 			return true, nil
@@ -83,7 +83,7 @@ func AreEmailOrUsernameInUser(src sqlx.Queryer, username, email string) (bool, e
 func GetUserByEmail(src sqlx.Queryer, email string) (*User, error) {
 	user, err := getUser(src, sq.Eq{"email": email})
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, err
 	}
 	return user, nil
 }
