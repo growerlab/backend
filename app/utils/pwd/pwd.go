@@ -1,13 +1,22 @@
 package pwd
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"github.com/growerlab/argon2"
+	"github.com/pkg/errors"
+)
+
+var argon2Cfg = argon2.DefaultConfig()
 
 func GeneratePassword(src string) (pwd string, err error) {
-	raw, err := bcrypt.GenerateFromPassword([]byte(src), bcrypt.DefaultCost)
-	return string(raw), err
+	raw, err := argon2Cfg.Hash([]byte(src), nil)
+	return string(raw.Encode()), errors.WithStack(err)
 }
 
 func ComparePassword(hashedPwd string, inputPwd string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hashedPwd), []byte(inputPwd))
-	return err == nil
+	raw, err := argon2.Decode([]byte(hashedPwd))
+	b, err := raw.Verify([]byte(inputPwd))
+	if err != nil {
+		return false
+	}
+	return b
 }
