@@ -77,7 +77,7 @@ func (q *Queue) AddJob(w Job) error {
 func (q *Queue) Start() {
 	run := func() (idle bool, err error) {
 		idle = true
-		for jobName, _ := range q.jobsSet {
+		for jobName := range q.jobsSet {
 			var payload []byte
 			key := q.jobKey(jobName)
 			payload, err = q.srcListable.Pop(key)

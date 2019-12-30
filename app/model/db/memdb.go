@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/garyburd/redigo/redis"
+	"github.com/gomodule/redigo/redis"
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/utils/conf"
 )
