@@ -10,7 +10,7 @@ var queueInstance *queue.Queue
 
 func InitQueue() error {
 	workerCount := 5 // worker count，暂时写死
-	jobCount := 2    // 每个worker的待处理容器，多出来的会被阻塞
+	jobCount := 1    // 每个worker的待处理容器，多出来的会被阻塞
 
 	queueInstance = queue.New(queue.NewList(db.QueueDB), workerCount, jobCount)
 	queueInstance.AddJob(NewEmail())

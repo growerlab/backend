@@ -2,6 +2,8 @@ package queue
 
 import (
 	"encoding/json"
+
+	"github.com/growerlab/backend/app/common/errors"
 )
 
 const EmailUUID = "send_email"
@@ -36,4 +38,12 @@ func (e *Email) Eval(payload []byte) (requeue bool, err error) {
 func (e *Email) Send(payload *EmailPayload) error {
 	// TODO 发送邮件的具体逻辑(调用其他的smtp发送库)
 	return nil
+}
+
+func PushSendEmail(payload *EmailPayload) error {
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	return queueInstance.PushPayload(EmailUUID, body)
 }
