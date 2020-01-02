@@ -14,8 +14,8 @@ const (
 
 var (
 	SqlNormal        = sq.Eq{"deleted_at": nil}
+	SqlDeleted       = sq.NotEq{"deleted_at": nil}
 	SqlStatusClosed  = sq.Eq{"status": StatusClosed}
 	SqlStatusNormal  = sq.Eq{"status": StatusNormal}
 	SqlStatusSuspend = sq.Eq{"status": StatusSuspend}
-	SqlStatusDeleted = sq.NotEq{"deleted_at": nil}
 )
