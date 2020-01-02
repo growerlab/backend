@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/garyburd/redigo/redis"
+	"github.com/gomodule/redigo/redis"
 	"github.com/growerlab/backend/app/utils/conf"
 )
 
@@ -58,7 +58,7 @@ func TestNewList(t *testing.T) {
 			return
 		}
 
-		if bytes.Compare(got, want) != 0 {
+		if !bytes.Equal(got, want) {
 			t.Errorf("got = %v, want: %v", got, want)
 			return
 		}

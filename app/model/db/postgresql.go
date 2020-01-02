@@ -51,11 +51,11 @@ func Transact(txFn func(*DBTx) error) (err error) {
 	defer func() {
 		if p := recover(); p != nil {
 			logger.Warn("%s: %s", p, debug.Stack())
-			switch p.(type) {
+			switch x := p.(type) {
 			case error:
-				err = p.(error)
+				err = error(x)
 			default:
-				err = fmt.Errorf("%s", p)
+				err = fmt.Errorf("%s", x)
 			}
 		}
 		if err != nil {
