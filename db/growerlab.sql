@@ -132,7 +132,9 @@ CREATE TABLE public.repository (
     namespace_id bigint NOT NULL,
     owner_id bigint NOT NULL,
     description text,
-    created_at bigint NOT NULL
+    created_at bigint NOT NULL,
+    server_id integer NOT NULL,
+    server_path character varying(255) NOT NULL
 );
 
 
@@ -188,6 +190,13 @@ COMMENT ON COLUMN public.repository.description IS '仓库描述';
 
 
 --
+-- Name: COLUMN repository.server_path; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.repository.server_path IS '在服务器中的物理路径';
+
+
+--
 -- Name: repository_id_seq; Type: SEQUENCE; Schema: public; Owner: growerlab
 --
 
@@ -207,6 +216,72 @@ ALTER TABLE public.repository_id_seq OWNER TO growerlab;
 --
 
 ALTER SEQUENCE public.repository_id_seq OWNED BY public.repository.id;
+
+
+--
+-- Name: server; Type: TABLE; Schema: public; Owner: growerlab
+--
+
+CREATE TABLE public.server (
+    id bigint NOT NULL,
+    summary character varying(255) NOT NULL,
+    host character varying(255) NOT NULL,
+    port integer DEFAULT 9000 NOT NULL,
+    status integer DEFAULT 1 NOT NULL,
+    created_at bigint NOT NULL,
+    deleted_at bigint
+);
+
+
+ALTER TABLE public.server OWNER TO growerlab;
+
+--
+-- Name: COLUMN server.summary; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.server.summary IS '说明备注';
+
+
+--
+-- Name: COLUMN server.status; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.server.status IS '服务器状态（0关闭；1正常；2暂停）';
+
+
+--
+-- Name: COLUMN server.created_at; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.server.created_at IS '服务器创建时间';
+
+
+--
+-- Name: COLUMN server.deleted_at; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.server.deleted_at IS '是否被删除';
+
+
+--
+-- Name: server_id_seq; Type: SEQUENCE; Schema: public; Owner: growerlab
+--
+
+CREATE SEQUENCE public.server_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.server_id_seq OWNER TO growerlab;
+
+--
+-- Name: server_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: growerlab
+--
+
+ALTER SEQUENCE public.server_id_seq OWNED BY public.server.id;
 
 
 --
@@ -257,7 +332,7 @@ CREATE TABLE public."user" (
     username character varying(40) NOT NULL,
     name character varying(255) NOT NULL,
     public_email character varying(255) NOT NULL,
-    last_login_ip character varying(46),
+    last_login_ip character varying(46) DEFAULT ''::character varying,
     created_at bigint NOT NULL,
     deleted_at bigint,
     verified_at bigint,
@@ -359,6 +434,13 @@ ALTER TABLE ONLY public.repository ALTER COLUMN id SET DEFAULT nextval('public.r
 
 
 --
+-- Name: server id; Type: DEFAULT; Schema: public; Owner: growerlab
+--
+
+ALTER TABLE ONLY public.server ALTER COLUMN id SET DEFAULT nextval('public.server_id_seq'::regclass);
+
+
+--
 -- Name: session id; Type: DEFAULT; Schema: public; Owner: growerlab
 --
 
@@ -397,6 +479,14 @@ ALTER TABLE ONLY public.repository
 
 
 --
+-- Name: server server_pk; Type: CONSTRAINT; Schema: public; Owner: growerlab
+--
+
+ALTER TABLE ONLY public.server
+    ADD CONSTRAINT server_pk PRIMARY KEY (id);
+
+
+--
 -- Name: session session_pk; Type: CONSTRAINT; Schema: public; Owner: growerlab
 --
 
@@ -420,6 +510,34 @@ CREATE UNIQUE INDEX activate_code_code_uindex ON public.activate_code USING btre
 
 
 --
+-- Name: idx_host; Type: INDEX; Schema: public; Owner: growerlab
+--
+
+CREATE INDEX idx_host ON public.server USING btree (host);
+
+
+--
+-- Name: idx_path; Type: INDEX; Schema: public; Owner: growerlab
+--
+
+CREATE INDEX idx_path ON public.repository USING btree (path);
+
+
+--
+-- Name: idx_server; Type: INDEX; Schema: public; Owner: growerlab
+--
+
+CREATE INDEX idx_server ON public.repository USING btree (server_id);
+
+
+--
+-- Name: idx_uuid; Type: INDEX; Schema: public; Owner: growerlab
+--
+
+CREATE INDEX idx_uuid ON public.repository USING btree (uuid);
+
+
+--
 -- Name: namespace_id_uindex; Type: INDEX; Schema: public; Owner: growerlab
 --
 
@@ -438,20 +556,6 @@ CREATE INDEX namespace_owner_id_index ON public.namespace USING btree (owner_id)
 --
 
 CREATE INDEX namespace_path_index ON public.namespace USING btree (path);
-
-
---
--- Name: repository_path_index; Type: INDEX; Schema: public; Owner: growerlab
---
-
-CREATE INDEX repository_path_index ON public.repository USING btree (path);
-
-
---
--- Name: repository_uuid_index; Type: INDEX; Schema: public; Owner: growerlab
---
-
-CREATE INDEX repository_uuid_index ON public.repository USING btree (uuid);
 
 
 --
