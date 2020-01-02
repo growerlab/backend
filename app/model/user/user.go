@@ -26,13 +26,6 @@ var columns = []string{
 	"last_login_ip",
 }
 
-var (
-	NormalUser          = sq.Eq{"deleted_at": nil}
-	NormalActivatedUser = sq.And{sq.Eq{"deleted_at": nil}, sq.NotEq{"verified_at": nil}}
-	InactivateUser      = sq.Eq{"verified_at": nil}
-	DeletedUser         = sq.NotEq{"deleted_at": nil}
-)
-
 func AddUser(tx sqlx.Queryer, user *User) error {
 	sql, args, _ := sq.Insert(tableNameMark).
 		Columns(columns[1:]...).

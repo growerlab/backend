@@ -1,5 +1,9 @@
 package user
 
+import (
+	sq "github.com/Masterminds/squirrel"
+)
+
 // 不允许用户注册的关键字
 //
 var InvalidUsernameList = []string{
@@ -41,3 +45,11 @@ func init() {
 		InvalidUsernameSet[InvalidUsernameList[i]] = struct{}{}
 	}
 }
+
+// sq statues
+var (
+	NormalUser          = sq.Eq{"deleted_at": nil}
+	NormalActivatedUser = sq.And{sq.Eq{"deleted_at": nil}, sq.NotEq{"verified_at": nil}}
+	InactivateUser      = sq.Eq{"verified_at": nil}
+	DeletedUser         = sq.NotEq{"deleted_at": nil}
+)
