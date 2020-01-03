@@ -1,6 +1,8 @@
 package server
 
 import (
+	"math/rand"
+
 	sq "github.com/Masterminds/squirrel"
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/jmoiron/sqlx"
@@ -16,6 +18,22 @@ var columns = []string{
 	"status",
 	"created_at",
 	"deleted_at",
+}
+
+// RandNormalServer 当有多个服务器时，随机返回一个服务器
+func RandNormalServer(src sqlx.Queryer) (*Server, error) {
+	servers, err := ListServers(src, StatusNormal)
+	if err != nil {
+		return nil, err
+	}
+	length := len(servers)
+	if length == 0 {
+		return nil, nil
+	}
+	rand.Shuffle(length, func(i, j int) {
+		servers[i], servers[j] = servers[j], servers[i]
+	})
+	return servers[0], nil
 }
 
 func ListServers(src sqlx.Queryer, statues ...statusType) ([]*Server, error) {

@@ -343,7 +343,7 @@ var parsedSchema = gqlparser.MustLoadSchema(
 }
 `},
 	&ast.Source{Name: "app/service/graphql/schema/repository.graphql", Input: `input NewRepository {
-  path: String! # 目前仅可能是自己、未来可能有组织
+  NamespacePath: String! # 目前仅可能是自己、未来可能有组织
   name: String!
   public: Boolean! # 是否公开的
   #readme: Boolean! # 是否初始化README
@@ -2550,9 +2550,9 @@ func (ec *executionContext) unmarshalInputNewRepository(ctx context.Context, obj
 
 	for k, v := range asMap {
 		switch k {
-		case "path":
+		case "NamespacePath":
 			var err error
-			it.Path, err = ec.unmarshalNString2string(ctx, v)
+			it.NamespacePath, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}

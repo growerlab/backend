@@ -23,6 +23,10 @@ const (
 	accessDenied = "AccessDenied"
 	// sql错误
 	sqlError = "SQLError"
+	// 未登录
+	unauthorize = "Unauthorize"
+	// PermisstionError
+	permisstionError = "PermisstionError"
 )
 
 // 定义错误原因
@@ -62,6 +66,14 @@ func SQLError() string {
 
 func GraphQLError() string {
 	return mustCode(graphQLError)
+}
+
+func Unauthorize() string {
+	return mustCode(unauthorize)
+}
+
+func PermisstionErrror(reason string) string {
+	return mustCode(permisstionError, reason)
 }
 
 // 必须调用该方法生成<xxx>字符串，便于前端解析数据

@@ -12,9 +12,9 @@ type LoginUserPayload struct {
 }
 
 type NewRepository struct {
-	Path   string `json:"path"`
-	Name   string `json:"name"`
-	Public bool   `json:"public"`
+	NamespacePath string `json:"NamespacePath"`
+	Name          string `json:"name"`
+	Public        bool   `json:"public"`
 }
 
 type NewUserPayload struct {

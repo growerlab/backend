@@ -4,22 +4,25 @@ import (
 	"context"
 
 	"github.com/growerlab/backend/app/common/errors"
+	"github.com/growerlab/backend/app/model/db"
 	"github.com/growerlab/backend/app/model/user"
 	"github.com/growerlab/backend/app/service/graphql"
 )
 
-var (
-	ErrNotFoundSession = errors.New("not found session")
-)
-
 func CurrentUser(ctx context.Context) (*user.User, error) {
 	session, ok := Session(ctx)
-	if ok {
-		return nil, ErrNotFoundSession
+	if !ok {
+		return nil, errors.New(errors.Unauthorize())
 	}
-	_ = session.UserToken()
-
-	return nil, nil
+	userToken := session.UserToken()
+	u, err := user.GetUserByUserToken(db.DB, userToken)
+	if err != nil {
+		return nil, err
+	}
+	if u == nil {
+		return nil, errors.New(errors.Unauthorize())
+	}
+	return u, nil
 }
 
 func Session(ctx context.Context) (*graphql.Session, bool) {

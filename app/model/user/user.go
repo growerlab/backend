@@ -1,10 +1,12 @@
 package user
 
 import (
+	"fmt"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/growerlab/backend/app/common/errors"
+	"github.com/growerlab/backend/app/model/session"
 	"github.com/growerlab/backend/app/model/utils"
 	"github.com/jmoiron/sqlx"
 )
@@ -141,4 +143,23 @@ func UpdateLogin(tx sqlx.Execer, userID int64, clientIP string) error {
 		return errors.Wrap(err, errors.SQLError())
 	}
 	return nil
+}
+
+func GetUserByUserToken(src sqlx.Queryer, userToken string) (*User, error) {
+	sql, args, _ := sq.Select(columns...).
+		From(tableNameMark).
+		Join(fmt.Sprintf("%s ON %s.token = ? AND %s.expired_at <= ?", session.TableName(), session.TableName(), session.TableName()), userToken, time.Now().Unix()).
+		Where(fmt.Sprintf("%s.id = %s.user_id", tableNameMark, session.TableName())).
+		ToSql()
+
+	users := make([]*User, 0, 1)
+
+	err := sqlx.Select(src, &users, sql, args...)
+	if err != nil {
+		return nil, errors.New(errors.SQLError())
+	}
+	if len(users) > 0 {
+		return users[0], nil
+	}
+	return nil, nil
 }

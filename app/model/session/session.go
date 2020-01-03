@@ -17,6 +17,10 @@ var columns = []string{
 	"expired_at",
 }
 
+func TableName() string {
+	return tableName
+}
+
 func AddSession(tx sqlx.Queryer, sess *Session) error {
 	sql, args, _ := sq.Insert(tableName).
 		Columns(columns[1:]...).

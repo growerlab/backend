@@ -8,6 +8,6 @@ import (
 )
 
 func (r *mutationResolver) CreateRepository(ctx context.Context, input service.NewRepository) (*service.Result, error) {
-	ok, err := repository.CreateRepository(&input)
+	ok, err := repository.CreateRepository(ctx, &input)
 	return &service.Result{Ok: ok}, err
 }
