@@ -6,4 +6,6 @@ package errors
 const (
 	User         = "User"
 	ActivateCode = "ActivateCode"
+	Namespace    = "Namespace"
+	Repository   = "Repository"
 )

@@ -57,6 +57,7 @@ type ComplexityRoot struct {
 		ID      func(childComplexity int) int
 		OwnerId func(childComplexity int) int
 		Path    func(childComplexity int) int
+		Type    func(childComplexity int) int
 	}
 
 	Query struct {
@@ -180,6 +181,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Namespace.Path(childComplexity), true
+
+	case "Namespace.Type":
+		if e.complexity.Namespace.Type == nil {
+			break
+		}
+
+		return e.complexity.Namespace.Type(childComplexity), true
 
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
@@ -331,10 +339,11 @@ var parsedSchema = gqlparser.MustLoadSchema(
   id: ID!
   path: String!
   ownerId: Int!
+  Type: Int!
 }
 `},
 	&ast.Source{Name: "app/service/graphql/schema/repository.graphql", Input: `input NewRepository {
-  owner: String! # 目前仅可能是自己、未来可能有组织
+  path: String! # 目前仅可能是自己、未来可能有组织
   name: String!
   public: Boolean! # 是否公开的
   #readme: Boolean! # 是否初始化README
@@ -793,6 +802,43 @@ func (ec *executionContext) _Namespace_ownerId(ctx context.Context, field graphq
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Namespace_Type(ctx context.Context, field graphql.CollectedField, obj *namespace.Namespace) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Namespace",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2504,9 +2550,9 @@ func (ec *executionContext) unmarshalInputNewRepository(ctx context.Context, obj
 
 	for k, v := range asMap {
 		switch k {
-		case "owner":
+		case "path":
 			var err error
-			it.Owner, err = ec.unmarshalNString2string(ctx, v)
+			it.Path, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2644,6 +2690,11 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 			}
 		case "ownerId":
 			out.Values[i] = ec._Namespace_ownerId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "Type":
+			out.Values[i] = ec._Namespace_Type(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
@@ -3083,6 +3134,20 @@ func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface
 
 func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	res := graphql.MarshalID(v)
+	if res == graphql.Null {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
+	return graphql.UnmarshalInt(v)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
 	if res == graphql.Null {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")

@@ -73,6 +73,7 @@ func buildNamespace(user *userModel.User) *nsModel.Namespace {
 	return &nsModel.Namespace{
 		Path:    user.Username,
 		OwnerId: user.ID,
+		Type:    nsModel.TypeUser,
 	}
 }
 

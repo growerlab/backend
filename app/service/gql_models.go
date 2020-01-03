@@ -12,7 +12,7 @@ type LoginUserPayload struct {
 }
 
 type NewRepository struct {
-	Owner  string `json:"owner"`
+	Path   string `json:"path"`
 	Name   string `json:"name"`
 	Public bool   `json:"public"`
 }

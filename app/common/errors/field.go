@@ -10,4 +10,5 @@ const (
 	Password        = "Password"
 	ConfirmPassword = "ConfirmPassword"
 	Code            = "Code"
+	Path            = "Path"
 )

@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 12.0
--- Dumped by pg_dump version 12.0
+-- Dumped from database version 12.1
+-- Dumped by pg_dump version 12.1
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -71,7 +71,8 @@ ALTER SEQUENCE public.activate_code_id_seq OWNED BY public.activate_code.id;
 CREATE TABLE public.namespace (
     id bigint NOT NULL,
     path character varying(255) NOT NULL,
-    owner_id integer NOT NULL
+    owner_id integer NOT NULL,
+    type integer NOT NULL
 );
 
 
@@ -96,6 +97,13 @@ COMMENT ON COLUMN public.namespace.path IS '路径';
 --
 
 COMMENT ON COLUMN public.namespace.owner_id IS '所有者';
+
+
+--
+-- Name: COLUMN namespace.type; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.namespace.type IS '1用户 2组织';
 
 
 --
@@ -538,13 +546,6 @@ CREATE INDEX idx_uuid ON public.repository USING btree (uuid);
 
 
 --
--- Name: namespace_id_uindex; Type: INDEX; Schema: public; Owner: growerlab
---
-
-CREATE UNIQUE INDEX namespace_id_uindex ON public.namespace USING btree (id);
-
-
---
 -- Name: namespace_owner_id_index; Type: INDEX; Schema: public; Owner: growerlab
 --
 
@@ -552,10 +553,10 @@ CREATE INDEX namespace_owner_id_index ON public.namespace USING btree (owner_id)
 
 
 --
--- Name: namespace_path_index; Type: INDEX; Schema: public; Owner: growerlab
+-- Name: namespace_path_uniq_index; Type: INDEX; Schema: public; Owner: growerlab
 --
 
-CREATE INDEX namespace_path_index ON public.namespace USING btree (path);
+CREATE UNIQUE INDEX namespace_path_uniq_index ON public.namespace USING btree (path);
 
 
 --
