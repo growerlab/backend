@@ -47,9 +47,10 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
-		ActivateUser func(childComplexity int, input service.ActivateCodePayload) int
-		LoginUser    func(childComplexity int, input service.LoginUserPayload) int
-		RegisterUser func(childComplexity int, input service.NewUserPayload) int
+		ActivateUser     func(childComplexity int, input service.ActivateCodePayload) int
+		CreateRepository func(childComplexity int, input service.NewRepository) int
+		LoginUser        func(childComplexity int, input service.LoginUserPayload) int
+		RegisterUser     func(childComplexity int, input service.NewUserPayload) int
 	}
 
 	Namespace struct {
@@ -87,6 +88,7 @@ type MutationResolver interface {
 	RegisterUser(ctx context.Context, input service.NewUserPayload) (*service.Result, error)
 	ActivateUser(ctx context.Context, input service.ActivateCodePayload) (*service.Result, error)
 	LoginUser(ctx context.Context, input service.LoginUserPayload) (*service.UserToken, error)
+	CreateRepository(ctx context.Context, input service.NewRepository) (*service.Result, error)
 }
 type NamespaceResolver interface {
 	ID(ctx context.Context, obj *namespace.Namespace) (string, error)
@@ -121,6 +123,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.ActivateUser(childComplexity, args["input"].(service.ActivateCodePayload)), true
+
+	case "Mutation.createRepository":
+		if e.complexity.Mutation.CreateRepository == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createRepository_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateRepository(childComplexity, args["input"].(service.NewRepository)), true
 
 	case "Mutation.loginUser":
 		if e.complexity.Mutation.LoginUser == nil {
@@ -319,6 +333,15 @@ var parsedSchema = gqlparser.MustLoadSchema(
   ownerId: Int!
 }
 `},
+	&ast.Source{Name: "app/service/graphql/schema/repository.graphql", Input: `input NewRepository {
+  owner: String! # 目前仅可能是自己、未来可能有组织
+  name: String!
+  public: Boolean! # 是否公开的
+  #readme: Boolean! # 是否初始化README
+  #gitignoreFile: String!  # 忽略的文件
+  #license: String! # 授权
+}
+`},
 	&ast.Source{Name: "app/service/graphql/schema/schema.graphql", Input: `type Query {
   users: [User!]!
 }
@@ -327,14 +350,13 @@ type Result {
   OK: Boolean!
 }
 
-type UserToken {
-  token: String!
-}
-
 type Mutation {
   registerUser(input: NewUserPayload!): Result!
   activateUser(input: ActivateCodePayload!): Result!
   loginUser(input: LoginUserPayload!): UserToken!
+
+  # repository
+  createRepository(input: NewRepository!): Result!
 }
 `},
 	&ast.Source{Name: "app/service/graphql/schema/user.graphql", Input: `# GraphQL schema example
@@ -353,6 +375,10 @@ type User {
   verifiedAt: Int
   lastLoginAt: Int
   namespace: Namespace!
+}
+
+type UserToken {
+  token: String!
 }
 
 input NewUserPayload {
@@ -382,6 +408,20 @@ func (ec *executionContext) field_Mutation_activateUser_args(ctx context.Context
 	var arg0 service.ActivateCodePayload
 	if tmp, ok := rawArgs["input"]; ok {
 		arg0, err = ec.unmarshalNActivateCodePayload2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐActivateCodePayload(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createRepository_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 service.NewRepository
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNNewRepository2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐNewRepository(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -598,6 +638,50 @@ func (ec *executionContext) _Mutation_loginUser(ctx context.Context, field graph
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNUserToken2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐUserToken(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createRepository(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createRepository_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateRepository(rctx, args["input"].(service.NewRepository))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*service.Result)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNResult2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐResult(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Namespace_id(ctx context.Context, field graphql.CollectedField, obj *namespace.Namespace) (ret graphql.Marshaler) {
@@ -2414,6 +2498,36 @@ func (ec *executionContext) unmarshalInputLoginUserPayload(ctx context.Context, 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputNewRepository(ctx context.Context, obj interface{}) (service.NewRepository, error) {
+	var it service.NewRepository
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "owner":
+			var err error
+			it.Owner, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "public":
+			var err error
+			it.Public, err = ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewUserPayload(ctx context.Context, obj interface{}) (service.NewUserPayload, error) {
 	var it service.NewUserPayload
 	var asMap = obj.(map[string]interface{})
@@ -2479,6 +2593,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "loginUser":
 			out.Values[i] = ec._Mutation_loginUser(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createRepository":
+			out.Values[i] = ec._Mutation_createRepository(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3002,6 +3121,10 @@ func (ec *executionContext) marshalNNamespace2ᚖgithubᚗcomᚋgrowerlabᚋback
 		return graphql.Null
 	}
 	return ec._Namespace(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNNewRepository2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐNewRepository(ctx context.Context, v interface{}) (service.NewRepository, error) {
+	return ec.unmarshalInputNewRepository(ctx, v)
 }
 
 func (ec *executionContext) unmarshalNNewUserPayload2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐNewUserPayload(ctx context.Context, v interface{}) (service.NewUserPayload, error) {

@@ -1,0 +1,8 @@
+input NewRepository {
+  owner: String! # 目前仅可能是自己、未来可能有组织
+  name: String!
+  public: Boolean! # 是否公开的
+  #readme: Boolean! # 是否初始化README
+  #gitignoreFile: String!  # 忽略的文件
+  #license: String! # 授权
+}

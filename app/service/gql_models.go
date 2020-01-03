@@ -11,6 +11,12 @@ type LoginUserPayload struct {
 	Password string `json:"password"`
 }
 
+type NewRepository struct {
+	Owner  string `json:"owner"`
+	Name   string `json:"name"`
+	Public bool   `json:"public"`
+}
+
 type NewUserPayload struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`

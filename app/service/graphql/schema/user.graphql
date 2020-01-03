@@ -16,6 +16,10 @@ type User {
   namespace: Namespace!
 }
 
+type UserToken {
+  token: String!
+}
+
 input NewUserPayload {
   email: String!
   password: String!

@@ -1,4 +1,5 @@
 {
     "go.lintTool": "golint",
     "go.lintOnSave": "off",
+    "sqltools.connections": [],
 }
