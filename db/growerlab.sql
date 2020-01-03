@@ -525,13 +525,6 @@ CREATE INDEX idx_host ON public.server USING btree (host);
 
 
 --
--- Name: idx_path; Type: INDEX; Schema: public; Owner: growerlab
---
-
-CREATE INDEX idx_path ON public.repository USING btree (path);
-
-
---
 -- Name: idx_server; Type: INDEX; Schema: public; Owner: growerlab
 --
 
@@ -564,6 +557,13 @@ CREATE UNIQUE INDEX namespace_path_uniq_index ON public.namespace USING btree (p
 --
 
 CREATE UNIQUE INDEX session_user_id_token_uniq ON public.session USING btree (user_id, token);
+
+
+--
+-- Name: uniq_path_namespace; Type: INDEX; Schema: public; Owner: growerlab
+--
+
+CREATE UNIQUE INDEX uniq_path_namespace ON public.repository USING btree (path, namespace_id);
 
 
 --

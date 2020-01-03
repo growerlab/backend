@@ -38,6 +38,8 @@ const (
 	Used = "Used"
 	// 不匹配
 	NotEqual = "NotEqual"
+	// 已存在
+	AlreadyExists = "AlreadyExists"
 )
 
 var P = InvalidParameterError
