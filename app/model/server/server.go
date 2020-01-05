@@ -36,6 +36,22 @@ func RandNormalServer(src sqlx.Queryer) (*Server, error) {
 	return servers[0], nil
 }
 
+func GetServer(src sqlx.Queryer, srvID int64) (*Server, error) {
+	sql, args, _ := sq.Select(columns...).
+		Where(sq.And{sq.Eq{"id": srvID}, SqlNormal}).
+		ToSql()
+
+	data := make([]*Server, 0, 1)
+	err := sqlx.Select(src, &data, sql, args...)
+	if err != nil {
+		return nil, errors.Wrap(err, errors.SQLError())
+	}
+	if len(data) == 0 {
+		return nil, nil
+	}
+	return data[0], nil
+}
+
 func ListServers(src sqlx.Queryer, statues ...statusType) ([]*Server, error) {
 	or := sq.Or{SqlStatusNormal}
 	where := sq.And{SqlNormal, &or}

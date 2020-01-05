@@ -40,9 +40,13 @@ func CreateRepository(ctx context.Context, req *service.NewRepository) (bool, er
 			return err
 		}
 
-		// TODO 真正创建仓库
-
-		return nil
+		// 真正创建仓库
+		api, err := NewApi(srv, repo.ServerPath, repo.Path)
+		if err != nil {
+			return err
+		}
+		err = api.Repository().Create()
+		return err
 	})
 	if err != nil {
 		return false, err
@@ -66,7 +70,7 @@ func buildRepository(
 		Description: "",
 		CreatedAt:   time.Now().Unix(),
 		ServerID:    srv.ID,
-		ServerPath:  UsernameToFilePath(currentUser.Username, req.Name),
+		ServerPath:  UsernameToFilePath(ns.Path, req.Name),
 	}
 	return repo
 }
