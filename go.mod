@@ -10,6 +10,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/graphql-go/graphql v0.7.8
 	github.com/growerlab/argon2 v0.1.3
+	github.com/growerlab/codev-svc v0.0.0-20200102143802-6bc984c4de7a
 	github.com/ivpusic/grpool v1.0.0
 	github.com/jackc/pgx/v4 v4.1.2
 	github.com/jmoiron/sqlx v1.2.0
