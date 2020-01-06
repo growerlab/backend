@@ -1,6 +1,8 @@
 package graphql
 
 import (
+	"context"
+
 	"github.com/gin-gonic/gin"
 	"github.com/growerlab/backend/app/common/env"
 )
@@ -35,4 +37,18 @@ func (s *Session) UserToken() string { // current user
 func (s *Session) IsGuest() bool {
 	token := s.UserToken()
 	return len(token) == 0
+}
+
+const SessionName = "session"
+
+func GetSession(ctx context.Context) *Session {
+	sess, ok := ctx.Value(SessionName).(*Session)
+	if ok {
+		return sess
+	}
+	return nil
+}
+
+func BuildContextWithSession(ctx *gin.Context, sess *Session) context.Context {
+	return context.WithValue(ctx.Request.Context(), SessionName, sess)
 }

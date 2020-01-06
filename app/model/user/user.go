@@ -26,6 +26,7 @@ var columns = []string{
 	"verified_at",
 	"last_login_at",
 	"last_login_ip",
+	"register_ip",
 }
 
 func AddUser(tx sqlx.Queryer, user *User) error {
@@ -42,6 +43,7 @@ func AddUser(tx sqlx.Queryer, user *User) error {
 			nil,
 			nil,
 			nil,
+			user.RegisterIP,
 		).
 		Suffix(utils.Returning("id")).
 		ToSql()

@@ -54,7 +54,7 @@ func validateRegisterUser(payload *service.NewUserPayload) error {
 	return nil
 }
 
-func buildUser(payload *service.NewUserPayload) (*userModel.User, error) {
+func buildUser(payload *service.NewUserPayload, clientIP string) (*userModel.User, error) {
 	password, err := pwd.GeneratePassword(payload.Password)
 	if err != nil {
 		return nil, err
@@ -66,6 +66,7 @@ func buildUser(payload *service.NewUserPayload) (*userModel.User, error) {
 		Name:              payload.Username,
 		PublicEmail:       payload.Email,
 		CreatedAt:         time.Now().Unix(),
+		RegisterIP:        clientIP,
 	}, nil
 }
 
@@ -82,7 +83,7 @@ func buildNamespace(user *userModel.User) *nsModel.Namespace {
 // 2. 发送验证邮件（这里可以考虑使用KeyDB来建立邮件发送队列，避免重启进程后，发送任务丢失）
 // 3. Done
 //
-func Register(payload *service.NewUserPayload) (bool, error) {
+func Register(payload *service.NewUserPayload, clientIP string) (bool, error) {
 	var err error
 	err = validateRegisterUser(payload)
 	if err != nil {
@@ -90,7 +91,7 @@ func Register(payload *service.NewUserPayload) (bool, error) {
 	}
 
 	err = db.Transact(func(tx *db.DBTx) error {
-		user, err := buildUser(payload)
+		user, err := buildUser(payload, clientIP)
 		if err != nil {
 			return err
 		}

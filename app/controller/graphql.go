@@ -20,7 +20,7 @@ func GraphQL(ctx *gin.Context) {
 	var session = graphql.NewSession(userToken, ctx)
 	var graphqlOpts = make([]handler.Option, 0)
 
-	sessionCtx := resolver.GetContextWithSession(ctx, session)
+	sessionCtx := graphql.BuildContextWithSession(ctx, session)
 	ctx.Request = ctx.Request.WithContext(sessionCtx)
 
 	// options
