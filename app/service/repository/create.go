@@ -51,7 +51,7 @@ func CreateRepository(ctx context.Context, req *service.NewRepository) (bool, er
 	if err != nil {
 		return false, err
 	}
-	return false, nil
+	return true, nil
 }
 
 func buildRepository(
