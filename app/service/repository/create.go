@@ -41,7 +41,7 @@ func CreateRepository(ctx context.Context, req *service.NewRepository) (bool, er
 		}
 
 		// 真正创建仓库
-		api, err := NewApi(srv, repo.ServerPath, repo.Path)
+		api, err := NewApi(srv, repo)
 		if err != nil {
 			return err
 		}
@@ -51,7 +51,7 @@ func CreateRepository(ctx context.Context, req *service.NewRepository) (bool, er
 	if err != nil {
 		return false, err
 	}
-	return false, nil
+	return true, nil
 }
 
 func buildRepository(

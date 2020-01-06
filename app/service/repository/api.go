@@ -2,27 +2,28 @@ package repository
 
 import (
 	"github.com/growerlab/backend/app/model/db"
+	"github.com/growerlab/backend/app/model/repository"
 	"github.com/growerlab/backend/app/model/server"
 	"github.com/growerlab/codev-svc/client"
 )
 
-func NewApi(srv *server.Server, repoPath, repoName string) (*SVCApi, error) {
-	return getClient(srv, repoName, repoName)
+func NewApi(srv *server.Server, repo *repository.Repository) (*SVCApi, error) {
+	return getClient(srv, repo)
 }
 
-func NewApiFromSrvID(srvID int64, repoPath, repoName string) (*SVCApi, error) {
-	return getClientFromServerID(srvID, repoPath, repoName)
+func NewApiFromSrvID(srvID int64, repo *repository.Repository) (*SVCApi, error) {
+	return getClientFromServerID(srvID, repo)
 }
 
-func getClientFromServerID(srvID int64, repoPath, repoName string) (*SVCApi, error) {
+func getClientFromServerID(srvID int64, repo *repository.Repository) (*SVCApi, error) {
 	srv, err := server.GetServer(db.DB, srvID)
 	if err != nil {
 		return nil, err
 	}
-	return getClient(srv, repoPath, repoName)
+	return getClient(srv, repo)
 }
 
-func getClient(srv *server.Server, repoPath, repoName string) (*SVCApi, error) {
+func getClient(srv *server.Server,  repo *repository.Repository) (*SVCApi, error) {
 	c, err := client.NewClient(srv.URL(), 0) // default 10s timeout
 	if err != nil {
 		return nil, err
@@ -30,8 +31,8 @@ func getClient(srv *server.Server, repoPath, repoName string) (*SVCApi, error) {
 	return &SVCApi{
 		c: c,
 		repo: &client.RepoContext{
-			Path: repoPath,
-			Name: repoName,
+			Path: repo.ServerPath,
+			Name: repo.Path,
 		},
 	}, nil
 }

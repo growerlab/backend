@@ -53,7 +53,7 @@ func Transact(txFn func(*DBTx) error) (err error) {
 			logger.Warn("%s: %s", p, debug.Stack())
 			switch x := p.(type) {
 			case error:
-				err = error(x)
+				err = x
 			default:
 				err = fmt.Errorf("%s", x)
 			}
