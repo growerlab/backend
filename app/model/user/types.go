@@ -22,3 +22,7 @@ type User struct {
 func (u *User) Namespace() *namespace.Namespace {
 	return &namespace.Namespace{}
 }
+
+func (u *User) Verified() bool {
+	return u.VerifiedAt != nil && *u.VerifiedAt > 0
+}

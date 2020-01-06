@@ -44,6 +44,8 @@ const (
 	NotEqual = "NotEqual"
 	// 已存在
 	AlreadyExists = "AlreadyExists"
+	// 未激活
+	NotActivated = "NotActivated"
 )
 
 var P = InvalidParameterError
@@ -70,6 +72,10 @@ func GraphQLError() string {
 
 func Unauthorize() string {
 	return mustCode(unauthorize)
+}
+
+func AccessDenied(model, reason string) string {
+	return mustCode(accessDenied, model, reason)
 }
 
 func PermisstionErrror(reason string) string {

@@ -25,6 +25,12 @@ func Login(input *service.LoginUserPayload, clientIP string) (token string, err 
 		if err != nil {
 			return err
 		}
+		if user == nil {
+			return errors.New(errors.NotFoundError(errors.User))
+		}
+		if !user.Verified() {
+			return errors.New(errors.AccessDenied(errors.User, errors.NotActivated))
+		}
 
 		ok := pwd.ComparePassword(user.EncryptedPassword, input.Password)
 		if !ok {

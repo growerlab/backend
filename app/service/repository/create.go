@@ -98,7 +98,7 @@ func validateAndPrepre(src sqlx.Queryer, userID int64, req *service.NewRepositor
 
 	// TODO 未来应该验证权限(例如是否有权限在组织中创建权限)
 	if ns.OwnerId != userID {
-		return nil, errors.New(errors.PermisstionErrror(errors.Invalid))
+		return nil, errors.New(errors.AccessDenied(errors.User, errors.NotEqual))
 	}
 
 	// 验证仓库名是否合法
