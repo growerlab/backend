@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 12.1
--- Dumped by pg_dump version 12.1
+-- Dumped from database version 12.0
+-- Dumped by pg_dump version 12.0
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -301,11 +301,19 @@ CREATE TABLE public.session (
     user_id bigint NOT NULL,
     token character varying(36) NOT NULL,
     created_at bigint NOT NULL,
-    expired_at bigint NOT NULL
+    expired_at bigint NOT NULL,
+    client_ip character varying(46) NOT NULL
 );
 
 
 ALTER TABLE public.session OWNER TO growerlab;
+
+--
+-- Name: COLUMN session.client_ip; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.session.client_ip IS '用户当前登录的ip';
+
 
 --
 -- Name: session_id_seq; Type: SEQUENCE; Schema: public; Owner: growerlab
@@ -344,7 +352,8 @@ CREATE TABLE public."user" (
     created_at bigint NOT NULL,
     deleted_at bigint,
     verified_at bigint,
-    last_login_at bigint
+    last_login_at bigint,
+    register_ip character varying(46) NOT NULL
 );
 
 
@@ -397,6 +406,13 @@ COMMENT ON COLUMN public."user".public_email IS '公开的邮箱地址';
 --
 
 COMMENT ON COLUMN public."user".last_login_ip IS '最后的登录ip（兼容ipv6长度）';
+
+
+--
+-- Name: COLUMN "user".register_ip; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public."user".register_ip IS '注册ip';
 
 
 --

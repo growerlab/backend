@@ -13,6 +13,7 @@ var columns = []string{
 	"id",
 	"user_id",
 	"token",
+	"client",
 	"created_at",
 	"expired_at",
 }
@@ -27,6 +28,7 @@ func AddSession(tx sqlx.Queryer, sess *Session) error {
 		Values(
 			sess.UserID,
 			sess.Token,
+			sess.ClientIP,
 			sess.CreatedAt,
 			sess.ExpiredAt,
 		).

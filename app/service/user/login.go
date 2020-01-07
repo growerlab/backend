@@ -43,7 +43,7 @@ func Login(input *service.LoginUserPayload, clientIP string) (token string, err 
 		}
 
 		// 生成TOKEN返回给客户端
-		sess := buildSession(user.ID)
+		sess := buildSession(user.ID, clientIP)
 		err = sessionModel.AddSession(tx, sess)
 		if err != nil {
 			return err
@@ -57,10 +57,11 @@ func Login(input *service.LoginUserPayload, clientIP string) (token string, err 
 	return
 }
 
-func buildSession(userID int64) *sessionModel.Session {
+func buildSession(userID int64, clientIP string) *sessionModel.Session {
 	return &sessionModel.Session{
 		UserID:    userID,
 		Token:     uuid.UUID(),
+		ClientIP:  clientIP,
 		CreatedAt: time.Now().Unix(),
 		ExpiredAt: time.Now().Add(TokenExpiredTime).Unix(),
 	}
