@@ -2,7 +2,7 @@
 
 package service
 
-type ActivateCodePayload struct {
+type ActivationCodePayload struct {
 	Code string `json:"code"`
 }
 

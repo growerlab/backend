@@ -47,7 +47,7 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
-		ActivateUser     func(childComplexity int, input service.ActivateCodePayload) int
+		ActivateUser     func(childComplexity int, input service.ActivationCodePayload) int
 		CreateRepository func(childComplexity int, input service.NewRepository) int
 		LoginUser        func(childComplexity int, input service.LoginUserPayload) int
 		RegisterUser     func(childComplexity int, input service.NewUserPayload) int
@@ -87,7 +87,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	RegisterUser(ctx context.Context, input service.NewUserPayload) (*service.Result, error)
-	ActivateUser(ctx context.Context, input service.ActivateCodePayload) (*service.Result, error)
+	ActivateUser(ctx context.Context, input service.ActivationCodePayload) (*service.Result, error)
 	LoginUser(ctx context.Context, input service.LoginUserPayload) (*service.UserToken, error)
 	CreateRepository(ctx context.Context, input service.NewRepository) (*service.Result, error)
 }
@@ -123,7 +123,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ActivateUser(childComplexity, args["input"].(service.ActivateCodePayload)), true
+		return e.complexity.Mutation.ActivateUser(childComplexity, args["input"].(service.ActivationCodePayload)), true
 
 	case "Mutation.createRepository":
 		if e.complexity.Mutation.CreateRepository == nil {
@@ -361,7 +361,7 @@ type Result {
 
 type Mutation {
   registerUser(input: NewUserPayload!): Result!
-  activateUser(input: ActivateCodePayload!): Result!
+  activateUser(input: ActivationCodePayload!): Result!
   loginUser(input: LoginUserPayload!): UserToken!
 
   # repository
@@ -396,7 +396,7 @@ input NewUserPayload {
   username: String!
 }
 
-input ActivateCodePayload {
+input ActivationCodePayload {
   code: String!
 }
 
@@ -414,9 +414,9 @@ input LoginUserPayload {
 func (ec *executionContext) field_Mutation_activateUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 service.ActivateCodePayload
+	var arg0 service.ActivationCodePayload
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalNActivateCodePayload2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐActivateCodePayload(ctx, tmp)
+		arg0, err = ec.unmarshalNActivationCodePayload2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐActivationCodePayload(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -587,7 +587,7 @@ func (ec *executionContext) _Mutation_activateUser(ctx context.Context, field gr
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ActivateUser(rctx, args["input"].(service.ActivateCodePayload))
+		return ec.resolvers.Mutation().ActivateUser(rctx, args["input"].(service.ActivationCodePayload))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2502,8 +2502,8 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputActivateCodePayload(ctx context.Context, obj interface{}) (service.ActivateCodePayload, error) {
-	var it service.ActivateCodePayload
+func (ec *executionContext) unmarshalInputActivationCodePayload(ctx context.Context, obj interface{}) (service.ActivationCodePayload, error) {
+	var it service.ActivationCodePayload
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -3110,8 +3110,8 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNActivateCodePayload2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐActivateCodePayload(ctx context.Context, v interface{}) (service.ActivateCodePayload, error) {
-	return ec.unmarshalInputActivateCodePayload(ctx, v)
+func (ec *executionContext) unmarshalNActivationCodePayload2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐActivationCodePayload(ctx context.Context, v interface{}) (service.ActivationCodePayload, error) {
+	return ec.unmarshalInputActivationCodePayload(ctx, v)
 }
 
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {

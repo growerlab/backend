@@ -26,7 +26,7 @@ input NewUserPayload {
   username: String!
 }
 
-input ActivateCodePayload {
+input ActivationCodePayload {
   code: String!
 }
 

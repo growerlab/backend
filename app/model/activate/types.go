@@ -2,7 +2,7 @@ package activate
 
 const CodeMaxLen = 16
 
-type ActivateCode struct {
+type ActivationCode struct {
 	ID        int64  `db:"id"`
 	UserID    int64  `db:"user_id"`
 	Code      string `db:"code"`

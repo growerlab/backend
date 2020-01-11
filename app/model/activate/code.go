@@ -18,7 +18,7 @@ var columns = []string{
 	"expired_at",
 }
 
-func AddCode(tx sqlx.Execer, code *ActivateCode) error {
+func AddCode(tx sqlx.Execer, code *ActivationCode) error {
 	code.CreatedAt = time.Now().Unix()
 
 	sql, args, _ := sq.Insert(tableName).
@@ -38,14 +38,14 @@ func AddCode(tx sqlx.Execer, code *ActivateCode) error {
 	return nil
 }
 
-func GetCode(src sqlx.Queryer, code string) (*ActivateCode, error) {
+func GetCode(src sqlx.Queryer, code string) (*ActivationCode, error) {
 	sql, args, _ := sq.Select(columns...).
 		From(tableName).
 		Where(sq.Eq{"code": code}).
 		Limit(1).
 		ToSql()
 
-	var data = make([]*ActivateCode, 0)
+	var data = make([]*ActivationCode, 0)
 	err := sqlx.Select(src, &data, sql, args...)
 	if err != nil {
 		return nil, errors.Wrap(err, errors.SQLError())
@@ -56,9 +56,8 @@ func GetCode(src sqlx.Queryer, code string) (*ActivateCode, error) {
 	return nil, nil
 }
 
-// 修改code状态
-//
-func UpdateCodeUsed(tx sqlx.Execer, code string) error {
+// ActivateCode
+func ActivateCode(tx sqlx.Execer, code string) error {
 	sql, args, _ := sq.Update(tableName).
 		Set("used_at", time.Now().Unix()).
 		Where(sq.Eq{"code": code}).

@@ -4,8 +4,8 @@ package errors
 
 // User
 const (
-	User         = "User"
-	ActivateCode = "ActivateCode"
-	Namespace    = "Namespace"
-	Repository   = "Repository"
+	User           = "User"
+	ActivationCode = "ActivationCode"
+	Namespace      = "Namespace"
+	Repository     = "Repository"
 )

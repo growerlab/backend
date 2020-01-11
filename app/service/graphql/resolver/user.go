@@ -19,7 +19,7 @@ func (r *mutationResolver) RegisterUser(ctx context.Context, input service.NewUs
 	return &service.Result{Ok: ok}, err
 }
 
-func (r *mutationResolver) ActivateUser(ctx context.Context, input service.ActivateCodePayload) (*service.Result, error) {
+func (r *mutationResolver) ActivateUser(ctx context.Context, input service.ActivationCodePayload) (*service.Result, error) {
 	ok, err := user.Activate(&input)
 	return &service.Result{Ok: ok}, err
 }
