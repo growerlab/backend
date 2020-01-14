@@ -96,7 +96,7 @@ COMMENT ON COLUMN public.namespace.path IS '路径';
 -- Name: COLUMN namespace.owner_id; Type: COMMENT; Schema: public; Owner: growerlab
 --
 
-COMMENT ON COLUMN public.namespace.owner_id IS '所有者';
+COMMENT ON COLUMN public.namespace.owner_id IS '命名空间所有者（用户）';
 
 
 --
@@ -562,10 +562,10 @@ CREATE INDEX namespace_owner_id_index ON public.namespace USING btree (owner_id)
 
 
 --
--- Name: namespace_path_uniq_index; Type: INDEX; Schema: public; Owner: growerlab
+-- Name: namespace_path_uniq; Type: INDEX; Schema: public; Owner: growerlab
 --
 
-CREATE UNIQUE INDEX namespace_path_uniq_index ON public.namespace USING btree (path);
+CREATE UNIQUE INDEX namespace_path_uniq ON public.namespace USING btree (path);
 
 
 --
