@@ -48,7 +48,7 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	Mutation struct {
 		ActivateUser     func(childComplexity int, input service.ActivationCodePayload) int
-		CreateRepository func(childComplexity int, input service.NewRepository) int
+		CreateRepository func(childComplexity int, input service.NewRepositoryPayload) int
 		LoginUser        func(childComplexity int, input service.LoginUserPayload) int
 		RegisterUser     func(childComplexity int, input service.NewUserPayload) int
 	}
@@ -89,7 +89,7 @@ type MutationResolver interface {
 	RegisterUser(ctx context.Context, input service.NewUserPayload) (*service.Result, error)
 	ActivateUser(ctx context.Context, input service.ActivationCodePayload) (*service.Result, error)
 	LoginUser(ctx context.Context, input service.LoginUserPayload) (*service.UserToken, error)
-	CreateRepository(ctx context.Context, input service.NewRepository) (*service.Result, error)
+	CreateRepository(ctx context.Context, input service.NewRepositoryPayload) (*service.Result, error)
 }
 type NamespaceResolver interface {
 	ID(ctx context.Context, obj *namespace.Namespace) (string, error)
@@ -135,7 +135,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateRepository(childComplexity, args["input"].(service.NewRepository)), true
+		return e.complexity.Mutation.CreateRepository(childComplexity, args["input"].(service.NewRepositoryPayload)), true
 
 	case "Mutation.loginUser":
 		if e.complexity.Mutation.LoginUser == nil {
@@ -342,7 +342,7 @@ var parsedSchema = gqlparser.MustLoadSchema(
   Type: Int!
 }
 `},
-	&ast.Source{Name: "app/service/graphql/schema/repository.graphql", Input: `input NewRepository {
+	&ast.Source{Name: "app/service/graphql/schema/repository.graphql", Input: `input NewRepositoryPayload {
   NamespacePath: String! # 目前仅可能是自己、未来可能有组织
   name: String!
   public: Boolean! # 是否公开的
@@ -365,7 +365,7 @@ type Mutation {
   loginUser(input: LoginUserPayload!): UserToken!
 
   # repository
-  createRepository(input: NewRepository!): Result!
+  createRepository(input: NewRepositoryPayload!): Result!
 }
 `},
 	&ast.Source{Name: "app/service/graphql/schema/user.graphql", Input: `# GraphQL schema example
@@ -428,9 +428,9 @@ func (ec *executionContext) field_Mutation_activateUser_args(ctx context.Context
 func (ec *executionContext) field_Mutation_createRepository_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 service.NewRepository
+	var arg0 service.NewRepositoryPayload
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalNNewRepository2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐNewRepository(ctx, tmp)
+		arg0, err = ec.unmarshalNNewRepositoryPayload2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐNewRepositoryPayload(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -675,7 +675,7 @@ func (ec *executionContext) _Mutation_createRepository(ctx context.Context, fiel
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateRepository(rctx, args["input"].(service.NewRepository))
+		return ec.resolvers.Mutation().CreateRepository(rctx, args["input"].(service.NewRepositoryPayload))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2544,8 +2544,8 @@ func (ec *executionContext) unmarshalInputLoginUserPayload(ctx context.Context, 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputNewRepository(ctx context.Context, obj interface{}) (service.NewRepository, error) {
-	var it service.NewRepository
+func (ec *executionContext) unmarshalInputNewRepositoryPayload(ctx context.Context, obj interface{}) (service.NewRepositoryPayload, error) {
+	var it service.NewRepositoryPayload
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -3188,8 +3188,8 @@ func (ec *executionContext) marshalNNamespace2ᚖgithubᚗcomᚋgrowerlabᚋback
 	return ec._Namespace(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNNewRepository2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐNewRepository(ctx context.Context, v interface{}) (service.NewRepository, error) {
-	return ec.unmarshalInputNewRepository(ctx, v)
+func (ec *executionContext) unmarshalNNewRepositoryPayload2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐNewRepositoryPayload(ctx context.Context, v interface{}) (service.NewRepositoryPayload, error) {
+	return ec.unmarshalInputNewRepositoryPayload(ctx, v)
 }
 
 func (ec *executionContext) unmarshalNNewUserPayload2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐNewUserPayload(ctx context.Context, v interface{}) (service.NewUserPayload, error) {

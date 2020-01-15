@@ -11,7 +11,7 @@ type LoginUserPayload struct {
 	Password string `json:"password"`
 }
 
-type NewRepository struct {
+type NewRepositoryPayload struct {
 	NamespacePath string `json:"NamespacePath"`
 	Name          string `json:"name"`
 	Public        bool   `json:"public"`
