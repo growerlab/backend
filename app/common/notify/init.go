@@ -5,6 +5,7 @@ package notify
 import (
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -14,7 +15,14 @@ var notifySubscribes = make([]func(), 0)
 func InitNotify() error {
 	go func() {
 		c := make(chan os.Signal, 1)
-		signal.Notify(c, os.Interrupt)
+		signal.Notify(c,
+			os.Interrupt,
+			os.Kill,
+			syscall.SIGQUIT,
+			syscall.SIGSTOP,
+			syscall.SIGUSR1,
+			syscall.SIGUSR2,
+		)
 		<-c
 
 		for _, sub := range notifySubscribes {
