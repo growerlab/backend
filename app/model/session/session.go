@@ -13,7 +13,7 @@ var columns = []string{
 	"id",
 	"user_id",
 	"token",
-	"client",
+	"client_ip",
 	"created_at",
 	"expired_at",
 }
