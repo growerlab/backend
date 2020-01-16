@@ -14,10 +14,16 @@ github.com/gin-gonic/gin
 github.com/gin-gonic/gin/binding
 github.com/gin-gonic/gin/internal/json
 github.com/gin-gonic/gin/render
-# github.com/golang/protobuf v1.3.1
+# github.com/go-redis/redis/v7 v7.0.0-beta.5
+github.com/go-redis/redis/v7
+github.com/go-redis/redis/v7/internal
+github.com/go-redis/redis/v7/internal/consistenthash
+github.com/go-redis/redis/v7/internal/hashtag
+github.com/go-redis/redis/v7/internal/pool
+github.com/go-redis/redis/v7/internal/proto
+github.com/go-redis/redis/v7/internal/util
+# github.com/golang/protobuf v1.3.2
 github.com/golang/protobuf/proto
-# github.com/gomodule/redigo v1.7.0
-github.com/gomodule/redigo/redis
 # github.com/google/uuid v1.1.1
 github.com/google/uuid
 # github.com/gorilla/websocket v1.2.0
@@ -116,5 +122,5 @@ golang.org/x/xerrors/internal
 gopkg.in/asaskevich/govalidator.v9
 # gopkg.in/go-playground/validator.v8 v8.18.2
 gopkg.in/go-playground/validator.v8
-# gopkg.in/yaml.v2 v2.2.2
+# gopkg.in/yaml.v2 v2.2.4
 gopkg.in/yaml.v2

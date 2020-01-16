@@ -7,13 +7,13 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gomodule/redigo/redis"
+	"github.com/go-redis/redis/v7"
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/utils/conf"
 )
 
-var CacheDB *redis.Pool
-var QueueDB *redis.Pool
+var CacheDB *redis.Client
+var QueueDB *redis.Client
 
 func InitMemDB() error {
 	var config = conf.GetConf().Redis
@@ -21,35 +21,23 @@ func InitMemDB() error {
 	QueueDB = newPool(config, config.QueueDB)
 
 	// Test
-	err := MemConn(CacheDB, func(conn redis.Conn) error {
-		reply, err := redis.String(conn.Do("PING"))
-		if reply != "PONG" {
-			return errors.New("memdb not ready")
-		}
-		return err
-	})
+	reply, err := CacheDB.Ping().Result()
+	if err != nil || reply != "PONG" {
+		return errors.New("memdb not ready")
+	}
 	return err
 }
 
-func MemConn(pool *redis.Pool, callback func(redis.Conn) error) error {
-	conn := pool.Get()
-	defer conn.Close()
+func newPool(cfg *conf.Redis, db int) *redis.Client {
+	addr := net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port))
+	idleTimeout := time.Duration(cfg.IdleTimeout) * time.Second
 
-	return callback(conn)
-}
-
-func newPool(cfg *conf.Redis, db int) *redis.Pool {
-	return &redis.Pool{
-		MaxIdle:     cfg.MaxIdle,
-		MaxActive:   cfg.MaxActive,
-		IdleTimeout: time.Duration(cfg.IdleTimeout) * time.Second,
-		Dial: func() (redis.Conn, error) {
-			dbOpt := redis.DialDatabase(db)
-			conn, err := redis.Dial("tcp", net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port)), dbOpt)
-			if err != nil {
-				return nil, err
-			}
-			return conn, nil
-		},
-	}
+	client := redis.NewClient(&redis.Options{
+		Addr:         addr,
+		DB:           db,
+		PoolSize:     cfg.MaxActive,
+		MinIdleConns: cfg.MaxIdle,
+		IdleTimeout:  idleTimeout,
+	})
+	return client
 }
