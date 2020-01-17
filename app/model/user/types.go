@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/growerlab/backend/app/model/db"
 	"github.com/growerlab/backend/app/model/namespace"
 )
 
@@ -20,7 +21,8 @@ type User struct {
 }
 
 func (u *User) Namespace() *namespace.Namespace {
-	return &namespace.Namespace{}
+	ns, _ := namespace.GetNamespaceByOwnerID(db.DB, u.ID)
+	return ns
 }
 
 func (u *User) Verified() bool {

@@ -25,6 +25,8 @@ func GraphQL(ctx *gin.Context) {
 
 	// options
 	// reqOpt := handler.RequestMiddleware(func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
+	// 	reqCtx := gql.GetRequestContext(ctx)
+	// 	opName := reqCtx.OperationName
 	// 	return next(ctx)
 	// })
 	// graphqlOpts = append(graphqlOpts, reqOpt)
@@ -46,9 +48,9 @@ func GraphQL(ctx *gin.Context) {
 		if len(msgParts) > 0 {
 			retErr.Message = msgParts[0]
 		}
-
 		return retErr
 	})
+
 	graphqlOpts = append(graphqlOpts, errorOpt)
 
 	recoverOpt := handler.RecoverFunc(func(ctx context.Context, err interface{}) (userMessage error) {

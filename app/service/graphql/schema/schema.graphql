@@ -9,7 +9,7 @@ type Result {
 type Mutation {
   registerUser(input: NewUserPayload!): Result!
   activateUser(input: ActivationCodePayload!): Result!
-  loginUser(input: LoginUserPayload!): UserToken!
+  loginUser(input: LoginUserPayload!): UserLoginResult!
 
   # repository
   createRepository(input: NewRepositoryPayload!): Result!

@@ -12,7 +12,7 @@ type LoginUserPayload struct {
 }
 
 type NewRepositoryPayload struct {
-	NamespacePath string `json:"NamespacePath"`
+	NamespacePath string `json:"namespacePath"`
 	Name          string `json:"name"`
 	Public        bool   `json:"public"`
 }
@@ -27,6 +27,10 @@ type Result struct {
 	Ok bool `json:"OK"`
 }
 
-type UserToken struct {
-	Token string `json:"token"`
+type UserLoginResult struct {
+	Token         string `json:"token"`
+	NamespacePath string `json:"namespacePath"`
+	Email         string `json:"email"`
+	Name          string `json:"name"`
+	PublicEmail   string `json:"publicEmail"`
 }

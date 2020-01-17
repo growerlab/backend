@@ -34,7 +34,15 @@ func AddNamespace(tx sqlx.Queryer, ns *Namespace) error {
 }
 
 func GetNamespaceByPath(src sqlx.Queryer, path string) (*Namespace, error) {
-	sql, args, _ := sq.Select(columns...).From(table).Where(sq.Eq{"path": path}).ToSql()
+	return getNamespaceByCond(src, sq.Eq{"path": path})
+}
+
+func GetNamespaceByOwnerID(src sqlx.Queryer, ownerID int64) (*Namespace, error) {
+	return getNamespaceByCond(src, sq.Eq{"owner_id": ownerID})
+}
+
+func getNamespaceByCond(src sqlx.Queryer, cond sq.Sqlizer) (*Namespace, error) {
+	sql, args, _ := sq.Select(columns...).From(table).Where(cond).ToSql()
 
 	result := make([]*Namespace, 0, 1)
 	err := sqlx.Select(src, &result, sql, args...)

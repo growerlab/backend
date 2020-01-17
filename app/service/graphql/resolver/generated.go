@@ -80,15 +80,19 @@ type ComplexityRoot struct {
 		VerifiedAt  func(childComplexity int) int
 	}
 
-	UserToken struct {
-		Token func(childComplexity int) int
+	UserLoginResult struct {
+		Email         func(childComplexity int) int
+		Name          func(childComplexity int) int
+		NamespacePath func(childComplexity int) int
+		PublicEmail   func(childComplexity int) int
+		Token         func(childComplexity int) int
 	}
 }
 
 type MutationResolver interface {
 	RegisterUser(ctx context.Context, input service.NewUserPayload) (*service.Result, error)
 	ActivateUser(ctx context.Context, input service.ActivationCodePayload) (*service.Result, error)
-	LoginUser(ctx context.Context, input service.LoginUserPayload) (*service.UserToken, error)
+	LoginUser(ctx context.Context, input service.LoginUserPayload) (*service.UserLoginResult, error)
 	CreateRepository(ctx context.Context, input service.NewRepositoryPayload) (*service.Result, error)
 }
 type NamespaceResolver interface {
@@ -266,12 +270,40 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.VerifiedAt(childComplexity), true
 
-	case "UserToken.token":
-		if e.complexity.UserToken.Token == nil {
+	case "UserLoginResult.email":
+		if e.complexity.UserLoginResult.Email == nil {
 			break
 		}
 
-		return e.complexity.UserToken.Token(childComplexity), true
+		return e.complexity.UserLoginResult.Email(childComplexity), true
+
+	case "UserLoginResult.name":
+		if e.complexity.UserLoginResult.Name == nil {
+			break
+		}
+
+		return e.complexity.UserLoginResult.Name(childComplexity), true
+
+	case "UserLoginResult.namespacePath":
+		if e.complexity.UserLoginResult.NamespacePath == nil {
+			break
+		}
+
+		return e.complexity.UserLoginResult.NamespacePath(childComplexity), true
+
+	case "UserLoginResult.publicEmail":
+		if e.complexity.UserLoginResult.PublicEmail == nil {
+			break
+		}
+
+		return e.complexity.UserLoginResult.PublicEmail(childComplexity), true
+
+	case "UserLoginResult.token":
+		if e.complexity.UserLoginResult.Token == nil {
+			break
+		}
+
+		return e.complexity.UserLoginResult.Token(childComplexity), true
 
 	}
 	return 0, false
@@ -343,7 +375,7 @@ var parsedSchema = gqlparser.MustLoadSchema(
 }
 `},
 	&ast.Source{Name: "app/service/graphql/schema/repository.graphql", Input: `input NewRepositoryPayload {
-  NamespacePath: String! # 目前仅可能是自己、未来可能有组织
+  namespacePath: String! # 目前仅可能是自己、未来可能有组织
   name: String!
   public: Boolean! # 是否公开的
   #readme: Boolean! # 是否初始化README
@@ -362,7 +394,7 @@ type Result {
 type Mutation {
   registerUser(input: NewUserPayload!): Result!
   activateUser(input: ActivationCodePayload!): Result!
-  loginUser(input: LoginUserPayload!): UserToken!
+  loginUser(input: LoginUserPayload!): UserLoginResult!
 
   # repository
   createRepository(input: NewRepositoryPayload!): Result!
@@ -386,8 +418,12 @@ type User {
   namespace: Namespace!
 }
 
-type UserToken {
+type UserLoginResult {
   token: String!
+  namespacePath: String!
+  email: String!
+  name: String!
+  publicEmail: String!
 }
 
 input NewUserPayload {
@@ -643,10 +679,10 @@ func (ec *executionContext) _Mutation_loginUser(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*service.UserToken)
+	res := resTmp.(*service.UserLoginResult)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNUserToken2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐUserToken(ctx, field.Selections, res)
+	return ec.marshalNUserLoginResult2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐUserLoginResult(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createRepository(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1314,7 +1350,7 @@ func (ec *executionContext) _User_namespace(ctx context.Context, field graphql.C
 	return ec.marshalNNamespace2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋmodelᚋnamespaceᚐNamespace(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _UserToken_token(ctx context.Context, field graphql.CollectedField, obj *service.UserToken) (ret graphql.Marshaler) {
+func (ec *executionContext) _UserLoginResult_token(ctx context.Context, field graphql.CollectedField, obj *service.UserLoginResult) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1324,7 +1360,7 @@ func (ec *executionContext) _UserToken_token(ctx context.Context, field graphql.
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "UserToken",
+		Object:   "UserLoginResult",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -1334,6 +1370,154 @@ func (ec *executionContext) _UserToken_token(ctx context.Context, field graphql.
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Token, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UserLoginResult_namespacePath(ctx context.Context, field graphql.CollectedField, obj *service.UserLoginResult) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "UserLoginResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NamespacePath, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UserLoginResult_email(ctx context.Context, field graphql.CollectedField, obj *service.UserLoginResult) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "UserLoginResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Email, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UserLoginResult_name(ctx context.Context, field graphql.CollectedField, obj *service.UserLoginResult) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "UserLoginResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UserLoginResult_publicEmail(ctx context.Context, field graphql.CollectedField, obj *service.UserLoginResult) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "UserLoginResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PublicEmail, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2550,7 +2734,7 @@ func (ec *executionContext) unmarshalInputNewRepositoryPayload(ctx context.Conte
 
 	for k, v := range asMap {
 		switch k {
-		case "NamespacePath":
+		case "namespacePath":
 			var err error
 			it.NamespacePath, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -2838,19 +3022,39 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
-var userTokenImplementors = []string{"UserToken"}
+var userLoginResultImplementors = []string{"UserLoginResult"}
 
-func (ec *executionContext) _UserToken(ctx context.Context, sel ast.SelectionSet, obj *service.UserToken) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, userTokenImplementors)
+func (ec *executionContext) _UserLoginResult(ctx context.Context, sel ast.SelectionSet, obj *service.UserLoginResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, userLoginResultImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("UserToken")
+			out.Values[i] = graphql.MarshalString("UserLoginResult")
 		case "token":
-			out.Values[i] = ec._UserToken_token(ctx, field, obj)
+			out.Values[i] = ec._UserLoginResult_token(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "namespacePath":
+			out.Values[i] = ec._UserLoginResult_namespacePath(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "email":
+			out.Values[i] = ec._UserLoginResult_email(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._UserLoginResult_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "publicEmail":
+			out.Values[i] = ec._UserLoginResult_publicEmail(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3275,18 +3479,18 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋgrowerlabᚋbackend�
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNUserToken2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐUserToken(ctx context.Context, sel ast.SelectionSet, v service.UserToken) graphql.Marshaler {
-	return ec._UserToken(ctx, sel, &v)
+func (ec *executionContext) marshalNUserLoginResult2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐUserLoginResult(ctx context.Context, sel ast.SelectionSet, v service.UserLoginResult) graphql.Marshaler {
+	return ec._UserLoginResult(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUserToken2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐUserToken(ctx context.Context, sel ast.SelectionSet, v *service.UserToken) graphql.Marshaler {
+func (ec *executionContext) marshalNUserLoginResult2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐUserLoginResult(ctx context.Context, sel ast.SelectionSet, v *service.UserLoginResult) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	return ec._UserToken(ctx, sel, v)
+	return ec._UserLoginResult(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

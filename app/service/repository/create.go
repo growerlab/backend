@@ -22,7 +22,11 @@ func CreateRepository(ctx context.Context, req *service.NewRepositoryPayload) (b
 	if err != nil {
 		return false, err
 	}
+	return DoCreateRepository(currentUser, req)
+}
 
+func DoCreateRepository(currentUser *user.User, req *service.NewRepositoryPayload) (bool, error) {
+	var err error
 	err = db.Transact(func(tx *db.DBTx) error {
 		ns, err := validateAndPrepare(tx, currentUser.ID, req)
 		if err != nil {
