@@ -71,7 +71,7 @@ func Login(input *service.LoginUserPayload, clientIP string) (
 
 func buildSession(userID int64, clientIP string) *sessionModel.Session {
 	return &sessionModel.Session{
-		UserID:    userID,
+		OwnerID:   userID,
 		Token:     uuid.UUID(),
 		ClientIP:  clientIP,
 		CreatedAt: time.Now().Unix(),

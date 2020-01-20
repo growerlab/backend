@@ -11,7 +11,7 @@ const tableName = "session"
 
 var columns = []string{
 	"id",
-	"user_id",
+	"owner_id",
 	"token",
 	"client_ip",
 	"created_at",
@@ -26,13 +26,13 @@ func AddSession(tx sqlx.Queryer, sess *Session) error {
 	sql, args, _ := sq.Insert(tableName).
 		Columns(columns[1:]...).
 		Values(
-			sess.UserID,
+			sess.OwnerID,
 			sess.Token,
 			sess.ClientIP,
 			sess.CreatedAt,
 			sess.ExpiredAt,
 		).
-		Suffix(utils.Returning("id")).
+		Suffix(utils.SqlReturning("id")).
 		ToSql()
 
 	err := tx.QueryRowx(sql, args...).Scan(&sess.ID)

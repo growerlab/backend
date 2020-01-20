@@ -45,7 +45,7 @@ func AddUser(tx sqlx.Queryer, user *User) error {
 			nil,
 			user.RegisterIP,
 		).
-		Suffix(utils.Returning("id")).
+		Suffix(utils.SqlReturning("id")).
 		ToSql()
 
 	err := tx.QueryRowx(sql, args...).Scan(&user.ID)
@@ -148,10 +148,11 @@ func UpdateLogin(tx sqlx.Execer, userID int64, clientIP string) error {
 }
 
 func GetUserByUserToken(src sqlx.Queryer, userToken string) (*User, error) {
-	sql, args, _ := sq.Select(columns...).
+	joinColumns := utils.SqlColumnsComplementTable(tableNameMark, columns...)
+	sql, args, _ := sq.Select(joinColumns...).
 		From(tableNameMark).
-		Join(fmt.Sprintf("%s ON %s.token = ? AND %s.expired_at <= ?", session.TableName(), session.TableName(), session.TableName()), userToken, time.Now().Unix()).
-		Where(fmt.Sprintf("%s.id = %s.user_id", tableNameMark, session.TableName())).
+		Join(fmt.Sprintf("%s ON %s.token = ? AND %s.expired_at >= ?", session.TableName(), session.TableName(), session.TableName()), userToken, time.Now().Unix()).
+		Where(fmt.Sprintf("%s.id = %s.owner_id", tableNameMark, session.TableName())).
 		ToSql()
 
 	users := make([]*User, 0, 1)

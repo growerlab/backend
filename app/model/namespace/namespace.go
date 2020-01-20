@@ -23,7 +23,7 @@ func AddNamespace(tx sqlx.Queryer, ns *Namespace) error {
 			ns.OwnerId,
 			ns.Type,
 		).
-		Suffix(utils.Returning("id")).
+		Suffix(utils.SqlReturning("id")).
 		ToSql()
 
 	err := tx.QueryRowx(sql, args...).Scan(&ns.ID)

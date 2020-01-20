@@ -23,8 +23,8 @@ func getClientFromServerID(srvID int64, repo *repository.Repository) (*SVCApi, e
 	return getClient(srv, repo)
 }
 
-func getClient(srv *server.Server,  repo *repository.Repository) (*SVCApi, error) {
-	c, err := client.NewClient(srv.URL(), 0) // default 10s timeout
+func getClient(srv *server.Server, repo *repository.Repository) (*SVCApi, error) {
+	c, err := client.NewClient(srv.ApiURL(), 0) // default 10s timeout
 	if err != nil {
 		return nil, err
 	}

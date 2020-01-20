@@ -14,23 +14,26 @@ const (
 	// 非法参数
 	invalidParameter = "InvalidParameter"
 	// 无法找到
-	notFound = "NotFound"
+	notFoundError = "NotFoundError"
 	// GraphQLError
 	graphQLError = "GraphQLError"
 	// 已存在
 	alreadyExists = "AlreadyExists"
 	// AccessDenied
-	accessDenied = "AccessDenied"
+	accessDeniedError = "AccessDeniedError"
 	// sql错误
 	sqlError = "SQLError"
 	// 未登录
 	unauthorize = "Unauthorize"
 	// PermisstionError
 	permisstionError = "PermisstionError"
+	// 仓库
+	repositoryError = "RepositoryError"
 )
 
 // 定义错误原因
 const (
+	// 非法的
 	Invalid = "Invalid"
 	// 无法找到属性（字段）
 	NotFoundField = "NotFoundField"
@@ -46,6 +49,8 @@ const (
 	AlreadyExists = "AlreadyExists"
 	// 未激活
 	NotActivated = "NotActivated"
+	// 仓库服务异常
+	SvcServerNotready = "SvcServerNotready"
 )
 
 var P = InvalidParameterError
@@ -55,7 +60,7 @@ func InvalidParameterError(model, field, reason string) string {
 }
 
 func NotFoundError(model string) string {
-	return mustCode(notFound, model)
+	return mustCode(notFoundError, model)
 }
 
 func AlreadyExistsError(model, reason string) string {
@@ -75,11 +80,15 @@ func Unauthorize() string {
 }
 
 func AccessDenied(model, reason string) string {
-	return mustCode(accessDenied, model, reason)
+	return mustCode(accessDeniedError, model, reason)
 }
 
 func PermisstionErrror(reason string) string {
 	return mustCode(permisstionError, reason)
+}
+
+func RepositoryError(reason string) string {
+	return mustCode(repositoryError, reason)
 }
 
 // 必须调用该方法生成<xxx>字符串，便于前端解析数据

@@ -298,7 +298,7 @@ ALTER SEQUENCE public.server_id_seq OWNED BY public.server.id;
 
 CREATE TABLE public.session (
     id bigint NOT NULL,
-    user_id bigint NOT NULL,
+    owner_id bigint NOT NULL,
     token character varying(36) NOT NULL,
     created_at bigint NOT NULL,
     expired_at bigint NOT NULL,
@@ -572,7 +572,7 @@ CREATE UNIQUE INDEX namespace_path_uniq ON public.namespace USING btree (path);
 -- Name: session_user_id_token_uniq; Type: INDEX; Schema: public; Owner: growerlab
 --
 
-CREATE UNIQUE INDEX session_user_id_token_uniq ON public.session USING btree (user_id, token);
+CREATE UNIQUE INDEX session_user_id_token_uniq ON public.session USING btree (owner_id, token);
 
 
 --

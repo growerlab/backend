@@ -37,7 +37,7 @@ func AddRepository(tx sqlx.Queryer, repo *Repository) error {
 			repo.ServerID,
 			repo.ServerPath,
 		).
-		Suffix(utils.Returning("id")).
+		Suffix(utils.SqlReturning("id")).
 		ToSql()
 
 	err := tx.QueryRowx(sql, args...).Scan(&repo.ID)
