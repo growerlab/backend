@@ -1,5 +1,11 @@
 package repository
 
+import (
+	"github.com/growerlab/backend/app/model/db"
+	"github.com/growerlab/backend/app/model/namespace"
+	"github.com/growerlab/backend/app/model/user"
+)
+
 type Repository struct {
 	ID          int64  `db:"id"`
 	UUID        string `db:"uuid"`         // 全站唯一ID（fork时用到）
@@ -11,4 +17,24 @@ type Repository struct {
 	CreatedAt   int64  `db:"created_at"`
 	ServerID    int64  `db:"server_id"`   // 服务器id
 	ServerPath  string `db:"server_path"` // 服务器中的绝对路径
+	Public      int    `db:"public"`      // 共有
+
+	ns    *namespace.Namespace
+	owner *user.User
+}
+
+func (r *Repository) Namespace() *namespace.Namespace {
+	if r.ns != nil {
+		return r.ns
+	}
+	r.ns, _ = namespace.GetNamespace(db.DB, r.NamespaceID)
+	return r.ns
+}
+
+func (r *Repository) Owner() *user.User {
+	if r.owner != nil {
+		return r.owner
+	}
+	r.owner, _ = user.GetUser(db.DB, r.OwnerID)
+	return r.owner
 }

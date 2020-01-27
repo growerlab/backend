@@ -6,3 +6,13 @@ input NewRepositoryPayload {
   #gitignoreFile: String!  # 忽略的文件
   #license: String! # 授权
 }
+
+type Repository {
+  uuid: String!
+  path: String!
+  name: String!
+  namespace: Namespace!
+  owner: User!
+  description: String!
+  createdAt: Int!
+}

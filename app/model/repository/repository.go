@@ -20,6 +20,7 @@ var (
 		"created_at",
 		"server_id",
 		"server_path",
+		"public",
 	}
 )
 
@@ -36,6 +37,7 @@ func AddRepository(tx sqlx.Queryer, repo *Repository) error {
 			repo.CreatedAt,
 			repo.ServerID,
 			repo.ServerPath,
+			repo.Public,
 		).
 		Suffix(utils.SqlReturning("id")).
 		ToSql()
@@ -52,18 +54,36 @@ func AreNameInNamespace(src sqlx.Queryer, namespaceID int64, name string) (bool,
 		sq.Eq{"namespace_id": namespaceID},
 		sq.Eq{"path": name},
 	}
-	sql, args, _ := sq.Select(columns[0]).
+	result, err := listRepositoriesByCond(src, []string{"id"}, where)
+	if err != nil {
+		return false, err
+	}
+	return len(result) > 0, nil
+}
+
+func ListRepositoriesByNamespace(src sqlx.Queryer, state RepoState, namespaceID int64) ([]*Repository, error) {
+	where := sq.And{sq.Eq{"namespace_id": namespaceID}}
+	switch state {
+	case StatePublic, StatePrivate:
+		where = append(where, sq.Eq{"public": state})
+	case StateAll:
+	default:
+	}
+
+	return listRepositoriesByCond(src, columns, where)
+}
+
+func listRepositoriesByCond(src sqlx.Queryer, tableColumns []string, cond sq.Sqlizer) ([]*Repository, error) {
+	where := cond
+	sql, args, _ := sq.Select(tableColumns...).
 		From(table).
 		Where(where).
 		ToSql()
 
-	result := make([]int, 0)
+	result := make([]*Repository, 0)
 	err := sqlx.Select(src, &result, sql, args...)
 	if err != nil {
-		return false, errors.Wrap(err, errors.SQLError())
+		return nil, errors.Wrap(err, errors.SQLError())
 	}
-	if len(result) > 0 {
-		return true, nil
-	}
-	return false, nil
+	return result, nil
 }

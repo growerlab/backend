@@ -576,10 +576,10 @@ CREATE UNIQUE INDEX session_user_id_token_uniq ON public.session USING btree (ow
 
 
 --
--- Name: uniq_path_namespace; Type: INDEX; Schema: public; Owner: growerlab
+-- Name: unq_namespace_path; Type: INDEX; Schema: public; Owner: growerlab
 --
 
-CREATE UNIQUE INDEX uniq_path_namespace ON public.repository USING btree (path, namespace_id);
+CREATE UNIQUE INDEX unq_namespace_path ON public.repository USING btree (namespace_id, path);
 
 
 --

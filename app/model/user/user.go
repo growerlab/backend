@@ -79,10 +79,12 @@ func AreEmailOrUsernameInUser(src sqlx.Queryer, username, email string) (bool, e
 
 func GetUserByEmail(src sqlx.Queryer, email string) (*User, error) {
 	user, err := getUser(src, sq.Eq{"email": email})
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
+	return user, err
+}
+
+func GetUser(src sqlx.Queryer, id int64) (*User, error) {
+	user, err := getUser(src, sq.Eq{"id": id})
+	return user, err
 }
 
 func getUser(src sqlx.Queryer, cond sq.Sqlizer) (*User, error) {

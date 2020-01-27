@@ -18,11 +18,16 @@ type User struct {
 	LastLoginAt       *int64  `db:"last_login_at"`
 	LastLoginIP       *string `db:"last_login_ip"`
 	RegisterIP        string  `db:"register_ip"`
+
+	ns *namespace.Namespace // cached namespace
 }
 
 func (u *User) Namespace() *namespace.Namespace {
-	ns, _ := namespace.GetNamespaceByOwnerID(db.DB, u.ID)
-	return ns
+	if u.ns != nil {
+		return u.ns
+	}
+	u.ns, _ = namespace.GetNamespaceByOwnerID(db.DB, u.ID)
+	return u.ns
 }
 
 func (u *User) Verified() bool {

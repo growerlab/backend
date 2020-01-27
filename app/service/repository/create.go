@@ -68,6 +68,11 @@ func buildRepository(
 	srv *server.Server,
 ) (repo *repository.Repository) {
 
+	public := repository.StatePublic
+	if !req.Public {
+		public = repository.StatePrivate
+	}
+
 	repo = &repository.Repository{
 		NamespaceID: ns.ID,
 		UUID:        uuid.UUIDv16(),
@@ -78,6 +83,7 @@ func buildRepository(
 		CreatedAt:   time.Now().Unix(),
 		ServerID:    srv.ID,
 		ServerPath:  UsernameToFilePath(ns.Path, req.Name),
+		Public:      int(public),
 	}
 	return repo
 }

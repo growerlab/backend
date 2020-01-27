@@ -41,6 +41,10 @@ func GetNamespaceByOwnerID(src sqlx.Queryer, ownerID int64) (*Namespace, error) 
 	return getNamespaceByCond(src, sq.Eq{"owner_id": ownerID})
 }
 
+func GetNamespace(src sqlx.Queryer, id int64) (*Namespace, error) {
+	return getNamespaceByCond(src, sq.Eq{"id": id})
+}
+
 func getNamespaceByCond(src sqlx.Queryer, cond sq.Sqlizer) (*Namespace, error) {
 	sql, args, _ := sq.Select(columns...).From(table).Where(cond).ToSql()
 
