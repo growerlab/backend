@@ -51,6 +51,8 @@ const (
 	NotActivated = "NotActivated"
 	// 仓库服务异常
 	SvcServerNotready = "SvcServerNotready"
+	// 无权限
+	NoPermission = "NoPermission"
 )
 
 var P = InvalidParameterError

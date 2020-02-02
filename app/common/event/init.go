@@ -8,7 +8,15 @@ import (
 
 var queueInstance *queue.Queue
 
-func InitQueue() error {
+func InitEvents() error {
+	if err := initQueue(); err != nil {
+		return err
+	}
+	queueInstance.AddJob(NewEmail())
+	return nil
+}
+
+func initQueue() error {
 	workerCount := 5 // worker count，暂时写死
 	jobCount := 1    // 每个worker的待处理容器，多出来的会被阻塞
 
@@ -19,10 +27,5 @@ func InitQueue() error {
 	notify.Subscribe(func() {
 		queueInstance.Release()
 	})
-	return nil
-}
-
-func InitEvents() error {
-	queueInstance.AddJob(NewEmail())
 	return nil
 }

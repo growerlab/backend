@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/growerlab/backend/app/common/event"
 	"github.com/growerlab/backend/app/common/notify"
+	"github.com/growerlab/backend/app/common/permission"
 	"github.com/growerlab/backend/app/model/db"
 	"github.com/growerlab/backend/app/utils/conf"
 )
@@ -15,8 +16,8 @@ func init() {
 	onStart(db.InitMemDB)
 	onStart(db.InitDatabase)
 	onStart(notify.InitNotify)
-	onStart(event.InitQueue)
 	onStart(event.InitEvents)
+	onStart(permission.InitPermission)
 }
 
 func onStart(fn func() error) {
