@@ -14,11 +14,13 @@ import (
 
 var CacheDB *redis.Client
 var QueueDB *redis.Client
+var PermissionDB *redis.Client
 
 func InitMemDB() error {
 	var config = conf.GetConf().Redis
 	CacheDB = newPool(config, config.CacheDB)
 	QueueDB = newPool(config, config.QueueDB)
+	PermissionDB = newPool(config, config.PermissionDB)
 
 	// Test
 	reply, err := CacheDB.Ping().Result()
