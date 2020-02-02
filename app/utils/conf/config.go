@@ -20,13 +20,14 @@ type DB struct {
 }
 
 type Redis struct {
-	Host        string `yaml:"host"`
-	Port        int    `yaml:"port"`
-	CacheDB     int    `yaml:"cache_db"`
-	QueueDB     int    `yaml:"queue_db"`
-	MaxIdle     int    `yaml:"max_idle"`
-	MaxActive   int    `yaml:"max_active"`
-	IdleTimeout int    `yaml:"idle_timeout"`
+	Host         string `yaml:"host"`
+	Port         int    `yaml:"port"`
+	CacheDB      int    `yaml:"cache_db"`
+	QueueDB      int    `yaml:"queue_db"`
+	PermissionDB int    `yaml:"permission_db"`
+	MaxIdle      int    `yaml:"max_idle"`
+	MaxActive    int    `yaml:"max_active"`
+	IdleTimeout  int    `yaml:"idle_timeout"`
 }
 
 type Config struct {

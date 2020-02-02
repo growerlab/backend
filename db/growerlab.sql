@@ -129,6 +129,117 @@ ALTER SEQUENCE public.namespace_id_seq OWNED BY public.namespace.id;
 
 
 --
+-- Name: permission; Type: TABLE; Schema: public; Owner: growerlab
+--
+
+CREATE TABLE public.permission (
+    id bigint NOT NULL,
+    namespace_id bigint NOT NULL,
+    context_type integer NOT NULL,
+    context_param_1 bigint NOT NULL,
+    context_param_2 bigint DEFAULT 0 NOT NULL,
+    user_domain_type integer NOT NULL,
+    user_domain_param bigint DEFAULT 0 NOT NULL,
+    created_at bigint NOT NULL,
+    deleted_at bigint,
+    code integer NOT NULL
+);
+
+
+ALTER TABLE public.permission OWNER TO growerlab;
+
+--
+-- Name: TABLE permission; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON TABLE public.permission IS '权限表';
+
+
+--
+-- Name: COLUMN permission.namespace_id; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.permission.namespace_id IS '权限所属命名空间（不依赖组织或个人，而是依赖命名空间）';
+
+
+--
+-- Name: COLUMN permission.context_type; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.permission.context_type IS '上下文类型';
+
+
+--
+-- Name: COLUMN permission.context_param_1; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.permission.context_param_1 IS '上下文参数1';
+
+
+--
+-- Name: COLUMN permission.context_param_2; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.permission.context_param_2 IS '上下文参数2';
+
+
+--
+-- Name: COLUMN permission.user_domain_type; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.permission.user_domain_type IS '用户域类型';
+
+
+--
+-- Name: COLUMN permission.user_domain_param; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.permission.user_domain_param IS '用户域参数';
+
+
+--
+-- Name: COLUMN permission.created_at; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.permission.created_at IS '创建时间';
+
+
+--
+-- Name: COLUMN permission.deleted_at; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.permission.deleted_at IS '删除时间';
+
+
+--
+-- Name: COLUMN permission.code; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.permission.code IS '权限';
+
+
+--
+-- Name: permission_id_seq; Type: SEQUENCE; Schema: public; Owner: growerlab
+--
+
+CREATE SEQUENCE public.permission_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.permission_id_seq OWNER TO growerlab;
+
+--
+-- Name: permission_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: growerlab
+--
+
+ALTER SEQUENCE public.permission_id_seq OWNED BY public.permission.id;
+
+
+--
 -- Name: repository; Type: TABLE; Schema: public; Owner: growerlab
 --
 
@@ -142,7 +253,8 @@ CREATE TABLE public.repository (
     description text,
     created_at bigint NOT NULL,
     server_id integer NOT NULL,
-    server_path character varying(255) NOT NULL
+    server_path character varying(255) NOT NULL,
+    public integer DEFAULT 1 NOT NULL
 );
 
 
@@ -202,6 +314,13 @@ COMMENT ON COLUMN public.repository.description IS '仓库描述';
 --
 
 COMMENT ON COLUMN public.repository.server_path IS '在服务器中的物理路径';
+
+
+--
+-- Name: COLUMN repository.public; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public.repository.public IS '公共1，私有0';
 
 
 --
@@ -353,7 +472,8 @@ CREATE TABLE public."user" (
     deleted_at bigint,
     verified_at bigint,
     last_login_at bigint,
-    register_ip character varying(46) NOT NULL
+    register_ip character varying(46) NOT NULL,
+    is_admin boolean DEFAULT false NOT NULL
 );
 
 
@@ -451,6 +571,13 @@ ALTER TABLE ONLY public.namespace ALTER COLUMN id SET DEFAULT nextval('public.na
 
 
 --
+-- Name: permission id; Type: DEFAULT; Schema: public; Owner: growerlab
+--
+
+ALTER TABLE ONLY public.permission ALTER COLUMN id SET DEFAULT nextval('public.permission_id_seq'::regclass);
+
+
+--
 -- Name: repository id; Type: DEFAULT; Schema: public; Owner: growerlab
 --
 
@@ -495,6 +622,14 @@ ALTER TABLE ONLY public.namespace
 
 
 --
+-- Name: permission permission_pk; Type: CONSTRAINT; Schema: public; Owner: growerlab
+--
+
+ALTER TABLE ONLY public.permission
+    ADD CONSTRAINT permission_pk PRIMARY KEY (id);
+
+
+--
 -- Name: repository repository_pk; Type: CONSTRAINT; Schema: public; Owner: growerlab
 --
 
@@ -531,6 +666,13 @@ ALTER TABLE ONLY public."user"
 --
 
 CREATE UNIQUE INDEX activate_code_code_uindex ON public.activate_code USING btree (code);
+
+
+--
+-- Name: idx_ctx; Type: INDEX; Schema: public; Owner: growerlab
+--
+
+CREATE INDEX idx_ctx ON public.permission USING btree (namespace_id, code, context_type, context_param_1, context_param_2);
 
 
 --
