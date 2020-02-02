@@ -12,6 +12,10 @@ func (r *Resolver) Query() QueryResolver {
 	return &queryResolver{r}
 }
 
-type mutationResolver struct{ *Resolver }
+func (r *Resolver) Namespace() NamespaceResolver {
+	return &namespaceResolver{r}
+}
 
+type mutationResolver struct{ *Resolver }
+type namespaceResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

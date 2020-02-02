@@ -2,11 +2,6 @@
 
 package service
 
-import (
-	"github.com/growerlab/backend/app/model/namespace"
-	"github.com/growerlab/backend/app/model/user"
-)
-
 type ActivationCodePayload struct {
 	Code string `json:"code"`
 }
@@ -26,16 +21,6 @@ type NewUserPayload struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Username string `json:"username"`
-}
-
-type Repository struct {
-	UUID        string               `json:"uuid"`
-	Path        string               `json:"path"`
-	Name        string               `json:"name"`
-	Namespace   *namespace.Namespace `json:"namespace"`
-	Owner       *user.User           `json:"owner"`
-	Description string               `json:"description"`
-	CreatedAt   int                  `json:"createdAt"`
 }
 
 type Result struct {

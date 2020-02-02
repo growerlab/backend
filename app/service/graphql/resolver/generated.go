@@ -13,6 +13,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/growerlab/backend/app/model/namespace"
+	"github.com/growerlab/backend/app/model/repository"
 	"github.com/growerlab/backend/app/model/user"
 	"github.com/growerlab/backend/app/service"
 	"github.com/vektah/gqlparser"
@@ -111,7 +112,7 @@ type NamespaceResolver interface {
 }
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*user.User, error)
-	Repositories(ctx context.Context, namespaceID int) ([]*service.Repository, error)
+	Repositories(ctx context.Context, namespaceID int) ([]*repository.Repository, error)
 }
 
 type executableSchema struct {
@@ -1050,10 +1051,10 @@ func (ec *executionContext) _Query_repositories(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*service.Repository)
+	res := resTmp.([]*repository.Repository)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNRepository2ᚕᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐRepositoryᚄ(ctx, field.Selections, res)
+	return ec.marshalNRepository2ᚕᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋmodelᚋrepositoryᚐRepositoryᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1131,7 +1132,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Repository_uuid(ctx context.Context, field graphql.CollectedField, obj *service.Repository) (ret graphql.Marshaler) {
+func (ec *executionContext) _Repository_uuid(ctx context.Context, field graphql.CollectedField, obj *repository.Repository) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1168,7 +1169,7 @@ func (ec *executionContext) _Repository_uuid(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Repository_path(ctx context.Context, field graphql.CollectedField, obj *service.Repository) (ret graphql.Marshaler) {
+func (ec *executionContext) _Repository_path(ctx context.Context, field graphql.CollectedField, obj *repository.Repository) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1205,7 +1206,7 @@ func (ec *executionContext) _Repository_path(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Repository_name(ctx context.Context, field graphql.CollectedField, obj *service.Repository) (ret graphql.Marshaler) {
+func (ec *executionContext) _Repository_name(ctx context.Context, field graphql.CollectedField, obj *repository.Repository) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1242,7 +1243,7 @@ func (ec *executionContext) _Repository_name(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Repository_namespace(ctx context.Context, field graphql.CollectedField, obj *service.Repository) (ret graphql.Marshaler) {
+func (ec *executionContext) _Repository_namespace(ctx context.Context, field graphql.CollectedField, obj *repository.Repository) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1255,13 +1256,13 @@ func (ec *executionContext) _Repository_namespace(ctx context.Context, field gra
 		Object:   "Repository",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Namespace, nil
+		return obj.Namespace(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1279,7 +1280,7 @@ func (ec *executionContext) _Repository_namespace(ctx context.Context, field gra
 	return ec.marshalNNamespace2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋmodelᚋnamespaceᚐNamespace(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Repository_owner(ctx context.Context, field graphql.CollectedField, obj *service.Repository) (ret graphql.Marshaler) {
+func (ec *executionContext) _Repository_owner(ctx context.Context, field graphql.CollectedField, obj *repository.Repository) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1292,13 +1293,13 @@ func (ec *executionContext) _Repository_owner(ctx context.Context, field graphql
 		Object:   "Repository",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Owner, nil
+		return obj.Owner(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1316,7 +1317,7 @@ func (ec *executionContext) _Repository_owner(ctx context.Context, field graphql
 	return ec.marshalNUser2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋmodelᚋuserᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Repository_description(ctx context.Context, field graphql.CollectedField, obj *service.Repository) (ret graphql.Marshaler) {
+func (ec *executionContext) _Repository_description(ctx context.Context, field graphql.CollectedField, obj *repository.Repository) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1353,7 +1354,7 @@ func (ec *executionContext) _Repository_description(ctx context.Context, field g
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Repository_createdAt(ctx context.Context, field graphql.CollectedField, obj *service.Repository) (ret graphql.Marshaler) {
+func (ec *executionContext) _Repository_createdAt(ctx context.Context, field graphql.CollectedField, obj *repository.Repository) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1384,10 +1385,10 @@ func (ec *executionContext) _Repository_createdAt(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(int64)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Result_OK(ctx context.Context, field graphql.CollectedField, obj *service.Result) (ret graphql.Marshaler) {
@@ -3354,7 +3355,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 
 var repositoryImplementors = []string{"Repository"}
 
-func (ec *executionContext) _Repository(ctx context.Context, sel ast.SelectionSet, obj *service.Repository) graphql.Marshaler {
+func (ec *executionContext) _Repository(ctx context.Context, sel ast.SelectionSet, obj *repository.Repository) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, repositoryImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -3872,11 +3873,11 @@ func (ec *executionContext) unmarshalNNewUserPayload2githubᚗcomᚋgrowerlabᚋ
 	return ec.unmarshalInputNewUserPayload(ctx, v)
 }
 
-func (ec *executionContext) marshalNRepository2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐRepository(ctx context.Context, sel ast.SelectionSet, v service.Repository) graphql.Marshaler {
+func (ec *executionContext) marshalNRepository2githubᚗcomᚋgrowerlabᚋbackendᚋappᚋmodelᚋrepositoryᚐRepository(ctx context.Context, sel ast.SelectionSet, v repository.Repository) graphql.Marshaler {
 	return ec._Repository(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNRepository2ᚕᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐRepositoryᚄ(ctx context.Context, sel ast.SelectionSet, v []*service.Repository) graphql.Marshaler {
+func (ec *executionContext) marshalNRepository2ᚕᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋmodelᚋrepositoryᚐRepositoryᚄ(ctx context.Context, sel ast.SelectionSet, v []*repository.Repository) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3900,7 +3901,7 @@ func (ec *executionContext) marshalNRepository2ᚕᚖgithubᚗcomᚋgrowerlabᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNRepository2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐRepository(ctx, sel, v[i])
+			ret[i] = ec.marshalNRepository2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋmodelᚋrepositoryᚐRepository(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3913,7 +3914,7 @@ func (ec *executionContext) marshalNRepository2ᚕᚖgithubᚗcomᚋgrowerlabᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalNRepository2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋserviceᚐRepository(ctx context.Context, sel ast.SelectionSet, v *service.Repository) graphql.Marshaler {
+func (ec *executionContext) marshalNRepository2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋmodelᚋrepositoryᚐRepository(ctx context.Context, sel ast.SelectionSet, v *repository.Repository) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")

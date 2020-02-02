@@ -3,11 +3,12 @@ package resolver
 import (
 	"context"
 
+	repoModel "github.com/growerlab/backend/app/model/repository"
 	"github.com/growerlab/backend/app/service"
 	"github.com/growerlab/backend/app/service/repository"
 )
 
-func (r *queryResolver) Repositories(ctx context.Context, namespaceID int) ([]*service.Repository, error) {
+func (r *queryResolver) Repositories(ctx context.Context, namespaceID int) ([]*repoModel.Repository, error) {
 	return repository.ListRepositories(ctx, int64(namespaceID))
 }
 

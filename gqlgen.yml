@@ -19,6 +19,8 @@ models:
     model: github.com/growerlab/backend/app/model/user.User
   Namespace:
     model: github.com/growerlab/backend/app/model/namespace.Namespace
+  Repository:
+    model: github.com/growerlab/backend/app/model/repository.Repository
 
 resolver:
   filename: app/service/graphql/resolver/resolver.go

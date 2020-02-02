@@ -9,7 +9,7 @@ import (
 )
 
 // TODO 权限判断（公私项目区分）；分页功能；
-func ListRepositories(ctx context.Context, namespaceID int64) ([]*service.Repository, error) {
+func ListRepositories(ctx context.Context, namespaceID int64) ([]*repository.Repository, error) {
 	currentUser, err := service.CurrentUser(ctx)
 	if err != nil {
 		return nil, err
@@ -33,20 +33,18 @@ func ListRepositories(ctx context.Context, namespaceID int64) ([]*service.Reposi
 	return buildServiceRepositories(repositories), nil
 }
 
-func buildServiceRepositories(repos []*repository.Repository) []*service.Repository {
-	result := make([]*service.Repository, 0)
+func buildServiceRepositories(repos []*repository.Repository) []*repository.Repository {
+	result := make([]*repository.Repository, 0)
 	if len(repos) == 0 {
 		return result
 	}
 	for _, repo := range repos {
-		result = append(result, &service.Repository{
+		result = append(result, &repository.Repository{
 			UUID:        repo.UUID,
 			Path:        repo.Path,
 			Name:        repo.Name,
-			Namespace:   repo.Namespace(),
-			Owner:       repo.Owner(),
 			Description: repo.Description,
-			CreatedAt:   int(repo.CreatedAt),
+			CreatedAt:   repo.CreatedAt,
 		})
 	}
 	return result
