@@ -67,6 +67,7 @@ func buildUser(payload *service.NewUserPayload, clientIP string) (*userModel.Use
 		PublicEmail:       payload.Email,
 		CreatedAt:         time.Now().Unix(),
 		RegisterIP:        clientIP,
+		IsAdmin:           false,
 	}, nil
 }
 
