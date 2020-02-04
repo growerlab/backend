@@ -672,7 +672,7 @@ CREATE UNIQUE INDEX activate_code_code_uindex ON public.activate_code USING btre
 -- Name: idx_ctx; Type: INDEX; Schema: public; Owner: growerlab
 --
 
-CREATE INDEX idx_ctx ON public.permission USING btree (namespace_id, code, context_type, context_param_1, context_param_2);
+CREATE INDEX idx_ctx ON public.permission USING btree (code, context_type, context_param_1, context_param_2);
 
 
 --
@@ -680,6 +680,13 @@ CREATE INDEX idx_ctx ON public.permission USING btree (namespace_id, code, conte
 --
 
 CREATE INDEX idx_host ON public.server USING btree (host);
+
+
+--
+-- Name: idx_namespace; Type: INDEX; Schema: public; Owner: growerlab
+--
+
+CREATE INDEX idx_namespace ON public.permission USING btree (namespace_id);
 
 
 --
@@ -701,6 +708,13 @@ CREATE INDEX idx_uuid ON public.repository USING btree (uuid);
 --
 
 CREATE INDEX namespace_owner_id_index ON public.namespace USING btree (owner_id);
+
+
+--
+-- Name: namespace_owner_type_uniq; Type: INDEX; Schema: public; Owner: growerlab
+--
+
+CREATE UNIQUE INDEX namespace_owner_type_uniq ON public.namespace USING btree (owner_id, type);
 
 
 --
