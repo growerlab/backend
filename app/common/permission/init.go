@@ -4,6 +4,7 @@ import (
 	"github.com/growerlab/backend/app/common/permission/common"
 	"github.com/growerlab/backend/app/common/permission/context"
 	"github.com/growerlab/backend/app/common/permission/delegate"
+	"github.com/growerlab/backend/app/common/permission/userdomain"
 	"github.com/growerlab/backend/app/model/db"
 )
 
@@ -36,7 +37,9 @@ func initRules() error {
 }
 
 func initUserDomains() error {
-
+	userdomains := make([]delegate.UserDomainDelegate, 0)
+	userdomains = append(userdomains, &userdomain.SuperAdmin{})
+	permHub.RegisterUserDomains(userdomains)
 	return nil
 }
 

@@ -6,6 +6,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/growerlab/backend/app/common/errors"
+	"github.com/growerlab/backend/app/model/namespace"
 	"github.com/growerlab/backend/app/model/session"
 	"github.com/growerlab/backend/app/model/utils"
 	"github.com/jmoiron/sqlx"
@@ -90,6 +91,17 @@ func GetUser(src sqlx.Queryer, id int64) (*User, error) {
 }
 
 func getUser(src sqlx.Queryer, cond sq.Sqlizer) (*User, error) {
+	users, err := listUsersByCond(src, cond)
+	if err != nil {
+		return nil, err
+	}
+	if len(users) > 0 {
+		return users[0], nil
+	}
+	return nil, nil
+}
+
+func listUsersByCond(src sqlx.Queryer, cond sq.Sqlizer) ([]*User, error) {
 	sql, args, _ := sq.Select(columns...).
 		From(tableNameMark).
 		Where(sq.And{cond, NormalUser}).
@@ -101,10 +113,7 @@ func getUser(src sqlx.Queryer, cond sq.Sqlizer) (*User, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, errors.SQLError())
 	}
-	if len(result) > 0 {
-		return result[0], nil
-	}
-	return nil, nil
+	return result, nil
 }
 
 func ActivateUser(tx sqlx.Execer, userID int64) error {
@@ -169,4 +178,37 @@ func GetUserByUserToken(src sqlx.Queryer, userToken string) (*User, error) {
 		return users[0], nil
 	}
 	return nil, nil
+}
+
+func ListAdminUsers(src sqlx.Queryer) ([]*User, error) {
+	where := sq.And{
+		sq.Eq{"is_admin": true},
+	}
+	users, err := listUsersByCond(src, where)
+	if err != nil {
+		return nil, err
+	}
+	err = fillNamespaceInUsers(src, users)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+func fillNamespaceInUsers(src sqlx.Queryer, users []*User) error {
+	userIDs := make([]int64, 0)
+	userMap := make(map[int64]*User)
+	for _, u := range users {
+		userIDs = append(userIDs, u.ID)
+		userMap[u.ID] = u
+	}
+	ns, err := namespace.ListNamespacesByOwner(src, namespace.TypeUser, userIDs...)
+	if err != nil {
+		return err
+	}
+	// fill
+	for _, n := range ns {
+		userMap[n.OwnerId].ns = n
+	}
+	return nil
 }

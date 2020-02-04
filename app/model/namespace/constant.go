@@ -1,6 +1,8 @@
 package namespace
 
+type NamespaceType int
+
 const (
-	TypeUser = 1
-	TypeOrg  = 2
+	TypeUser NamespaceType = 1
+	TypeOrg  NamespaceType = 2
 )

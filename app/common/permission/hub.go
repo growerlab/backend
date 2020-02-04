@@ -33,16 +33,16 @@ type PermissionHub struct {
 	userDomainHub map[int]delegate.UserDomainDelegate
 	contextHub    map[int]delegate.ContextDelegate
 
-	// src 数据库操作对象
-	src sqlx.Queryer
-	// memdb 内存数据库操作对象
-	memdb *redis.Client
+	// DBCtx 数据库操作对象; 内存数据库操作对象等
+	DBCtx *ctx.DBContext
 }
 
 func NewPermissionHub(src sqlx.Queryer, memdb *redis.Client) *PermissionHub {
 	return &PermissionHub{
-		src:     src,
-		memdb:   memdb,
+		DBCtx: &ctx.DBContext{
+			Src:   src,
+			MemDB: memdb,
+		},
 		ruleMap: make(map[int]*Rule),
 	}
 }
@@ -85,12 +85,12 @@ func (p *PermissionHub) CheckCache(namespaceID int64, c *ctx.Context, code int, 
 	key := p.memdbKey(code, c)
 
 	if rebuild {
-		lastUpdateStamp, err := p.memdb.HGet(p.stampKey(), key).Int64()
+		lastUpdateStamp, err := p.DBCtx.MemDB.HGet(p.stampKey(), key).Int64()
 		if err != nil {
 			return errors.Trace(err)
 		}
 
-		valueStampMap, err := p.memdb.HGetAll(key).Result()
+		valueStampMap, err := p.DBCtx.MemDB.HGetAll(key).Result()
 		if err != nil {
 			return errors.Trace(err)
 		}
@@ -115,7 +115,7 @@ func (p *PermissionHub) CheckCache(namespaceID int64, c *ctx.Context, code int, 
 		}
 	}
 
-	if b := p.memdb.HExists(key, nsID); !b.Val() {
+	if b := p.DBCtx.MemDB.HExists(key, nsID); !b.Val() {
 		return errors.New(errors.PermisstionErrror(errors.NoPermission))
 	}
 	return nil
@@ -143,7 +143,7 @@ func (p *PermissionHub) buildCache(rule *Rule, c *ctx.Context) error {
 		if !ok {
 			return errors.Errorf("not found userdomain: %d", u.Type)
 		}
-		IDs, err := ud.BatchEval(&delegate.EvalArgs{
+		IDs, err := ud.BatchEval(p.DBCtx, &delegate.EvalArgs{
 			Ctx: c,
 		})
 		if err != nil {
@@ -161,7 +161,7 @@ func (p *PermissionHub) buildCache(rule *Rule, c *ctx.Context) error {
 
 	todayEndTime := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, time.Local)
 	key := p.memdbKey(rule.Code, c)
-	pipe := p.memdb.Pipeline()
+	pipe := p.DBCtx.MemDB.Pipeline()
 	_ = pipe.Del(key)
 	_ = pipe.HMSet(key, userIDValues)
 	_ = pipe.ExpireAt(key, todayEndTime)
@@ -187,7 +187,7 @@ func (p *PermissionHub) listUserDomainsByContext(rule *Rule, c *ctx.Context) ([]
 		Type: common.UserDomainSuperAdmin,
 	})
 
-	permissions, err := permModel.ListPermissionsByContext(p.src, rule.Code, c)
+	permissions, err := permModel.ListPermissionsByContext(p.DBCtx.Src, rule.Code, c)
 	if err != nil {
 		return nil, err
 	}
@@ -211,6 +211,6 @@ func (p *PermissionHub) stampKey() string {
 }
 func (p *PermissionHub) updateKeyStamp(code int, c *ctx.Context) error {
 	key := p.memdbKey(code, c)
-	err := p.memdb.HSet(p.stampKey(), key, time.Now().UnixNano()).Err()
+	err := p.DBCtx.MemDB.HSet(p.stampKey(), key, time.Now().UnixNano()).Err()
 	return errors.Trace(err)
 }
