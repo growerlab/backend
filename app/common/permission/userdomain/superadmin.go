@@ -3,11 +3,10 @@ package userdomain
 import (
 	"github.com/growerlab/backend/app/common/ctx"
 	"github.com/growerlab/backend/app/common/permission/common"
-	"github.com/growerlab/backend/app/common/permission/delegate"
 	"github.com/growerlab/backend/app/model/user"
 )
 
-var _ delegate.UserDomainDelegate = (*SuperAdmin)(nil)
+var _ common.UserDomainDelegate = (*SuperAdmin)(nil)
 
 type SuperAdmin struct {
 }
@@ -24,7 +23,7 @@ func (s *SuperAdmin) Validate(ud *ctx.UserDomain) error {
 	return nil
 }
 
-func (s *SuperAdmin) BatchEval(db *ctx.DBContext, args *delegate.EvalArgs) ([]int64, error) {
+func (s *SuperAdmin) BatchEval(db *ctx.DBContext, args *common.EvalArgs) ([]int64, error) {
 	admins, err := user.ListAdminUsers(db.Src)
 	if err != nil {
 		return nil, err

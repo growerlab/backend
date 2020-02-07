@@ -1,4 +1,4 @@
-package delegate
+package common
 
 import (
 	"github.com/growerlab/backend/app/common/ctx"

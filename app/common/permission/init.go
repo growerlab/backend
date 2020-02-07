@@ -3,7 +3,6 @@ package permission
 import (
 	"github.com/growerlab/backend/app/common/permission/common"
 	"github.com/growerlab/backend/app/common/permission/context"
-	"github.com/growerlab/backend/app/common/permission/delegate"
 	"github.com/growerlab/backend/app/common/permission/userdomain"
 	"github.com/growerlab/backend/app/model/db"
 )
@@ -37,14 +36,14 @@ func initRules() error {
 }
 
 func initUserDomains() error {
-	userdomains := make([]delegate.UserDomainDelegate, 0)
+	userdomains := make([]common.UserDomainDelegate, 0)
 	userdomains = append(userdomains, &userdomain.SuperAdmin{})
 	permHub.RegisterUserDomains(userdomains)
 	return nil
 }
 
 func initContexts() error {
-	contexts := make([]delegate.ContextDelegate, 0)
+	contexts := make([]common.ContextDelegate, 0)
 	contexts = append(contexts, &context.Repository{})
 	permHub.RegisterContexts(contexts)
 	return nil

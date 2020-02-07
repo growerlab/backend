@@ -4,10 +4,9 @@ import (
 	"github.com/growerlab/backend/app/common/ctx"
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/common/permission/common"
-	"github.com/growerlab/backend/app/common/permission/delegate"
 )
 
-var _ delegate.ContextDelegate = (*Repository)(nil)
+var _ common.ContextDelegate = (*Repository)(nil)
 
 type Repository struct {
 }
@@ -27,6 +26,6 @@ func (r *Repository) Validate(c *ctx.Context) error {
 	return nil
 }
 
-func (r *Repository) BatchEval(db *ctx.DBContext, args *delegate.EvalArgs) ([]int64, error) {
+func (r *Repository) BatchEval(db *ctx.DBContext, args *common.EvalArgs) ([]int64, error) {
 	return nil, nil
 }

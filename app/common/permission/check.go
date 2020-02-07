@@ -6,7 +6,7 @@ import (
 )
 
 func CheckViewRepository(namespaceID int64, repositoryID int64, code int) error {
-	c := ctx.RepositoryContext(repositoryID)
+	c := common.RepositoryContext(repositoryID)
 	return checkPermission(namespaceID, c, common.PermissionViewRepository)
 }
 

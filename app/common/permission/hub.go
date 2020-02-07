@@ -9,7 +9,6 @@ import (
 	"github.com/growerlab/backend/app/common/ctx"
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/common/permission/common"
-	"github.com/growerlab/backend/app/common/permission/delegate"
 	permModel "github.com/growerlab/backend/app/model/permission"
 	"github.com/jmoiron/sqlx"
 )
@@ -30,8 +29,8 @@ type Rule struct {
 
 type PermissionHub struct {
 	ruleMap       map[int]*Rule
-	userDomainHub map[int]delegate.UserDomainDelegate
-	contextHub    map[int]delegate.ContextDelegate
+	userDomainHub map[int]common.UserDomainDelegate
+	contextHub    map[int]common.ContextDelegate
 
 	// DBCtx 数据库操作对象; 内存数据库操作对象等
 	DBCtx *ctx.DBContext
@@ -58,7 +57,7 @@ func (p *PermissionHub) RegisterRules(rules []*Rule) error {
 	return nil
 }
 
-func (p *PermissionHub) RegisterUserDomains(userDomains []delegate.UserDomainDelegate) error {
+func (p *PermissionHub) RegisterUserDomains(userDomains []common.UserDomainDelegate) error {
 	for _, u := range userDomains {
 		if _, exist := p.userDomainHub[u.Type()]; !exist {
 			p.userDomainHub[u.Type()] = u
@@ -69,7 +68,7 @@ func (p *PermissionHub) RegisterUserDomains(userDomains []delegate.UserDomainDel
 	return nil
 }
 
-func (p *PermissionHub) RegisterContexts(contexts []delegate.ContextDelegate) error {
+func (p *PermissionHub) RegisterContexts(contexts []common.ContextDelegate) error {
 	for _, c := range contexts {
 		if _, exist := p.contextHub[c.Type()]; !exist {
 			p.contextHub[c.Type()] = c
@@ -143,7 +142,7 @@ func (p *PermissionHub) buildCache(rule *Rule, c *ctx.Context) error {
 		if !ok {
 			return errors.Errorf("not found userdomain: %d", u.Type)
 		}
-		IDs, err := ud.BatchEval(p.DBCtx, &delegate.EvalArgs{
+		IDs, err := ud.BatchEval(p.DBCtx, &common.EvalArgs{
 			Ctx: c,
 		})
 		if err != nil {
