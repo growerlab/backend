@@ -28,9 +28,9 @@ func (s *SuperAdmin) BatchEval(db *ctx.DBContext, args *common.EvalArgs) ([]int6
 	if err != nil {
 		return nil, err
 	}
-	userIds := make([]int64, len(admins))
+	namespaceIds := make([]int64, len(admins))
 	for i := range admins {
-		userIds[i] = admins[i].ID
+		namespaceIds[i] = admins[i].NamespaceID
 	}
-	return userIds, nil
+	return namespaceIds, nil
 }

@@ -21,9 +21,11 @@ type Rule struct {
 	// Code 具体的权限
 	Code int
 	// ConstraintUserDomains「约束」权限允许的用户域（例如个人、组织成员等）
+	// - 在添加相关权限到数据库时，需要该参数进行验证
 	ConstraintUserDomains []int
 	// BuiltInUserDomains 默认的、不可删除的特殊用户域（或者说用户角色），例如：「仓库创建者」等等
 	// 这里的默认角色，默认就拥有Code所代表的权限
+	// - 在构建权限缓存时，这里的权限也将一起初始化到缓存中
 	BuiltInUserDomains []int
 }
 
@@ -144,6 +146,7 @@ func (p *PermissionHub) buildCache(rule *Rule, c *ctx.Context) error {
 		}
 		IDs, err := ud.BatchEval(p.DBCtx, &common.EvalArgs{
 			Ctx: c,
+			UD:  u,
 		})
 		if err != nil {
 			return err

@@ -68,6 +68,7 @@ func buildUser(payload *service.NewUserPayload, clientIP string) (*userModel.Use
 		CreatedAt:         time.Now().Unix(),
 		RegisterIP:        clientIP,
 		IsAdmin:           false,
+		NamespaceID:       0,
 	}, nil
 }
 
@@ -102,14 +103,20 @@ func Register(payload *service.NewUserPayload, clientIP string) (bool, error) {
 			return err
 		}
 
-		// 创建namespace
+		// create namespace
 		ns := buildNamespace(user)
 		err = nsModel.AddNamespace(tx, ns)
 		if err != nil {
 			return err
 		}
 
-		// 激活用户
+		// set namespace id to user
+		err = userModel.UpdateNamespace(tx, user.ID, ns.ID)
+		if err != nil {
+			return err
+		}
+
+		// activate user
 		err = DoPreActivate(tx, user.ID)
 		if err != nil {
 			return err

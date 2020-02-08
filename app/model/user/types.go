@@ -19,6 +19,7 @@ type User struct {
 	LastLoginIP       *string `db:"last_login_ip"`
 	RegisterIP        string  `db:"register_ip"`
 	IsAdmin           bool    `db:"is_admin"`
+	NamespaceID       int64   `db:"namespace_id"`
 
 	ns *namespace.Namespace // cached namespace
 }

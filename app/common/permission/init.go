@@ -38,6 +38,8 @@ func initRules() error {
 func initUserDomains() error {
 	userdomains := make([]common.UserDomainDelegate, 0)
 	userdomains = append(userdomains, &userdomain.SuperAdmin{})
+	userdomains = append(userdomains, &userdomain.Person{})
+	userdomains = append(userdomains, &userdomain.RepositoryOwner{})
 	permHub.RegisterUserDomains(userdomains)
 	return nil
 }

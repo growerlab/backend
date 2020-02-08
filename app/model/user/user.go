@@ -29,6 +29,7 @@ var columns = []string{
 	"last_login_ip",
 	"register_ip",
 	"is_admin",
+	"namespace_id",
 }
 
 func AddUser(tx sqlx.Queryer, user *User) error {
@@ -47,6 +48,7 @@ func AddUser(tx sqlx.Queryer, user *User) error {
 			nil,
 			user.RegisterIP,
 			user.IsAdmin,
+			user.NamespaceID,
 		).
 		Suffix(utils.SqlReturning("id")).
 		ToSql()
@@ -91,7 +93,7 @@ func GetUser(src sqlx.Queryer, id int64) (*User, error) {
 }
 
 func getUser(src sqlx.Queryer, cond sq.Sqlizer) (*User, error) {
-	users, err := listUsersByCond(src, cond)
+	users, err := listUsersByCond(src, columns, cond)
 	if err != nil {
 		return nil, err
 	}
@@ -101,8 +103,8 @@ func getUser(src sqlx.Queryer, cond sq.Sqlizer) (*User, error) {
 	return nil, nil
 }
 
-func listUsersByCond(src sqlx.Queryer, cond sq.Sqlizer) ([]*User, error) {
-	sql, args, _ := sq.Select(columns...).
+func listUsersByCond(src sqlx.Queryer, tableColumns []string, cond sq.Sqlizer) ([]*User, error) {
+	sql, args, _ := sq.Select(tableColumns...).
 		From(tableNameMark).
 		Where(sq.And{cond, NormalUser}).
 		Limit(1).
@@ -145,12 +147,26 @@ func ListAllUsers(src sqlx.Queryer, page, per uint64) ([]*User, error) {
 }
 
 func UpdateLogin(tx sqlx.Execer, userID int64, clientIP string) error {
+	where := sq.Eq{"id": userID}
+	valueMap := map[string]interface{}{
+		"last_login_at": time.Now().Unix(),
+		"last_login_ip": clientIP,
+	}
+	return update(tx, where, valueMap)
+}
+
+func UpdateNamespace(tx sqlx.Execer, userID int64, namespaceID int64) error {
+	where := sq.Eq{"id": userID}
+	valueMap := map[string]interface{}{
+		"namespace_id": namespaceID,
+	}
+	return update(tx, where, valueMap)
+}
+
+func update(tx sqlx.Execer, cond sq.Sqlizer, valueMap map[string]interface{}) error {
 	sql, args, _ := sq.Update(tableNameMark).
-		SetMap(map[string]interface{}{
-			"last_login_at": time.Now().Unix(),
-			"last_login_ip": clientIP,
-		}).
-		Where(sq.Eq{"id": userID}).
+		SetMap(valueMap).
+		Where(cond).
 		ToSql()
 
 	_, err := tx.Exec(sql, args...)
@@ -184,7 +200,7 @@ func ListAdminUsers(src sqlx.Queryer) ([]*User, error) {
 	where := sq.And{
 		sq.Eq{"is_admin": true},
 	}
-	users, err := listUsersByCond(src, where)
+	users, err := listUsersByCond(src, columns, where)
 	if err != nil {
 		return nil, err
 	}
