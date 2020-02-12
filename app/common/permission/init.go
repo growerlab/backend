@@ -35,11 +35,11 @@ func initRules() error {
 }
 
 func initUserDomains() error {
-	userdomains := make([]common.UserDomainDelegate, 0)
-	userdomains = append(userdomains, &userdomain.SuperAdmin{})
-	userdomains = append(userdomains, &userdomain.Person{})
-	userdomains = append(userdomains, &userdomain.RepositoryOwner{})
-	return permHub.RegisterUserDomains(userdomains)
+	userDomains := make([]common.UserDomainDelegate, 0)
+	userDomains = append(userDomains, &userdomain.SuperAdmin{})
+	userDomains = append(userDomains, &userdomain.Person{})
+	userDomains = append(userDomains, &userdomain.RepositoryOwner{})
+	return permHub.RegisterUserDomains(userDomains)
 }
 
 func initContexts() error {
