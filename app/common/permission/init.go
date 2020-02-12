@@ -31,8 +31,7 @@ func initRules() error {
 		ConstraintUserDomains: []int{common.UserDomainPerson},
 		BuiltInUserDomains:    []int{common.UserDomainRepositoryOwner},
 	})
-	err := permHub.RegisterRules(rules)
-	return err
+	return permHub.RegisterRules(rules)
 }
 
 func initUserDomains() error {
@@ -40,13 +39,11 @@ func initUserDomains() error {
 	userdomains = append(userdomains, &userdomain.SuperAdmin{})
 	userdomains = append(userdomains, &userdomain.Person{})
 	userdomains = append(userdomains, &userdomain.RepositoryOwner{})
-	permHub.RegisterUserDomains(userdomains)
-	return nil
+	return permHub.RegisterUserDomains(userdomains)
 }
 
 func initContexts() error {
 	contexts := make([]common.ContextDelegate, 0)
 	contexts = append(contexts, &context.Repository{})
-	permHub.RegisterContexts(contexts)
-	return nil
+	return permHub.RegisterContexts(contexts)
 }
