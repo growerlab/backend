@@ -17,6 +17,8 @@ var (
 	ErrNotFoundRule = errors.New("not found permission rule")
 )
 
+type PermissionsFunc func(src sqlx.Queryer, code int, c *ctx.Context) ([]*permModel.Permission, error)
+
 type Rule struct {
 	// Code 具体的权限
 	Code int
@@ -34,6 +36,9 @@ type PermissionHub struct {
 	userDomainHub map[int]common.UserDomainDelegate
 	contextHub    map[int]common.ContextDelegate
 
+	// PermissionsByContextFunc 独立出来，灵活实现数据源
+	// 必须实现
+	PermissionsByContextFunc PermissionsFunc
 	// DBCtx 数据库操作对象; 内存数据库操作对象等
 	DBCtx *ctx.DBContext
 }
@@ -44,7 +49,10 @@ func NewPermissionHub(src sqlx.Queryer, memdb *redis.Client) *PermissionHub {
 			Src:   src,
 			MemDB: memdb,
 		},
-		ruleMap: make(map[int]*Rule),
+		ruleMap:                  make(map[int]*Rule),
+		userDomainHub:            make(map[int]common.UserDomainDelegate),
+		contextHub:               make(map[int]common.ContextDelegate),
+		PermissionsByContextFunc: permModel.ListPermissionsByContext,
 	}
 }
 
@@ -87,12 +95,12 @@ func (p *PermissionHub) CheckCache(namespaceID int64, c *ctx.Context, code int, 
 
 	if rebuild {
 		lastUpdateStamp, err := p.DBCtx.MemDB.HGet(p.stampKey(), key).Int64()
-		if err != nil {
+		if err != nil && err != redis.Nil {
 			return errors.Trace(err)
 		}
 
 		valueStampMap, err := p.DBCtx.MemDB.HGetAll(key).Result()
-		if err != nil {
+		if err != nil && err != redis.Nil {
 			return errors.Trace(err)
 		}
 
@@ -189,7 +197,7 @@ func (p *PermissionHub) listUserDomainsByContext(rule *Rule, c *ctx.Context) ([]
 		Type: common.UserDomainSuperAdmin,
 	})
 
-	permissions, err := permModel.ListPermissionsByContext(p.DBCtx.Src, rule.Code, c)
+	permissions, err := p.PermissionsByContextFunc(p.DBCtx.Src, rule.Code, c)
 	if err != nil {
 		return nil, err
 	}
