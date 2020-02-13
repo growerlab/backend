@@ -5,7 +5,7 @@ import (
 	"github.com/growerlab/backend/app/common/permission/common"
 )
 
-func CheckViewRepository(namespaceID int64, repositoryID int64, code int) error {
+func CheckViewRepository(namespaceID int64, repositoryID int64) error {
 	c := common.RepositoryContext(repositoryID)
 	return checkPermission(namespaceID, c, common.PermissionViewRepository)
 }
