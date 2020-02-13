@@ -68,9 +68,9 @@ func buildRepository(
 	srv *server.Server,
 ) (repo *repository.Repository) {
 
-	public := repository.StatePublic
+	status := repository.StatusPublic
 	if !req.Public {
-		public = repository.StatePrivate
+		status = repository.StatusPrivate
 	}
 
 	repo = &repository.Repository{
@@ -83,7 +83,7 @@ func buildRepository(
 		CreatedAt:   time.Now().Unix(),
 		ServerID:    srv.ID,
 		ServerPath:  UsernameToFilePath(ns.Path, req.Name),
-		Public:      int(public),
+		Public:      int(status),
 	}
 	return repo
 }

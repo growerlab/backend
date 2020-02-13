@@ -61,12 +61,12 @@ func AreNameInNamespace(src sqlx.Queryer, namespaceID int64, name string) (bool,
 	return len(result) > 0, nil
 }
 
-func ListRepositoriesByNamespace(src sqlx.Queryer, state RepoState, namespaceID int64) ([]*Repository, error) {
+func ListRepositoriesByNamespace(src sqlx.Queryer, state RepoStatus, namespaceID int64) ([]*Repository, error) {
 	where := sq.And{sq.Eq{"namespace_id": namespaceID}}
 	switch state {
-	case StatePublic, StatePrivate:
+	case StatusPublic, StatusPrivate:
 		where = append(where, sq.Eq{"public": state})
-	case StateAll:
+	case StatusAll:
 	default:
 	}
 

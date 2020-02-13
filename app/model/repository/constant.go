@@ -1,9 +1,9 @@
 package repository
 
-type RepoState int
+type RepoStatus int
 
 const (
-	StatePrivate RepoState = 0
-	StatePublic  RepoState = 1
-	StateAll     RepoState = -1
+	StatusPrivate RepoStatus = 0
+	StatusPublic  RepoStatus = 1
+	StatusAll     RepoStatus = -1
 )

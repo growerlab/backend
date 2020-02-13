@@ -19,11 +19,11 @@ func ListRepositories(ctx context.Context, namespaceID int64) ([]*repositoryMode
 	// TODO 目前没有权限判断，所以目前只能取 currentUser.Namespace == namespaceID 的仓库（既自己的仓库）；以及其他人的公共仓库
 	// TODO 目前不支持”组织“
 	onlyPublic := ns.ID != namespaceID
-	state := repositoryModel.StatePublic
+	state := repositoryModel.StatusPublic
 	if onlyPublic {
-		state = repositoryModel.StatePublic
+		state = repositoryModel.StatusPublic
 	} else {
-		state = repositoryModel.StatePrivate
+		state = repositoryModel.StatusPrivate
 	}
 	repositories, err := repositoryModel.ListRepositoriesByNamespace(db.DB, state, ns.ID)
 	if err != nil {
