@@ -27,7 +27,7 @@ type Rule struct {
 	ConstraintUserDomains []int
 	// BuiltInUserDomains 默认的、不可删除的特殊用户域（或者说用户角色），例如：「仓库创建者」等等
 	// 这里的默认角色，默认就拥有Code所代表的权限
-	// - 在构建权限缓存时，这里的权限也将一起初始化到缓存中
+	// - 在构建权限缓存时，这里的用户域将一起初始化到缓存中
 	BuiltInUserDomains []int
 }
 
@@ -131,15 +131,14 @@ func (p *PermissionHub) CheckCache(namespaceID int64, c *ctx.Context, code int, 
 }
 
 // buildCache 重新构建缓存
-// 这里之所以传rule，因为希望rebuild时，尽量只构建小一些的颗粒度
+// 这里之所以传rule，因为希望rebuild时，尽量只构建小一些的颗粒度缓存
 // - 每天凌晨12点自动过期
-// -
 func (p *PermissionHub) buildCache(rule *Rule, c *ctx.Context) error {
-	userdomains, err := p.listUserDomainsByContext(rule, c)
+	userDomains, err := p.listUserDomainsByContext(rule, c)
 	if err != nil {
 		return err
 	}
-	if len(userdomains) == 0 {
+	if len(userDomains) == 0 {
 		return nil
 	}
 
@@ -147,7 +146,7 @@ func (p *PermissionHub) buildCache(rule *Rule, c *ctx.Context) error {
 	now := time.Now()
 	stamp := now.UnixNano()
 
-	for _, u := range userdomains {
+	for _, u := range userDomains {
 		ud, ok := p.userDomainHub[u.Type]
 		if !ok {
 			return errors.Errorf("not found userdomain: %d", u.Type)
@@ -185,15 +184,16 @@ func (p *PermissionHub) buildCache(rule *Rule, c *ctx.Context) error {
 }
 
 func (p *PermissionHub) listUserDomainsByContext(rule *Rule, c *ctx.Context) ([]*ctx.UserDomain, error) {
-	userdomains := make([]*ctx.UserDomain, len(rule.BuiltInUserDomains))
+	userDomains := make([]*ctx.UserDomain, len(rule.BuiltInUserDomains))
 	for i := range rule.BuiltInUserDomains {
-		userdomains[i] = &ctx.UserDomain{
+		userDomains[i] = &ctx.UserDomain{
 			Type: rule.BuiltInUserDomains[i],
 		}
 	}
 
 	// 默认增加超级管理员的用户域，既超级管理员
-	userdomains = append(userdomains, &ctx.UserDomain{
+	// 这样超级管理员默认就拥有所有的权限
+	userDomains = append(userDomains, &ctx.UserDomain{
 		Type: common.UserDomainSuperAdmin,
 	})
 
@@ -203,12 +203,12 @@ func (p *PermissionHub) listUserDomainsByContext(rule *Rule, c *ctx.Context) ([]
 	}
 
 	for _, p := range permissions {
-		userdomains = append(userdomains, &ctx.UserDomain{
+		userDomains = append(userDomains, &ctx.UserDomain{
 			Type:  p.UserDomainType,
 			Param: p.UserDomainParam,
 		})
 	}
-	return userdomains, nil
+	return userDomains, nil
 }
 
 func (p *PermissionHub) memdbKey(code int, c *ctx.Context) string {

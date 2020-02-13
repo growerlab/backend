@@ -6,6 +6,9 @@ import (
 )
 
 func CheckViewRepository(namespaceID int64, repositoryID int64) error {
+	// if namespaceID <= 0 {
+	// 	namespaceID = common.NamespaceEveryone
+	// }
 	c := common.RepositoryContext(repositoryID)
 	return checkPermission(namespaceID, c, common.PermissionViewRepository)
 }
