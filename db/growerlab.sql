@@ -473,7 +473,8 @@ CREATE TABLE public."user" (
     verified_at bigint,
     last_login_at bigint,
     register_ip character varying(46) NOT NULL,
-    is_admin boolean DEFAULT false NOT NULL
+    is_admin boolean DEFAULT false NOT NULL,
+    namespace_id int8 NOT NULL,
 );
 
 
