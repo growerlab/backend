@@ -185,13 +185,13 @@ func (p *PermissionHub) buildCache(rule *Rule, c *ctx.Context) error {
 
 func (p *PermissionHub) listUserDomainsByContext(rule *Rule, c *ctx.Context) ([]*ctx.UserDomain, error) {
 	userDomains := make([]*ctx.UserDomain, len(rule.BuiltInUserDomains))
-	for i := range rule.BuiltInUserDomains {
+	for i, domain := range rule.BuiltInUserDomains {
 		userDomains[i] = &ctx.UserDomain{
-			Type: rule.BuiltInUserDomains[i],
+			Type: domain,
 		}
 	}
 
-	// 默认增加超级管理员的用户域，既超级管理员
+	// 默认增加超级管理员的用户域，即超级管理员
 	// 这样超级管理员默认就拥有所有的权限
 	userDomains = append(userDomains, &ctx.UserDomain{
 		Type: common.UserDomainSuperAdmin,

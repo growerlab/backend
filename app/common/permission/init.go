@@ -25,10 +25,11 @@ func InitPermission() error {
 }
 
 func initUserDomains() error {
-	userDomains := make([]common.UserDomainDelegate, 0)
-	userDomains = append(userDomains, &userdomain.SuperAdmin{})
-	userDomains = append(userDomains, &userdomain.Person{})
-	userDomains = append(userDomains, &userdomain.RepositoryOwner{})
+	userDomains := []common.UserDomainDelegate{
+		&userdomain.SuperAdmin{},
+		&userdomain.Person{},
+		&userdomain.RepositoryOwner{},
+	}
 	return permHub.RegisterUserDomains(userDomains)
 }
 
@@ -39,21 +40,22 @@ func initContexts() error {
 }
 
 func initRules() error {
-	rules := make([]*Rule, 0)
-	rules = append(rules, &Rule{
-		Code:                  common.PermissionViewRepository,
-		ConstraintUserDomains: []int{common.UserDomainPerson},
-		BuiltInUserDomains:    []int{common.UserDomainRepositoryOwner},
-	})
-	rules = append(rules, &Rule{
-		Code:                  common.PermissionCloneRepository,
-		ConstraintUserDomains: []int{common.UserDomainPerson},
-		BuiltInUserDomains:    []int{common.UserDomainRepositoryOwner},
-	})
-	rules = append(rules, &Rule{
-		Code:                  common.PermissionPushRepository,
-		ConstraintUserDomains: []int{common.UserDomainPerson},
-		BuiltInUserDomains:    []int{common.UserDomainRepositoryOwner},
-	})
+	rules := []*Rule{
+		&Rule{
+			Code:                  common.PermissionViewRepository,
+			ConstraintUserDomains: []int{common.UserDomainPerson},
+			BuiltInUserDomains:    []int{common.UserDomainRepositoryOwner},
+		},
+		&Rule{
+			Code:                  common.PermissionCloneRepository,
+			ConstraintUserDomains: []int{common.UserDomainPerson},
+			BuiltInUserDomains:    []int{common.UserDomainRepositoryOwner},
+		},
+		&Rule{
+			Code:                  common.PermissionPushRepository,
+			ConstraintUserDomains: []int{common.UserDomainPerson},
+			BuiltInUserDomains:    []int{common.UserDomainRepositoryOwner},
+		},
+	}
 	return permHub.RegisterRules(rules)
 }
