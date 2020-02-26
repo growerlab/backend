@@ -62,7 +62,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Repositories func(childComplexity int, namespaceID int) int
+		Repositories func(childComplexity int, ownerPath string) int
 		Users        func(childComplexity int) int
 	}
 
@@ -73,6 +73,7 @@ type ComplexityRoot struct {
 		Namespace   func(childComplexity int) int
 		Owner       func(childComplexity int) int
 		Path        func(childComplexity int) int
+		Public      func(childComplexity int) int
 		UUID        func(childComplexity int) int
 	}
 
@@ -112,7 +113,7 @@ type NamespaceResolver interface {
 }
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*user.User, error)
-	Repositories(ctx context.Context, namespaceID int) ([]*repository.Repository, error)
+	Repositories(ctx context.Context, ownerPath string) ([]*repository.Repository, error)
 }
 
 type executableSchema struct {
@@ -216,7 +217,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Repositories(childComplexity, args["namespaceID"].(int)), true
+		return e.complexity.Query.Repositories(childComplexity, args["ownerPath"].(string)), true
 
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
@@ -266,6 +267,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Repository.Path(childComplexity), true
+
+	case "Repository.public":
+		if e.complexity.Repository.Public == nil {
+			break
+		}
+
+		return e.complexity.Repository.Public(childComplexity), true
 
 	case "Repository.uuid":
 		if e.complexity.Repository.UUID == nil {
@@ -461,6 +469,7 @@ type Repository {
   uuid: String!
   path: String!
   name: String!
+  public: Int!
   namespace: Namespace!
   owner: User!
   description: String!
@@ -469,7 +478,7 @@ type Repository {
 `},
 	&ast.Source{Name: "app/service/graphql/schema/schema.graphql", Input: `type Query {
   users: [User!]!
-  repositories(namespaceID: Int!): [Repository!]!
+  repositories(ownerPath: String!): [Repository!]!
 }
 
 type Result {
@@ -605,14 +614,14 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_repositories_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 int
-	if tmp, ok := rawArgs["namespaceID"]; ok {
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+	var arg0 string
+	if tmp, ok := rawArgs["ownerPath"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["namespaceID"] = arg0
+	args["ownerPath"] = arg0
 	return args, nil
 }
 
@@ -1039,7 +1048,7 @@ func (ec *executionContext) _Query_repositories(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Repositories(rctx, args["namespaceID"].(int))
+		return ec.resolvers.Query().Repositories(rctx, args["ownerPath"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1241,6 +1250,43 @@ func (ec *executionContext) _Repository_name(ctx context.Context, field graphql.
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Repository_public(ctx context.Context, field graphql.CollectedField, obj *repository.Repository) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Repository",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Public, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Repository_namespace(ctx context.Context, field graphql.CollectedField, obj *repository.Repository) (ret graphql.Marshaler) {
@@ -3376,6 +3422,11 @@ func (ec *executionContext) _Repository(ctx context.Context, sel ast.SelectionSe
 			}
 		case "name":
 			out.Values[i] = ec._Repository_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "public":
+			out.Values[i] = ec._Repository_public(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

@@ -8,8 +8,8 @@ import (
 	"github.com/growerlab/backend/app/service/repository"
 )
 
-func (r *queryResolver) Repositories(ctx context.Context, namespaceID int) ([]*repoModel.Repository, error) {
-	return repository.ListRepositories(ctx, int64(namespaceID))
+func (r *queryResolver) Repositories(ctx context.Context, ownerPath string) ([]*repoModel.Repository, error) {
+	return repository.ListRepositories(ctx, ownerPath)
 }
 
 func (r *mutationResolver) CreateRepository(ctx context.Context, input service.NewRepositoryPayload) (*service.Result, error) {

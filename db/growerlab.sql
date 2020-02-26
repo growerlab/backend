@@ -474,7 +474,7 @@ CREATE TABLE public."user" (
     last_login_at bigint,
     register_ip character varying(46) NOT NULL,
     is_admin boolean DEFAULT false NOT NULL,
-    namespace_id int8 NOT NULL,
+    namespace_id bigint DEFAULT 0 NOT NULL
 );
 
 
@@ -534,6 +534,13 @@ COMMENT ON COLUMN public."user".last_login_ip IS '最后的登录ip（兼容ipv6
 --
 
 COMMENT ON COLUMN public."user".register_ip IS '注册ip';
+
+
+--
+-- Name: COLUMN "user".namespace_id; Type: COMMENT; Schema: public; Owner: growerlab
+--
+
+COMMENT ON COLUMN public."user".namespace_id IS '用户的用户域id';
 
 
 --

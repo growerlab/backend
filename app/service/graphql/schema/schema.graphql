@@ -1,6 +1,6 @@
 type Query {
   users: [User!]!
-  repositories(namespaceID: Int!): [Repository!]!
+  repositories(ownerPath: String!): [Repository!]!
 }
 
 type Result {
