@@ -24,9 +24,9 @@ const (
 	// sql错误
 	sqlError = "SQLError"
 	// 未登录
-	unauthorize = "Unauthorize"
-	// PermisstionError
-	permisstionError = "PermisstionError"
+	unauthorized = "Unauthorized"
+	// PermissionError
+	permissionError = "PermissionError"
 	// 仓库
 	repositoryError = "RepositoryError"
 )
@@ -50,7 +50,7 @@ const (
 	// 未激活
 	NotActivated = "NotActivated"
 	// 仓库服务异常
-	SvcServerNotready = "SvcServerNotready"
+	SvcServerNotReady = "SvcServerNotReady"
 	// 无权限
 	NoPermission = "NoPermission"
 )
@@ -78,15 +78,15 @@ func GraphQLError() string {
 }
 
 func Unauthorize() string {
-	return mustCode(unauthorize)
+	return mustCode(unauthorized)
 }
 
 func AccessDenied(model, reason string) string {
 	return mustCode(accessDeniedError, model, reason)
 }
 
-func PermisstionErrror(reason string) string {
-	return mustCode(permisstionError, reason)
+func PermissionError(reason string) string {
+	return mustCode(permissionError, reason)
 }
 
 func RepositoryError(reason string) string {

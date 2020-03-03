@@ -51,7 +51,7 @@ func DoCreateRepository(currentUser *user.User, req *service.NewRepositoryPayloa
 		}
 		err = api.Repository().Create()
 		if err != nil {
-			return errors.Wrap(err, errors.RepositoryError(errors.SvcServerNotready))
+			return errors.Wrap(err, errors.RepositoryError(errors.SvcServerNotReady))
 		}
 		return nil
 	})
