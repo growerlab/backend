@@ -3,6 +3,7 @@ package user
 import (
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/model/db"
 	sessionModel "github.com/growerlab/backend/app/model/session"
@@ -19,10 +20,12 @@ const TokenExpiredTime = 24 * time.Hour * 30 // 30天过期
 //	更新用户最后的登录时间/IP
 //	生成用户登录token
 //
-func Login(input *service.LoginUserPayload, clientIP string) (
+func Login(input *service.LoginUserPayload, ctx *gin.Context) (
 	result *service.UserLoginResult,
 	err error,
 ) {
+	clientIP := ctx.ClientIP()
+
 	err = db.Transact(func(tx *db.DBTx) error {
 		user, err := userModel.GetUserByEmail(tx, input.Email)
 		if err != nil {
@@ -61,6 +64,7 @@ func Login(input *service.LoginUserPayload, clientIP string) (
 			Email:         user.Email,
 			PublicEmail:   user.PublicEmail,
 		}
+		ctx.SetCookie("token", sess.Token, 0, "/", ctx.Request.Host, false, false)
 		return err
 	})
 	if err != nil {

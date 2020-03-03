@@ -26,11 +26,7 @@ func (r *mutationResolver) ActivateUser(ctx context.Context, input service.Activ
 
 func (r *mutationResolver) LoginUser(ctx context.Context, input service.LoginUserPayload) (*service.UserLoginResult, error) {
 	var session = graphql.GetSession(ctx)
-	var clientIP string
-	if session != nil {
-		clientIP = session.GetContext().ClientIP()
-	}
-	result, err := user.Login(&input, clientIP)
+	result, err := user.Login(&input, session.GetContext())
 	return result, err
 }
 
