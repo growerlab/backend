@@ -2,8 +2,8 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"runtime/debug"
-	"strings"
 
 	gql "github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"
@@ -14,6 +14,14 @@ import (
 	"github.com/growerlab/backend/app/utils/logger"
 	"github.com/vektah/gqlparser/gqlerror"
 )
+
+type errCauser interface {
+	Cause() error
+}
+type errFormat interface {
+	Error() string
+	Format(s fmt.State, verb rune)
+}
 
 func GraphQL(ctx *gin.Context) {
 	var userToken = GetUserToken(ctx)
@@ -42,11 +50,15 @@ func GraphQL(ctx *gin.Context) {
 
 		retErr := gql.DefaultErrorPresenter(gqlCtx, err)
 		retErr.Message = err.Error()
+		if retErr.Extensions == nil {
+			retErr.Extensions = map[string]interface{}{}
+		}
 
-		// 只返回错误码，而不返回具体的错误信息
-		msgParts := strings.Split(retErr.Message, ": ")
-		if len(msgParts) > 0 {
-			retErr.Message = msgParts[0]
+		switch e := err.(type) {
+		case errCauser:
+			retErr.Extensions["code"] = e.Cause().Error()
+		case errFormat:
+			retErr.Extensions["code"] = e.Error()
 		}
 		return retErr
 	})
