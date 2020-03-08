@@ -2,9 +2,9 @@
 
 ### 数据库
 
-PostgreSQL v12
+PostgreSQL v12.x
 
-KeyDB 5.1.0
+KeyDB 5.x
 
 #### 初始化数据库
 
