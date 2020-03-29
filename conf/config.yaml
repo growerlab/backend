@@ -9,4 +9,3 @@ redis:
   max_active: 512
   idle_timeout: 120
   namespace: master
-
