@@ -8,6 +8,5 @@ redis:
   max_idle: 5
   max_active: 512
   idle_timeout: 120
-  cache_db: 10
-  queue_db: 11
-  permission_db: 12
+  namespace: master
+

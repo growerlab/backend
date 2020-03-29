@@ -1,8 +1,9 @@
 package queue
 
 import (
-	"fmt"
 	"time"
+
+	"github.com/growerlab/backend/app/model/db"
 
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/utils/logger"
@@ -140,5 +141,5 @@ func (q *Queue) Release() {
 }
 
 func (q *Queue) jobKey(jobName string) string {
-	return fmt.Sprintf("queue:%s", jobName)
+	return db.BaseKeyBuilder("queue", jobName).String()
 }

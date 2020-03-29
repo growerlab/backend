@@ -9,6 +9,7 @@ import (
 	"github.com/growerlab/backend/app/common/ctx"
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/common/permission/common"
+	"github.com/growerlab/backend/app/model/db"
 	permModel "github.com/growerlab/backend/app/model/permission"
 	"github.com/jmoiron/sqlx"
 )
@@ -212,12 +213,12 @@ func (p *PermissionHub) listUserDomainsByContext(rule *Rule, c *ctx.Context) ([]
 }
 
 func (p *PermissionHub) memdbKey(code int, c *ctx.Context) string {
-	return fmt.Sprintf("permission:%d:context:%d:%d:%d", code, c.Type, c.Param1, c.Param2)
+	return db.BaseKeyBuilder(fmt.Sprintf("permission:%d:context:%d:%d:%d", code, c.Type, c.Param1, c.Param2)).String()
 }
 
 // stampKey 当permission表或者相关角色变动后，将更新stampKey HSET中的stamp，表示memdbKey需要被更新
 func (p *PermissionHub) stampKey() string {
-	return fmt.Sprintf("permission:stamp")
+	return db.BaseKeyBuilder(fmt.Sprintf("permission:stamp")).String()
 }
 func (p *PermissionHub) updateKeyStamp(code int, c *ctx.Context) error {
 	key := p.memdbKey(code, c)

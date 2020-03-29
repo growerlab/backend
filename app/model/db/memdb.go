@@ -5,6 +5,7 @@ package db
 import (
 	"net"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-redis/redis/v7"
@@ -18,9 +19,9 @@ var PermissionDB *redis.Client
 
 func InitMemDB() error {
 	var config = conf.GetConf().Redis
-	CacheDB = newPool(config, config.CacheDB)
-	QueueDB = newPool(config, config.QueueDB)
-	PermissionDB = newPool(config, config.PermissionDB)
+	CacheDB = newPool(config, 0)
+	QueueDB = newPool(config, 0)
+	PermissionDB = newPool(config, 0)
 
 	// Test
 	reply, err := CacheDB.Ping().Result()
@@ -42,4 +43,30 @@ func newPool(cfg *conf.Redis, db int) *redis.Client {
 		IdleTimeout:  idleTimeout,
 	})
 	return client
+}
+
+type baseKeyBuilder struct {
+	sb *strings.Builder
+}
+
+func newBaseKeyBuilder(base string) *baseKeyBuilder {
+	b := &baseKeyBuilder{sb: &strings.Builder{}}
+	b.sb.WriteString(base)
+	return b
+}
+
+func (b *baseKeyBuilder) Append(s ...string) *baseKeyBuilder {
+	for i := range s {
+		b.sb.WriteString(":")
+		b.sb.WriteString(s[i])
+	}
+	return b
+}
+
+func (b *baseKeyBuilder) String() string {
+	return b.sb.String()
+}
+
+func BaseKeyBuilder(s ...string) *baseKeyBuilder {
+	return newBaseKeyBuilder(conf.GetConf().Redis.Namespace).Append(s...)
 }

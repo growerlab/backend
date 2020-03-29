@@ -41,17 +41,17 @@ func initContexts() error {
 
 func initRules() error {
 	rules := []*Rule{
-		&Rule{
+		{
 			Code:                  common.PermissionViewRepository,
 			ConstraintUserDomains: []int{common.UserDomainPerson},
 			BuiltInUserDomains:    []int{common.UserDomainRepositoryOwner},
 		},
-		&Rule{
+		{
 			Code:                  common.PermissionCloneRepository,
 			ConstraintUserDomains: []int{common.UserDomainPerson},
 			BuiltInUserDomains:    []int{common.UserDomainRepositoryOwner},
 		},
-		&Rule{
+		{
 			Code:                  common.PermissionPushRepository,
 			ConstraintUserDomains: []int{common.UserDomainPerson},
 			BuiltInUserDomains:    []int{common.UserDomainRepositoryOwner},
