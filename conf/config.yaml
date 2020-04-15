@@ -1,5 +1,6 @@
 debug: true
 website_url: http://localhost:8000
+port: 8000
 db:
   url: postgresql://growerlab:growerlab@127.0.0.1:5432/growerlab?sslmode=disable
 redis:
