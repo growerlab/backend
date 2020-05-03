@@ -32,7 +32,7 @@ type Rule struct {
 	BuiltInUserDomains []int
 }
 
-type PermissionHub struct {
+type Hub struct {
 	ruleMap       map[int]*Rule
 	userDomainHub map[int]common.UserDomainDelegate
 	contextHub    map[int]common.ContextDelegate
@@ -44,8 +44,8 @@ type PermissionHub struct {
 	DBCtx *ctx.DBContext
 }
 
-func NewPermissionHub(src sqlx.Queryer, memdb *redis.Client) *PermissionHub {
-	return &PermissionHub{
+func NewPermissionHub(src sqlx.Queryer, memdb *redis.Client) *Hub {
+	return &Hub{
 		DBCtx: &ctx.DBContext{
 			Src:   src,
 			MemDB: memdb,
@@ -57,7 +57,7 @@ func NewPermissionHub(src sqlx.Queryer, memdb *redis.Client) *PermissionHub {
 	}
 }
 
-func (p *PermissionHub) RegisterRules(rules []*Rule) error {
+func (p *Hub) RegisterRules(rules []*Rule) error {
 	for _, r := range rules {
 		if _, exist := p.ruleMap[r.Code]; !exist {
 			p.ruleMap[r.Code] = r
@@ -68,7 +68,7 @@ func (p *PermissionHub) RegisterRules(rules []*Rule) error {
 	return nil
 }
 
-func (p *PermissionHub) RegisterUserDomains(userDomains []common.UserDomainDelegate) error {
+func (p *Hub) RegisterUserDomains(userDomains []common.UserDomainDelegate) error {
 	for _, u := range userDomains {
 		if _, exist := p.userDomainHub[u.Type()]; !exist {
 			p.userDomainHub[u.Type()] = u
@@ -79,7 +79,7 @@ func (p *PermissionHub) RegisterUserDomains(userDomains []common.UserDomainDeleg
 	return nil
 }
 
-func (p *PermissionHub) RegisterContexts(contexts []common.ContextDelegate) error {
+func (p *Hub) RegisterContexts(contexts []common.ContextDelegate) error {
 	for _, c := range contexts {
 		if _, exist := p.contextHub[c.Type()]; !exist {
 			p.contextHub[c.Type()] = c
@@ -90,7 +90,7 @@ func (p *PermissionHub) RegisterContexts(contexts []common.ContextDelegate) erro
 	return nil
 }
 
-func (p *PermissionHub) CheckCache(namespaceID int64, c *ctx.Context, code int, rebuild bool) error {
+func (p *Hub) CheckCache(namespaceID int64, c *ctx.Context, code int, rebuild bool) error {
 	nsID := strconv.FormatInt(namespaceID, 10)
 	key := p.memdbKey(code, c)
 
@@ -134,7 +134,7 @@ func (p *PermissionHub) CheckCache(namespaceID int64, c *ctx.Context, code int, 
 // buildCache 重新构建缓存
 // 这里之所以传rule，因为希望rebuild时，尽量只构建小一些的颗粒度缓存
 // - 每天凌晨12点自动过期
-func (p *PermissionHub) buildCache(rule *Rule, c *ctx.Context) error {
+func (p *Hub) buildCache(rule *Rule, c *ctx.Context) error {
 	userDomains, err := p.listUserDomainsByContext(rule, c)
 	if err != nil {
 		return err
@@ -184,7 +184,7 @@ func (p *PermissionHub) buildCache(rule *Rule, c *ctx.Context) error {
 	return nil
 }
 
-func (p *PermissionHub) listUserDomainsByContext(rule *Rule, c *ctx.Context) ([]*ctx.UserDomain, error) {
+func (p *Hub) listUserDomainsByContext(rule *Rule, c *ctx.Context) ([]*ctx.UserDomain, error) {
 	userDomains := make([]*ctx.UserDomain, len(rule.BuiltInUserDomains))
 	for i, domain := range rule.BuiltInUserDomains {
 		userDomains[i] = &ctx.UserDomain{
@@ -212,15 +212,15 @@ func (p *PermissionHub) listUserDomainsByContext(rule *Rule, c *ctx.Context) ([]
 	return userDomains, nil
 }
 
-func (p *PermissionHub) memdbKey(code int, c *ctx.Context) string {
+func (p *Hub) memdbKey(code int, c *ctx.Context) string {
 	return db.BaseKeyBuilder(fmt.Sprintf("permission:%d:context:%d:%d:%d", code, c.Type, c.Param1, c.Param2)).String()
 }
 
 // stampKey 当permission表或者相关角色变动后，将更新stampKey HSET中的stamp，表示memdbKey需要被更新
-func (p *PermissionHub) stampKey() string {
-	return db.BaseKeyBuilder(fmt.Sprintf("permission:stamp")).String()
+func (p *Hub) stampKey() string {
+	return db.BaseKeyBuilder("permission", "stamp").String()
 }
-func (p *PermissionHub) updateKeyStamp(code int, c *ctx.Context) error {
+func (p *Hub) updateKeyStamp(code int, c *ctx.Context) error {
 	key := p.memdbKey(code, c)
 	err := p.DBCtx.MemDB.HSet(p.stampKey(), key, time.Now().UnixNano()).Err()
 	return errors.Trace(err)

@@ -7,7 +7,7 @@ import (
 	"github.com/growerlab/backend/app/model/db"
 )
 
-var permHub *PermissionHub
+var permHub *Hub
 
 func InitPermission() error {
 	permHub = NewPermissionHub(db.DB, db.PermissionDB)
