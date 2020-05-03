@@ -107,7 +107,6 @@ func listUsersByCond(src sqlx.Queryer, tableColumns []string, cond sq.Sqlizer) (
 	sql, args, _ := sq.Select(tableColumns...).
 		From(tableNameMark).
 		Where(sq.And{cond, NormalUser}).
-		Limit(1).
 		ToSql()
 
 	result := make([]*User, 0)
