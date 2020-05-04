@@ -11,6 +11,7 @@ import (
 	"github.com/growerlab/backend/app/common/permission/common"
 	"github.com/growerlab/backend/app/model/db"
 	permModel "github.com/growerlab/backend/app/model/permission"
+	"github.com/growerlab/backend/app/utils/timestamp"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -169,7 +170,7 @@ func (p *Hub) buildCache(rule *Rule, c *ctx.Context) error {
 		}
 	}
 
-	todayEndTime := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, time.Local)
+	todayEndTime := timestamp.DayEnd(now)
 	key := p.memdbKey(rule.Code, c)
 	pipe := p.DBCtx.MemDB.Pipeline()
 	_ = pipe.Del(key)
