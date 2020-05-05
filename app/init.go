@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/growerlab/backend/app/common/event"
+	"github.com/growerlab/backend/app/common/mq"
 	"github.com/growerlab/backend/app/common/notify"
 	"github.com/growerlab/backend/app/common/permission"
 	"github.com/growerlab/backend/app/model/db"
@@ -16,8 +16,9 @@ func init() {
 	onStart(db.InitMemDB)
 	onStart(db.InitDatabase)
 	onStart(notify.InitNotify)
-	onStart(event.InitEvents)
+	// onStart(events.InitEvents)
 	onStart(permission.InitPermission)
+	onStart(mq.InitMQ)
 }
 
 func onStart(fn func() error) {

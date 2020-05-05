@@ -13,18 +13,16 @@ import (
 	"github.com/growerlab/backend/app/utils/conf"
 )
 
-var CacheDB *redis.Client
-var QueueDB *redis.Client
+var MemDB *redis.Client
 var PermissionDB *redis.Client
 
 func InitMemDB() error {
 	var config = conf.GetConf().Redis
-	CacheDB = newPool(config, 0)
-	QueueDB = newPool(config, 0)
+	MemDB = newPool(config, 0)
 	PermissionDB = newPool(config, 0)
 
 	// Test
-	reply, err := CacheDB.Ping().Result()
+	reply, err := MemDB.Ping().Result()
 	if err != nil || reply != "PONG" {
 		return errors.New("memdb not ready")
 	}
