@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 
 	"github.com/growerlab/backend/app/common/errors"
+	"github.com/growerlab/backend/app/common/mq"
 )
 
-const EmailUUID = "send_email"
+const (
+	EmailName = "send_email"
+)
 
 type EmailPayload struct {
 	From   string `json:"from,omitempty"`
@@ -15,35 +18,32 @@ type EmailPayload struct {
 	IsHtml bool   `json:"is_html,omitempty"`
 }
 
+var _ mq.Consumer = (*Email)(nil)
+
 func NewEmail() *Email {
-	return &Email{}
+	return &Email{
+		EventBase: NewEventBase(),
+	}
 }
 
 type Email struct {
+	EventBase
 }
 
 func (e *Email) Name() string {
-	return EmailUUID
+	return EmailName
 }
 
-func (e *Email) Eval(payload []byte) (requeue bool, err error) {
+func (e *Email) Consume(payload *mq.Payload) error {
 	p := new(EmailPayload)
-	err = json.Unmarshal(payload, p)
+	err := json.Unmarshal([]byte(payload.Values[DefaultField].(string)), p)
 	if err != nil {
-		return false, err
+		return errors.Trace(err)
 	}
-	return false, e.Send(p)
+	return e.Send(p)
 }
 
 func (e *Email) Send(payload *EmailPayload) error {
 	// TODO 发送邮件的具体逻辑(调用其他的smtp发送库)
 	return nil
-}
-
-func PushSendEmail(payload *EmailPayload) error {
-	body, err := json.Marshal(payload)
-	if err != nil {
-		return errors.Trace(err)
-	}
-	return queueInstance.PushPayload(EmailUUID, body)
 }

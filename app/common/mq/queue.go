@@ -2,21 +2,33 @@ package mq
 
 import (
 	"fmt"
+	"time"
+
+	"github.com/ivpusic/grpool"
+
+	"github.com/growerlab/backend/app/utils/logger"
 
 	"github.com/go-redis/redis/v7"
 	"github.com/growerlab/backend/app/model/db"
 )
 
 const (
-	DefaultKey   = "default"
-	DefaultValue = "default"
-	DefaultGroup = "defaultGroup"
+	DefaultField     = "default"
+	DefaultValue     = "default"
+	DefaultGroup     = "defaultGroup"
+	DefaultConsumer  = "GrowerLab"
+	DefaultReadCount = 10
+)
+
+const (
+	JobWorkers = 32
+	JobQueue   = 32
 )
 
 type Payload struct {
-	ID    string
-	Field string
-	Value string
+	ConsumerName string // 所属消息ID
+	ID           string
+	Values       map[string]interface{}
 }
 
 type Consumer interface {
@@ -32,22 +44,34 @@ type MessageQueue struct {
 	memDB  *redis.Client
 	stream *Stream
 
-	Consumers map[string]Consumer // 消费者
+	consumers       map[string]Consumer // 消费者
+	waitingMessages chan *Payload       // 等待处理的消息
+
+	pool *grpool.Pool
+}
+
+func NewMessageQueue(c *redis.Client) *MessageQueue {
+	return &MessageQueue{
+		memDB:           c,
+		stream:          NewStream(c),
+		waitingMessages: make(chan *Payload, 1024),
+		pool:            grpool.NewPool(JobWorkers, JobQueue),
+	}
 }
 
 func (m *MessageQueue) Register(consumers ...Consumer) error {
 	if len(consumers) == 0 {
 		return nil
 	}
-	if m.Consumers == nil {
-		m.Consumers = map[string]Consumer{}
+	if m.consumers == nil {
+		m.consumers = map[string]Consumer{}
 	}
 
 	for _, c := range consumers {
-		if _, exists := m.Consumers[c.Name()]; exists {
+		if _, exists := m.consumers[c.Name()]; exists {
 			return fmt.Errorf("consumer exists: %s", c.Name())
 		}
-		m.Consumers[c.Name()] = c
+		m.consumers[c.Name()] = c
 		err := m.createStream(c)
 		if err != nil {
 			return err
@@ -58,7 +82,12 @@ func (m *MessageQueue) Register(consumers ...Consumer) error {
 
 func (m *MessageQueue) createStream(c Consumer) error {
 	streamKey := m.streamKey(c.Name())
-	_, err := m.stream.AddMessage(streamKey, DefaultKey, DefaultValue)
+
+	if exists := m.stream.GroupExists(DefaultGroup); exists {
+		return nil
+	}
+
+	_, err := m.stream.AddMessage(streamKey, DefaultField, DefaultValue)
 	if err != nil {
 		return err
 	}
@@ -67,14 +96,109 @@ func (m *MessageQueue) createStream(c Consumer) error {
 	if err != nil {
 		return err
 	}
-	return nil
-}
 
-func (m *MessageQueue) Run() error {
-
-	return nil
+	// 通过ack将创建的默认数据去掉
+	_, err = m.stream.Ack(streamKey, DefaultGroup, DefaultField)
+	return err
 }
 
 func (m *MessageQueue) streamKey(name string) string {
 	return db.BaseKeyBuilder(name).String()
+}
+
+func (m *MessageQueue) buildPayload(belongID string, msg *redis.XMessage) *Payload {
+	payload := &Payload{
+		ConsumerName: belongID,
+		ID:           msg.ID,
+		Values:       msg.Values,
+	}
+	return payload
+}
+
+func (m *MessageQueue) Run() error {
+	go func() {
+		for {
+			count := m.take()
+
+			// 延迟的目的是降低内存数据库的压力
+			if count == 0 {
+				time.Sleep(3 * time.Second)
+			} else {
+				time.Sleep(100 * time.Millisecond)
+			}
+		}
+	}()
+	go func() {
+		for {
+			select {
+			case msg := <-m.waitingMessages:
+				m.delivery(msg)
+			}
+		}
+	}()
+	return nil
+}
+
+func (m *MessageQueue) delivery(msg *Payload) {
+	defer func() {
+		if e := recover(); e != nil {
+			logger.Error("[message queue] delivery err: %v", e)
+		}
+	}()
+	consumer, ok := m.consumers[msg.ConsumerName]
+	if !ok {
+		logger.Error("[message queue] not found consumer: %s", msg.ConsumerName)
+		return
+	}
+	m.pool.JobQueue <- func() {
+		err := consumer.Consume(msg)
+		if err != nil {
+			logger.Error("[message queue] consumer consume was err: %v", err)
+			return
+		} else { // err == nil
+			streamKey := m.streamKey(msg.ConsumerName)
+			_, err = m.stream.Ack(streamKey, DefaultGroup, msg.ID)
+			if err != nil {
+				logger.Error("[message queue] ack was err: %s - %s - %v", streamKey, msg.ID, err)
+				return
+			}
+		}
+	}
+}
+
+func (m *MessageQueue) take() (count int) {
+	defer func() {
+		if e := recover(); e != nil {
+			logger.Error("[message queue] running err: %v", e)
+		}
+	}()
+	for _, c := range m.consumers {
+		streamKey := m.streamKey(c.Name())
+		messages, err := m.stream.ReadGroupMessages(DefaultGroup, DefaultConsumer, streamKey, DefaultReadCount)
+		if err != nil {
+			panic(err)
+		}
+		count += len(messages)
+
+		for _, msg := range messages {
+			m.waitingMessages <- m.buildPayload(c.Name(), &msg)
+		}
+	}
+	return
+}
+
+func (m *MessageQueue) Add(consumerName, msgField, msgBody string) (id string, err error) {
+	_, ok := m.consumers[consumerName]
+	if !ok {
+		return "", fmt.Errorf("not found consumer: %s", consumerName)
+	}
+
+	streamKey := m.streamKey(consumerName)
+	return m.stream.AddMessage(streamKey, msgField, msgBody)
+}
+
+func (m *MessageQueue) Release() {
+	if m.pool != nil {
+		m.pool.Release()
+	}
 }
