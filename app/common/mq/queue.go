@@ -81,25 +81,13 @@ func (m *MessageQueue) Register(consumers ...Consumer) error {
 }
 
 func (m *MessageQueue) createStream(c Consumer) error {
-	streamKey := m.streamKey(c.Name())
-
 	if exists := m.stream.GroupExists(DefaultGroup); exists {
 		return nil
 	}
 
-	_, err := m.stream.AddMessage(streamKey, DefaultField, DefaultValue)
-	if err != nil {
-		return err
-	}
+	streamKey := m.streamKey(c.Name())
 
-	err = m.stream.CreateGroup(DefaultGroup, streamKey)
-	if err != nil {
-		return err
-	}
-
-	// 通过ack将创建的默认数据去掉
-	_, err = m.stream.Ack(streamKey, DefaultGroup, DefaultField)
-	return err
+	return m.stream.CreateGroup(DefaultGroup, streamKey)
 }
 
 func (m *MessageQueue) streamKey(name string) string {
