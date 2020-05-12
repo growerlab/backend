@@ -47,7 +47,7 @@ type KeyBuilder struct {
 	sb *strings.Builder
 }
 
-func NewBaseKeyBuilder(base string) *KeyBuilder {
+func NewKeyBuilder(base string) *KeyBuilder {
 	b := &KeyBuilder{sb: &strings.Builder{}}
 	b.sb.WriteString(base)
 	return b
@@ -66,5 +66,5 @@ func (b *KeyBuilder) String() string {
 }
 
 func BaseKeyBuilder(s ...string) *KeyBuilder {
-	return NewBaseKeyBuilder(conf.GetConf().Redis.Namespace).Append(s...)
+	return NewKeyBuilder(conf.GetConf().Redis.Namespace).Append(s...)
 }
