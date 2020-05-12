@@ -73,6 +73,18 @@ func ListRepositoriesByNamespace(src sqlx.Queryer, state RepoStatus, namespaceID
 	return listRepositoriesByCond(src, columns, where)
 }
 
+func GetRepositoryByNsWithPath(src sqlx.Queryer, namespaceID int64, path string) (*Repository, error) {
+	where := sq.And{sq.Eq{"namespace_id": namespaceID, "path": path}}
+	repos, err := listRepositoriesByCond(src, columns, where)
+	if err != nil {
+		return nil, err
+	}
+	if len(repos) > 0 {
+		return repos[0], nil
+	}
+	return nil, nil
+}
+
 func GetRepository(src sqlx.Queryer, id int64) (*Repository, error) {
 	repos, err := listRepositoriesByCond(src, columns, sq.Eq{"id": id})
 	if err != nil {
