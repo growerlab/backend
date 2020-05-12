@@ -43,17 +43,17 @@ func newPool(cfg *conf.Redis, db int) *redis.Client {
 	return client
 }
 
-type baseKeyBuilder struct {
+type KeyBuilder struct {
 	sb *strings.Builder
 }
 
-func newBaseKeyBuilder(base string) *baseKeyBuilder {
-	b := &baseKeyBuilder{sb: &strings.Builder{}}
+func NewBaseKeyBuilder(base string) *KeyBuilder {
+	b := &KeyBuilder{sb: &strings.Builder{}}
 	b.sb.WriteString(base)
 	return b
 }
 
-func (b *baseKeyBuilder) Append(s ...string) *baseKeyBuilder {
+func (b *KeyBuilder) Append(s ...string) *KeyBuilder {
 	for i := range s {
 		b.sb.WriteString(":")
 		b.sb.WriteString(s[i])
@@ -61,10 +61,10 @@ func (b *baseKeyBuilder) Append(s ...string) *baseKeyBuilder {
 	return b
 }
 
-func (b *baseKeyBuilder) String() string {
+func (b *KeyBuilder) String() string {
 	return b.sb.String()
 }
 
-func BaseKeyBuilder(s ...string) *baseKeyBuilder {
-	return newBaseKeyBuilder(conf.GetConf().Redis.Namespace).Append(s...)
+func BaseKeyBuilder(s ...string) *KeyBuilder {
+	return NewBaseKeyBuilder(conf.GetConf().Redis.Namespace).Append(s...)
 }
