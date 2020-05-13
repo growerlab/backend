@@ -11,6 +11,7 @@ import (
 	"github.com/growerlab/backend/app/service"
 	"github.com/growerlab/backend/app/utils/pwd"
 	"github.com/growerlab/backend/app/utils/uuid"
+	"github.com/jmoiron/sqlx"
 )
 
 const TokenExpiredTime = 24 * time.Hour * 30 // 30天过期
@@ -27,20 +28,9 @@ func Login(input *service.LoginUserPayload, ctx *gin.Context) (
 	clientIP := ctx.ClientIP()
 
 	err = db.Transact(func(tx *db.DBTx) error {
-		user, err := userModel.GetUserByEmail(tx, input.Email)
+		user, err := Validate(tx, input.Email, input.Password)
 		if err != nil {
 			return err
-		}
-		if user == nil {
-			return errors.New(errors.NotFoundError(errors.User))
-		}
-		if !user.Verified() {
-			return errors.New(errors.AccessDenied(errors.User, errors.NotActivated))
-		}
-
-		ok := pwd.ComparePassword(user.EncryptedPassword, input.Password)
-		if !ok {
-			return errors.New(errors.InvalidParameterError(errors.User, errors.Password, errors.NotEqual))
 		}
 
 		err = userModel.UpdateLogin(tx, user.ID, clientIP)
@@ -71,6 +61,25 @@ func Login(input *service.LoginUserPayload, ctx *gin.Context) (
 		return nil, err
 	}
 	return
+}
+
+func Validate(src sqlx.Queryer, email, password string) (*userModel.User, error) {
+	user, err := userModel.GetUserByEmail(src, email)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New(errors.NotFoundError(errors.User))
+	}
+	if !user.Verified() {
+		return nil, errors.New(errors.AccessDenied(errors.User, errors.NotActivated))
+	}
+
+	ok := pwd.ComparePassword(user.EncryptedPassword, password)
+	if !ok {
+		return nil, errors.New(errors.InvalidParameterError(errors.User, errors.Password, errors.NotEqual))
+	}
+	return user, nil
 }
 
 func buildSession(userID int64, clientIP string) *sessionModel.Session {
