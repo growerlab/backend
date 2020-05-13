@@ -87,6 +87,11 @@ func GetUserByEmail(src sqlx.Queryer, email string) (*User, error) {
 	return user, err
 }
 
+func GetUserByUsername(src sqlx.Queryer, username string) (*User, error) {
+	user, err := getUser(src, sq.Eq{"username": username})
+	return user, err
+}
+
 func GetUser(src sqlx.Queryer, id int64) (*User, error) {
 	user, err := getUser(src, sq.Eq{"id": id})
 	return user, err

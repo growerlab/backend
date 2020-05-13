@@ -1,6 +1,7 @@
 package user
 
 import (
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -63,11 +64,19 @@ func Login(input *service.LoginUserPayload, ctx *gin.Context) (
 	return
 }
 
-func Validate(src sqlx.Queryer, email, password string) (*userModel.User, error) {
-	user, err := userModel.GetUserByEmail(src, email)
-	if err != nil {
-		return nil, err
+func Validate(src sqlx.Queryer, usernameOrEmail, password string) (user *userModel.User, err error) {
+	if strings.Contains(usernameOrEmail, "@") {
+		user, err = userModel.GetUserByEmail(src, usernameOrEmail)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		user, err = userModel.GetUserByUsername(src, usernameOrEmail)
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	if user == nil {
 		return nil, errors.New(errors.NotFoundError(errors.User))
 	}
