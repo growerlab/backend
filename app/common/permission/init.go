@@ -29,6 +29,7 @@ func initUserDomains() error {
 		&userdomain.SuperAdmin{},
 		&userdomain.Person{},
 		&userdomain.RepositoryOwner{},
+		&userdomain.Visitor{},
 	}
 	return permHub.RegisterUserDomains(userDomains)
 }
