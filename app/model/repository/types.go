@@ -38,3 +38,7 @@ func (r *Repository) Owner() *user.User {
 	r.owner, _ = user.GetUser(db.DB, r.OwnerID)
 	return r.owner
 }
+
+func (r *Repository) IsPublic() bool {
+	return r.Public == int(StatusPublic)
+}
