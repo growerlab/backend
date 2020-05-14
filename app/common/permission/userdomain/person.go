@@ -28,6 +28,7 @@ func (s *Person) Validate(ud *ctx.UserDomain) error {
 }
 
 func (s *Person) BatchEval(db *ctx.DBContext, args *common.EvalArgs) ([]int64, error) {
+	// TODO 如果这里只是想知道某个用户的namespace id 的话，那么是可以进行cache的，而不用重复的读取数据库
 	u, err := user.GetUser(db.Src, args.UD.Param)
 	if err != nil {
 		return nil, err
