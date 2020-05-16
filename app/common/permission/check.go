@@ -15,9 +15,9 @@ func CheckPushRepository(namespaceID int64, repositoryID int64) error {
 	return checkPermission(&namespaceID, c, common.PermissionPushRepository)
 }
 
-func CheckCloneRepository(namespaceID int64, repositoryID int64) error {
+func CheckCloneRepository(namespaceID *int64, repositoryID int64) error {
 	c := common.RepositoryContext(repositoryID)
-	return checkPermission(&namespaceID, c, common.PermissionCloneRepository)
+	return checkPermission(namespaceID, c, common.PermissionCloneRepository)
 }
 
 func checkPermission(namespaceID *int64, ctx *ctx.Context, code int) error {
