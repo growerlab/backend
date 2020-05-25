@@ -28,8 +28,8 @@ func InitNotify() error {
 		for _, sub := range notifySubscribes {
 			sub()
 		}
-		time.Sleep(1 * time.Second) // 等待结果的输出，避免过早结束进程，导致无法看到订阅函数的输出
 
+		time.Sleep(time.Second) // 等待结果的输出，避免过早结束进程，导致无法看到订阅函数的输出
 		close(AllOfDone)
 	}()
 	return nil
@@ -37,4 +37,8 @@ func InitNotify() error {
 
 func Subscribe(fn func()) {
 	notifySubscribes = append(notifySubscribes, fn)
+}
+
+func Done() {
+	<-AllOfDone
 }
