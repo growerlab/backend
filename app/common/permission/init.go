@@ -1,9 +1,8 @@
 package permission
 
 import (
-	"github.com/growerlab/backend/app/common/permission/common"
-	"github.com/growerlab/backend/app/common/permission/context"
-	"github.com/growerlab/backend/app/common/permission/userdomain"
+	context2 "github.com/growerlab/backend/app/common/context"
+	"github.com/growerlab/backend/app/common/userdomain"
 	"github.com/growerlab/backend/app/model/db"
 )
 
@@ -25,7 +24,7 @@ func InitPermission() error {
 }
 
 func initUserDomains() error {
-	userDomains := []common.UserDomainDelegate{
+	userDomains := []UserDomainDelegate{
 		&userdomain.SuperAdmin{},
 		&userdomain.Person{},
 		&userdomain.RepositoryOwner{},
@@ -35,27 +34,27 @@ func initUserDomains() error {
 }
 
 func initContexts() error {
-	contexts := make([]common.ContextDelegate, 0)
-	contexts = append(contexts, &context.Repository{})
+	contexts := make([]ContextDelegate, 0)
+	contexts = append(contexts, &context2.Repository{})
 	return permHub.RegisterContexts(contexts)
 }
 
 func initRules() error {
 	rules := []*Rule{
 		{
-			Code:                  common.PermissionViewRepository,
-			ConstraintUserDomains: []int{common.UserDomainPerson},
-			BuiltInUserDomains:    []int{common.UserDomainRepositoryOwner},
+			Code:                  ViewRepository,
+			ConstraintUserDomains: []int{userdomain.TypePerson},
+			BuiltInUserDomains:    []int{userdomain.TypeRepositoryOwner},
 		},
 		{
-			Code:                  common.PermissionCloneRepository,
-			ConstraintUserDomains: []int{common.UserDomainPerson},
-			BuiltInUserDomains:    []int{common.UserDomainRepositoryOwner},
+			Code:                  CloneRepository,
+			ConstraintUserDomains: []int{userdomain.TypePerson},
+			BuiltInUserDomains:    []int{userdomain.TypeRepositoryOwner},
 		},
 		{
-			Code:                  common.PermissionPushRepository,
-			ConstraintUserDomains: []int{common.UserDomainPerson},
-			BuiltInUserDomains:    []int{common.UserDomainRepositoryOwner},
+			Code:                  PushRepository,
+			ConstraintUserDomains: []int{userdomain.TypePerson},
+			BuiltInUserDomains:    []int{userdomain.TypeRepositoryOwner},
 		},
 	}
 	return permHub.RegisterRules(rules)

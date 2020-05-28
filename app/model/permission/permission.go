@@ -2,7 +2,7 @@ package permission
 
 import (
 	sq "github.com/Masterminds/squirrel"
-	"github.com/growerlab/backend/app/common/ctx"
+	"github.com/growerlab/backend/app/common/context"
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/jmoiron/sqlx"
 )
@@ -21,7 +21,7 @@ var columns = []string{
 	"deleted_at",
 }
 
-func ListPermissionsByContext(src sqlx.Queryer, code int, c *ctx.Context) ([]*Permission, error) {
+func ListPermissionsByContext(src sqlx.Queryer, code int, c *context.Context) ([]*Permission, error) {
 	where := sq.And{
 		sq.Eq{"code": code},
 		sq.Eq{"context_type": c.Type},

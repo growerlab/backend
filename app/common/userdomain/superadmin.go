@@ -1,30 +1,26 @@
 package userdomain
 
 import (
-	"github.com/growerlab/backend/app/common/ctx"
-	"github.com/growerlab/backend/app/common/permission/common"
 	"github.com/growerlab/backend/app/model/user"
 )
-
-var _ common.UserDomainDelegate = (*SuperAdmin)(nil)
 
 type SuperAdmin struct {
 }
 
 func (s *SuperAdmin) Type() int {
-	return common.UserDomainSuperAdmin
+	return TypeSuperAdmin
 }
 
 func (s *SuperAdmin) TypeLabel() string {
 	return "super_admin"
 }
 
-func (s *SuperAdmin) Validate(ud *ctx.UserDomain) error {
+func (s *SuperAdmin) Validate(ud *UserDomain) error {
 	return nil
 }
 
-func (s *SuperAdmin) BatchEval(db *ctx.DBContext, args *common.EvalArgs) ([]int64, error) {
-	admins, err := user.ListAdminUsers(db.Src)
+func (s *SuperAdmin) Eval(args Evaluable) ([]int64, error) {
+	admins, err := user.ListAdminUsers(args.DB().Src)
 	if err != nil {
 		return nil, err
 	}
