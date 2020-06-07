@@ -45,6 +45,8 @@ const (
 	Used = "Used"
 	// 不匹配
 	NotEqual = "NotEqual"
+	// 空的
+	Empty = "Empty"
 	// 已存在
 	AlreadyExists = "AlreadyExists"
 	// 未激活

@@ -228,7 +228,7 @@ func fillNamespaceInUsers(src sqlx.Queryer, users []*User) error {
 	}
 	// fill
 	for _, n := range ns {
-		userMap[n.OwnerId].ns = n
+		userMap[n.OwnerID].ns = n
 	}
 	return nil
 }

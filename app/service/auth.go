@@ -9,20 +9,20 @@ import (
 	"github.com/growerlab/backend/app/service/graphql"
 )
 
-func CurrentUser(ctx context.Context) (*user.User, error) {
+func CurrentUser(ctx context.Context) (u *user.User, userNSID *int64, err error) {
 	session, ok := Session(ctx)
 	if !ok {
-		return nil, errors.New(errors.Unauthorize())
+		return nil, nil, errors.New(errors.Unauthorize())
 	}
 	userToken := session.UserToken()
-	u, err := user.GetUserByUserToken(db.DB, userToken)
+	u, err = user.GetUserByUserToken(db.DB, userToken)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	if u == nil {
-		return nil, errors.New(errors.Unauthorize())
+	if u != nil {
+		return u, &u.NamespaceID, nil
 	}
-	return u, nil
+	return nil, nil, nil
 }
 
 func Session(ctx context.Context) (*graphql.Session, bool) {

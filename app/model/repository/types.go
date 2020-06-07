@@ -1,9 +1,13 @@
 package repository
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/growerlab/backend/app/model/db"
 	"github.com/growerlab/backend/app/model/namespace"
 	"github.com/growerlab/backend/app/model/user"
+	"github.com/growerlab/backend/app/utils/conf"
 )
 
 type Repository struct {
@@ -17,12 +21,13 @@ type Repository struct {
 	CreatedAt   int64  `db:"created_at"`
 	ServerID    int64  `db:"server_id"`   // 服务器id
 	ServerPath  string `db:"server_path"` // 服务器中的绝对路径
-	Public      int    `db:"public"`      // 共有
+	Public      int    `db:"public"`      // 公有
 
 	ns    *namespace.Namespace
 	owner *user.User
 }
 
+// TODO N+1 问题
 func (r *Repository) Namespace() *namespace.Namespace {
 	if r.ns != nil {
 		return r.ns
@@ -31,6 +36,7 @@ func (r *Repository) Namespace() *namespace.Namespace {
 	return r.ns
 }
 
+// TODO N+1 问题
 func (r *Repository) Owner() *user.User {
 	if r.owner != nil {
 		return r.owner
@@ -41,4 +47,26 @@ func (r *Repository) Owner() *user.User {
 
 func (r *Repository) IsPublic() bool {
 	return r.Public == int(StatusPublic)
+}
+
+func (r *Repository) PathGroup() string {
+	return fmt.Sprintf("%s/%s", r.Namespace().Path, r.Path)
+}
+
+func (r *Repository) GitHttpURL() string {
+	var sb strings.Builder
+	sb.WriteString(conf.GetConf().WebsiteURL)
+	sb.WriteByte('/')
+	sb.WriteString(r.PathGroup())
+	sb.WriteString(".git")
+	return sb.String()
+}
+
+func (r *Repository) GitSshURL() string {
+	var sb strings.Builder
+	sb.WriteString(conf.GetConf().SshURL)
+	sb.WriteByte('/')
+	sb.WriteString(r.PathGroup())
+	sb.WriteString(".git")
+	return sb.String()
 }

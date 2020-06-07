@@ -18,7 +18,7 @@ import (
 )
 
 func CreateRepository(ctx context.Context, req *service.NewRepositoryPayload) (bool, error) {
-	currentUser, err := service.CurrentUser(ctx)
+	currentUser, _, err := service.CurrentUser(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -110,7 +110,7 @@ func validateAndPrepare(src sqlx.Queryer, userID int64, req *service.NewReposito
 	}
 
 	// TODO 未来应该验证权限(例如是否有权限在组织中创建权限)
-	if ns.OwnerId != userID {
+	if ns.OwnerID != userID {
 		return nil, errors.New(errors.AccessDenied(errors.User, errors.NotEqual))
 	}
 

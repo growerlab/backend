@@ -24,6 +24,7 @@ type User struct {
 	ns *namespace.Namespace // cached namespace
 }
 
+// TODO N+1 问题
 func (u *User) Namespace() *namespace.Namespace {
 	if u.ns != nil {
 		return u.ns

@@ -16,4 +16,7 @@ type Repository {
   owner: User!
   description: String!
   createdAt: Int!
+  pathGroup: String!
+  gitHttpURL: String!
+  gitSshURL: String!
 }

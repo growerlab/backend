@@ -56,23 +56,27 @@ type ComplexityRoot struct {
 
 	Namespace struct {
 		ID      func(childComplexity int) int
-		OwnerId func(childComplexity int) int
+		OwnerID func(childComplexity int) int
 		Path    func(childComplexity int) int
 		Type    func(childComplexity int) int
 	}
 
 	Query struct {
 		Repositories func(childComplexity int, ownerPath string) int
+		Repository   func(childComplexity int, ownerPath string, path string) int
 		Users        func(childComplexity int) int
 	}
 
 	Repository struct {
 		CreatedAt   func(childComplexity int) int
 		Description func(childComplexity int) int
+		GitHttpURL  func(childComplexity int) int
+		GitSshURL   func(childComplexity int) int
 		Name        func(childComplexity int) int
 		Namespace   func(childComplexity int) int
 		Owner       func(childComplexity int) int
 		Path        func(childComplexity int) int
+		PathGroup   func(childComplexity int) int
 		Public      func(childComplexity int) int
 		UUID        func(childComplexity int) int
 	}
@@ -114,6 +118,7 @@ type NamespaceResolver interface {
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*user.User, error)
 	Repositories(ctx context.Context, ownerPath string) ([]*repository.Repository, error)
+	Repository(ctx context.Context, ownerPath string, path string) (*repository.Repository, error)
 }
 
 type executableSchema struct {
@@ -187,11 +192,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.Namespace.ID(childComplexity), true
 
 	case "Namespace.ownerId":
-		if e.complexity.Namespace.OwnerId == nil {
+		if e.complexity.Namespace.OwnerID == nil {
 			break
 		}
 
-		return e.complexity.Namespace.OwnerId(childComplexity), true
+		return e.complexity.Namespace.OwnerID(childComplexity), true
 
 	case "Namespace.path":
 		if e.complexity.Namespace.Path == nil {
@@ -219,6 +224,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Repositories(childComplexity, args["ownerPath"].(string)), true
 
+	case "Query.repository":
+		if e.complexity.Query.Repository == nil {
+			break
+		}
+
+		args, err := ec.field_Query_repository_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Repository(childComplexity, args["ownerPath"].(string), args["path"].(string)), true
+
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
 			break
@@ -239,6 +256,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Repository.Description(childComplexity), true
+
+	case "Repository.gitHttpURL":
+		if e.complexity.Repository.GitHttpURL == nil {
+			break
+		}
+
+		return e.complexity.Repository.GitHttpURL(childComplexity), true
+
+	case "Repository.gitSshURL":
+		if e.complexity.Repository.GitSshURL == nil {
+			break
+		}
+
+		return e.complexity.Repository.GitSshURL(childComplexity), true
 
 	case "Repository.name":
 		if e.complexity.Repository.Name == nil {
@@ -267,6 +298,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Repository.Path(childComplexity), true
+
+	case "Repository.pathGroup":
+		if e.complexity.Repository.PathGroup == nil {
+			break
+		}
+
+		return e.complexity.Repository.PathGroup(childComplexity), true
 
 	case "Repository.public":
 		if e.complexity.Repository.Public == nil {
@@ -474,11 +512,15 @@ type Repository {
   owner: User!
   description: String!
   createdAt: Int!
+  pathGroup: String!
+  gitHttpURL: String!
+  gitSshURL: String!
 }
 `},
 	&ast.Source{Name: "app/service/graphql/schema/schema.graphql", Input: `type Query {
   users: [User!]!
   repositories(ownerPath: String!): [Repository!]!
+  repository(ownerPath: String!, path: String!): Repository!
 }
 
 type Result {
@@ -622,6 +664,28 @@ func (ec *executionContext) field_Query_repositories_args(ctx context.Context, r
 		}
 	}
 	args["ownerPath"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_repository_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["ownerPath"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["ownerPath"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["path"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["path"] = arg1
 	return args, nil
 }
 
@@ -930,7 +994,7 @@ func (ec *executionContext) _Namespace_ownerId(ctx context.Context, field graphq
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.OwnerId, nil
+		return obj.OwnerID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1064,6 +1128,50 @@ func (ec *executionContext) _Query_repositories(ctx context.Context, field graph
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNRepository2ᚕᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋmodelᚋrepositoryᚐRepositoryᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_repository(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_repository_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Repository(rctx, args["ownerPath"].(string), args["path"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*repository.Repository)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNRepository2ᚖgithubᚗcomᚋgrowerlabᚋbackendᚋappᚋmodelᚋrepositoryᚐRepository(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1435,6 +1543,117 @@ func (ec *executionContext) _Repository_createdAt(ctx context.Context, field gra
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Repository_pathGroup(ctx context.Context, field graphql.CollectedField, obj *repository.Repository) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Repository",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PathGroup(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Repository_gitHttpURL(ctx context.Context, field graphql.CollectedField, obj *repository.Repository) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Repository",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GitHttpURL(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Repository_gitSshURL(ctx context.Context, field graphql.CollectedField, obj *repository.Repository) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Repository",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GitSshURL(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Result_OK(ctx context.Context, field graphql.CollectedField, obj *service.Result) (ret graphql.Marshaler) {
@@ -3384,6 +3603,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "repository":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_repository(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -3447,6 +3680,21 @@ func (ec *executionContext) _Repository(ctx context.Context, sel ast.SelectionSe
 			}
 		case "createdAt":
 			out.Values[i] = ec._Repository_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "pathGroup":
+			out.Values[i] = ec._Repository_pathGroup(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "gitHttpURL":
+			out.Values[i] = ec._Repository_gitHttpURL(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "gitSshURL":
+			out.Values[i] = ec._Repository_gitSshURL(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

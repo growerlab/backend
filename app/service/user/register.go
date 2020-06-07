@@ -75,7 +75,7 @@ func buildUser(payload *service.NewUserPayload, clientIP string) (*userModel.Use
 func buildNamespace(user *userModel.User) *nsModel.Namespace {
 	return &nsModel.Namespace{
 		Path:    user.Username,
-		OwnerId: user.ID,
+		OwnerID: user.ID,
 		Type:    int(nsModel.TypeUser),
 	}
 }

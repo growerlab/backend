@@ -33,6 +33,7 @@ type Config struct {
 	Database   *DB    `yaml:"db"`
 	Redis      *Redis `yaml:"redis"`
 	WebsiteURL string `yaml:"website_url"`
+	SshURL     string `yaml:"ssh_url"`
 	Port       int    `yaml:"port"`
 }
 

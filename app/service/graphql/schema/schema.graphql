@@ -1,6 +1,7 @@
 type Query {
   users: [User!]!
   repositories(ownerPath: String!): [Repository!]!
+  repository(ownerPath: String!, path: String!): Repository!
 }
 
 type Result {

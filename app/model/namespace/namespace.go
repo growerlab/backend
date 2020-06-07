@@ -20,7 +20,7 @@ func AddNamespace(tx sqlx.Queryer, ns *Namespace) error {
 		Columns(columns[1:]...).
 		Values(
 			ns.Path,
-			ns.OwnerId,
+			ns.OwnerID,
 			ns.Type,
 		).
 		Suffix(utils.SqlReturning("id")).

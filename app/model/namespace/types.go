@@ -3,6 +3,6 @@ package namespace
 type Namespace struct {
 	ID      int64  `db:"id"`
 	Path    string `db:"path"`
-	OwnerId int64  `db:"owner_id"`
+	OwnerID int64  `db:"owner_id"`
 	Type    int    `db:"type"`
 }
