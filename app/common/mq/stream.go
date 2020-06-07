@@ -26,6 +26,9 @@ func (s *Stream) GroupExists(groupName string) bool {
 }
 
 func (s *Stream) CreateGroup(groupName, streamKey string) error {
+	if s.memDB.Exists(streamKey).Val() == 1 {
+		return nil
+	}
 	err := s.memDB.XGroupCreateMkStream(streamKey, groupName, "0-0").Err()
 	return errors.Trace(err)
 }
