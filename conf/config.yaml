@@ -1,6 +1,5 @@
 debug: true
 website_url: http://localhost
-ssh_url: git@localhost
 port: 8081
 db:
   url: postgresql://growerlab:growerlab@127.0.0.1:5432/growerlab?sslmode=disable
@@ -11,3 +10,9 @@ redis:
   max_active: 512
   idle_timeout: 120
   namespace: master
+mensa:
+  ssh_user: git
+  ssh_host: localhost
+  ssh_port: 8022
+  http_host: localhost
+  http_port: 8080

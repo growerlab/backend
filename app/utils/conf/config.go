@@ -2,6 +2,7 @@ package conf
 
 import (
 	"io/ioutil"
+	"net/url"
 
 	"github.com/growerlab/backend/app/common/errors"
 	"gopkg.in/yaml.v2"
@@ -28,13 +29,34 @@ type Redis struct {
 	IdleTimeout int    `yaml:"idle_timeout"`
 }
 
+type Mensa struct {
+	SshUser  string `yaml:"ssh_user"`
+	SshHost  string `yaml:"ssh_host"`
+	SshPort  int    `yaml:"ssh_port"`
+	HttpHost string `yaml:"http_host"`
+	HttpPort int    `yaml:"http_port"`
+}
+
 type Config struct {
 	Debug      bool   `yaml:"debug"`
-	Database   *DB    `yaml:"db"`
-	Redis      *Redis `yaml:"redis"`
 	WebsiteURL string `yaml:"website_url"`
-	SshURL     string `yaml:"ssh_url"`
-	Port       int    `yaml:"port"`
+	websiteURL *url.URL
+
+	Port     int    `yaml:"port"`
+	Database *DB    `yaml:"db"`
+	Redis    *Redis `yaml:"redis"`
+	Mensa    *Mensa `yaml:"mensa"`
+}
+
+func (c *Config) EnableHTTPS() bool {
+	if c.websiteURL == nil {
+		var err error
+		c.websiteURL, err = url.Parse(c.WebsiteURL)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return c.websiteURL.Scheme == "https"
 }
 
 func GetConf() *Config {

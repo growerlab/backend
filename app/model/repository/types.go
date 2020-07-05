@@ -53,18 +53,41 @@ func (r *Repository) PathGroup() string {
 	return fmt.Sprintf("%s/%s", r.Namespace().Path, r.Path)
 }
 
+// https://domain.com:port/user/path.git
 func (r *Repository) GitHttpURL() string {
+	cfg := conf.GetConf().Mensa
+	port := fmt.Sprintf(":%d", cfg.HttpPort)
+	if cfg.HttpPort == 80 || cfg.HttpPort == 443 {
+		port = ""
+	}
+
 	var sb strings.Builder
-	sb.WriteString(conf.GetConf().WebsiteURL)
+	if conf.GetConf().EnableHTTPS() {
+		sb.WriteString("https://")
+	} else {
+		sb.WriteString("http://")
+	}
+	sb.WriteString(cfg.HttpHost)
+	sb.WriteString(port)
 	sb.WriteByte('/')
 	sb.WriteString(r.PathGroup())
 	sb.WriteString(".git")
 	return sb.String()
 }
 
+// git@domain.com:port/user/path.git
 func (r *Repository) GitSshURL() string {
+	cfg := conf.GetConf().Mensa
+	port := fmt.Sprintf(":%d", cfg.SshPort)
+	if cfg.SshPort == 22 {
+		port = ""
+	}
+
 	var sb strings.Builder
-	sb.WriteString(conf.GetConf().SshURL)
+	sb.WriteString(cfg.SshUser)
+	sb.WriteByte('@')
+	sb.WriteString(cfg.SshHost)
+	sb.WriteString(port)
 	sb.WriteByte('/')
 	sb.WriteString(r.PathGroup())
 	sb.WriteString(".git")
