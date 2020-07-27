@@ -77,17 +77,20 @@ type dbBase struct {
 	sqlx.Queryer
 	sqlx.Execer
 
+	// sql的操作
+	*sqlEvent
+
 	debug  bool
 	logger io.Writer
 }
 
 func (d *dbBase) Println(query string, args ...interface{}) {
 	if d.debug {
-		fmt.Fprint(d.logger, fmt.Sprintf("%c[%d;%d;%dm%s%c[0m ", 0x1B, 1, 0, 36, query, 0x1B))
+		_, _ = fmt.Fprint(d.logger, fmt.Sprintf("%c[%d;%d;%dm%s%c[0m ", 0x1B, 1, 0, 36, query, 0x1B))
 		if len(args) > 0 {
-			fmt.Fprint(d.logger, args, "\n")
+			_, _ = fmt.Fprint(d.logger, args, "\n")
 		} else {
-			fmt.Fprint(d.logger, "\n")
+			_, _ = fmt.Fprint(d.logger, "\n")
 		}
 	}
 }
@@ -124,10 +127,11 @@ func (d *DBQuery) Begin() *DBTx {
 
 	return &DBTx{
 		dbBase: &dbBase{
-			Queryer: tx,
-			Execer:  tx,
-			debug:   d.dbBase.debug,
-			logger:  d.dbBase.logger,
+			Queryer:  tx,
+			Execer:   tx,
+			debug:    d.dbBase.debug,
+			logger:   d.dbBase.logger,
+			sqlEvent: NewSqlEvent(),
 		},
 		Transaction: tx,
 	}
