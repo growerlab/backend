@@ -137,13 +137,13 @@ func (d *DBQuery) Begin() *DBTx {
 	}
 }
 
+var _ sqlx.Queryer = (*DBTx)(nil)
+var _ sqlx.Execer = (*DBTx)(nil)
+
 type DBTx struct {
 	Transaction
 	*dbBase
 }
-
-var _ sqlx.Queryer = (*DBTx)(nil)
-var _ sqlx.Execer = (*DBTx)(nil)
 
 func (d *DBTx) Rollback() error {
 	d.Println("ROLLBACK")

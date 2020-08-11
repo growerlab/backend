@@ -11,7 +11,7 @@ type Repository {
   uuid: String!
   path: String!
   name: String!
-  public: Int!
+  public: Boolean!
   namespace: Namespace!
   owner: User!
   description: String!

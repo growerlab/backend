@@ -21,7 +21,7 @@ type Repository struct {
 	CreatedAt   int64  `db:"created_at"`
 	ServerID    int64  `db:"server_id"`   // 服务器id
 	ServerPath  string `db:"server_path"` // 服务器中的绝对路径
-	Public      int    `db:"public"`      // 公有
+	Public      bool   `db:"public"`      // 公有
 
 	ns    *namespace.Namespace
 	owner *user.User
@@ -46,7 +46,7 @@ func (r *Repository) Owner() *user.User {
 }
 
 func (r *Repository) IsPublic() bool {
-	return r.Public == int(StatusPublic)
+	return r.Public
 }
 
 func (r *Repository) PathGroup() string {

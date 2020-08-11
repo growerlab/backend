@@ -507,7 +507,7 @@ type Repository {
   uuid: String!
   path: String!
   name: String!
-  public: Int!
+  public: Boolean!
   namespace: Namespace!
   owner: User!
   description: String!
@@ -1391,10 +1391,10 @@ func (ec *executionContext) _Repository_public(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(bool)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Repository_namespace(ctx context.Context, field graphql.CollectedField, obj *repository.Repository) (ret graphql.Marshaler) {
