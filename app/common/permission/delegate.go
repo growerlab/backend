@@ -25,9 +25,11 @@ type EvalArgs struct {
 func (e *EvalArgs) UserDomain() *userdomain.UserDomain {
 	return e.ud
 }
+
 func (e *EvalArgs) Context() *context.Context {
 	return e.ctx
 }
+
 func (e *EvalArgs) DB() *context.DBContext {
 	return e.dbctx
 }

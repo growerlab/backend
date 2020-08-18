@@ -25,9 +25,11 @@ type PermissionsFunc func(src sqlx.Queryer, code int, c *context.Context) ([]*pe
 type Rule struct {
 	// Code 具体的权限
 	Code int
+
 	// ConstraintUserDomains「约束」权限允许的用户域（例如个人、组织成员等）
 	// - 在添加相关权限到数据库时，需要该参数进行验证
 	ConstraintUserDomains []int
+
 	// BuiltInUserDomains 默认的、不可删除的特殊用户域（或者说用户角色），例如：「仓库创建者」等等
 	// 这里的默认角色，默认就拥有Code所代表的权限
 	// - 在构建权限缓存时，这里的用户域将一起初始化到缓存中
@@ -94,7 +96,7 @@ func (p *Hub) RegisterContexts(contexts []ContextDelegate) error {
 
 func (p *Hub) CheckCache(namespaceID int64, c *context.Context, code int, rebuild bool) error {
 	nsID := strconv.FormatInt(namespaceID, 10)
-	key := p.memdbKey(code, c)
+	key := p.memDBKey(code, c)
 
 	if rebuild {
 		lastUpdateStamp, err := p.DBCtx.MemDB.HGet(p.stampKey(), key).Int64()
@@ -169,7 +171,7 @@ func (p *Hub) buildCache(rule *Rule, c *context.Context) error {
 	}
 
 	todayEndTime := timestamp.DayEnd(now)
-	key := p.memdbKey(rule.Code, c)
+	key := p.memDBKey(rule.Code, c)
 	pipe := p.DBCtx.MemDB.Pipeline()
 	_ = pipe.Del(key)
 	_ = pipe.HMSet(key, userIDValues)
@@ -211,7 +213,7 @@ func (p *Hub) listUserDomainsByContext(rule *Rule, c *context.Context) ([]*userd
 	return userDomains, nil
 }
 
-func (p *Hub) memdbKey(code int, c *context.Context) string {
+func (p *Hub) memDBKey(code int, c *context.Context) string {
 	return db.BaseKeyBuilder(fmt.Sprintf("permission:%d:context:%d:%d:%d", code, c.Type, c.Param1, c.Param2)).String()
 }
 
@@ -220,7 +222,7 @@ func (p *Hub) stampKey() string {
 	return db.BaseKeyBuilder("permission", "stamp").String()
 }
 func (p *Hub) updateKeyStamp(code int, c *context.Context) error {
-	key := p.memdbKey(code, c)
+	key := p.memDBKey(code, c)
 	err := p.DBCtx.MemDB.HSet(p.stampKey(), key, time.Now().UnixNano()).Err()
 	return errors.Trace(err)
 }
