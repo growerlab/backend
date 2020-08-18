@@ -2,6 +2,7 @@ package mq
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/ivpusic/grpool"
@@ -47,7 +48,9 @@ type MessageQueue struct {
 	consumers       map[string]Consumer // 消费者
 	waitingMessages chan *Payload       // 等待处理的消息
 
-	pool *grpool.Pool
+	pool        *grpool.Pool
+	done        chan struct{}
+	releaseOnce sync.Once
 }
 
 func NewMessageQueue(c *redis.Client) *MessageQueue {
@@ -56,6 +59,7 @@ func NewMessageQueue(c *redis.Client) *MessageQueue {
 		stream:          NewStream(c),
 		waitingMessages: make(chan *Payload, 1024),
 		pool:            grpool.NewPool(JobWorkers, JobQueue),
+		done:            make(chan struct{}),
 	}
 }
 
@@ -106,19 +110,26 @@ func (m *MessageQueue) buildPayload(belongID string, msg *redis.XMessage) *Paylo
 func (m *MessageQueue) Run() error {
 	go func() {
 		for {
-			count := m.take()
+			select {
+			case <-m.done:
+				return
+			default:
+				count := m.take()
 
-			// 延迟的目的是降低内存数据库的压力
-			if count == 0 {
-				time.Sleep(3 * time.Second)
-			} else {
-				time.Sleep(100 * time.Millisecond)
+				// 延迟的目的是降低内存数据库的压力
+				if count == 0 {
+					time.Sleep(3 * time.Second)
+				} else {
+					time.Sleep(100 * time.Millisecond)
+				}
 			}
 		}
 	}()
 	go func() {
 		for {
 			select {
+			case <-m.done:
+				return
 			case msg := <-m.waitingMessages:
 				m.delivery(msg)
 			}
@@ -186,7 +197,8 @@ func (m *MessageQueue) Add(consumerName, msgField, msgBody string) (id string, e
 }
 
 func (m *MessageQueue) Release() {
-	if m.pool != nil {
+	m.releaseOnce.Do(func() {
+		close(m.done)
 		m.pool.Release()
-	}
+	})
 }
