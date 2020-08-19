@@ -2,14 +2,12 @@ package permission
 
 import (
 	"fmt"
-	"strconv"
 	"time"
 
-	"github.com/growerlab/backend/app/common/context"
-	"github.com/growerlab/backend/app/common/userdomain"
-
 	"github.com/go-redis/redis/v7"
+	"github.com/growerlab/backend/app/common/context"
 	"github.com/growerlab/backend/app/common/errors"
+	"github.com/growerlab/backend/app/common/userdomain"
 	"github.com/growerlab/backend/app/model/db"
 	permModel "github.com/growerlab/backend/app/model/permission"
 	"github.com/growerlab/backend/app/utils/timestamp"
@@ -95,27 +93,26 @@ func (p *Hub) RegisterContexts(contexts []ContextDelegate) error {
 }
 
 func (p *Hub) CheckCache(namespaceID int64, c *context.Context, code int, rebuild bool) error {
-	nsID := strconv.FormatInt(namespaceID, 10)
-	key := p.memDBKey(code, c)
+	var (
+		keyUser           = p.keyUser(namespaceID)
+		keyWithPermission = p.keyContextWithPermission(code, c)
+		keyStamp          = p.keyStamp()
+	)
 
 	if rebuild {
-		lastUpdateStamp, err := p.DBCtx.MemDB.HGet(p.stampKey(), key).Int64()
+		lastUpdateStamp, err := p.DBCtx.MemDB.HGet(keyStamp, keyWithPermission).Int64()
 		if err != nil && err != redis.Nil {
 			return errors.Trace(err)
 		}
 
-		valueStampMap, err := p.DBCtx.MemDB.HGetAll(key).Result()
+		existPermissionStamp, err := p.DBCtx.MemDB.HGet(keyUser, keyWithPermission).Int64()
 		if err != nil && err != redis.Nil {
 			return errors.Trace(err)
 		}
 
-		mustRebuild := len(valueStampMap) == 0
+		mustRebuild := existPermissionStamp == 0
 		if !mustRebuild {
-			for _, oldStampRaw := range valueStampMap {
-				oldStamp, _ := strconv.ParseInt(oldStampRaw, 10, 64)
-				mustRebuild = lastUpdateStamp > oldStamp
-				break
-			}
+			mustRebuild = lastUpdateStamp > existPermissionStamp
 		}
 		if mustRebuild {
 			// rebuild
@@ -129,7 +126,7 @@ func (p *Hub) CheckCache(namespaceID int64, c *context.Context, code int, rebuil
 		}
 	}
 
-	if b := p.DBCtx.MemDB.HExists(key, nsID); !b.Val() {
+	if b := p.DBCtx.MemDB.HExists(keyUser, keyWithPermission); !b.Val() {
 		return errors.New(errors.PermissionError(errors.NoPermission))
 	}
 	return nil
@@ -147,36 +144,37 @@ func (p *Hub) buildCache(rule *Rule, c *context.Context) error {
 		return nil
 	}
 
-	userIDValues := make(map[string]interface{})
-	now := time.Now()
-	stamp := now.UnixNano()
+	userContextSet := make(map[string]string)
 
 	for _, u := range userDomains {
 		ud, ok := p.userDomainHub[u.Type]
 		if !ok {
 			return errors.Errorf("not found userdomain: %d", u.Type)
 		}
-		IDs, err := ud.Eval(NewEvalArgs(c, u, p.DBCtx))
+		uids, err := ud.Eval(NewEvalArgs(c, u, p.DBCtx))
 		if err != nil {
 			return err
 		}
-		if len(IDs) == 0 {
+		if len(uids) == 0 {
 			continue
 		}
 		//
-		for _, id := range IDs {
-			idStr := strconv.FormatInt(id, 10)
-			userIDValues[idStr] = stamp
+		for _, id := range uids {
+			key := p.keyUser(id)
+			withPermissionKey := p.keyContextWithPermission(rule.Code, c)
+			userContextSet[key] = withPermissionKey
 		}
 	}
 
+	now := time.Now()
 	todayEndTime := timestamp.DayEnd(now)
-	key := p.memDBKey(rule.Code, c)
+
 	pipe := p.DBCtx.MemDB.Pipeline()
-	_ = pipe.Del(key)
-	_ = pipe.HMSet(key, userIDValues)
-	_ = pipe.ExpireAt(key, todayEndTime)
-	_ = pipe.HSet(p.stampKey(), key, 0)
+	for key, keyCtxCode := range userContextSet {
+		_ = pipe.HSet(key, keyCtxCode, now.Unix())
+		_ = pipe.ExpireAt(key, todayEndTime)
+		_ = pipe.HSet(p.keyStamp(), keyCtxCode, 0)
+	}
 	_, err = pipe.Exec()
 	if err != nil {
 		return errors.Trace(err)
@@ -186,22 +184,25 @@ func (p *Hub) buildCache(rule *Rule, c *context.Context) error {
 }
 
 func (p *Hub) listUserDomainsByContext(rule *Rule, c *context.Context) ([]*userdomain.UserDomain, error) {
-	userDomains := make([]*userdomain.UserDomain, len(rule.BuiltInUserDomains))
-	for i, domain := range rule.BuiltInUserDomains {
-		userDomains[i] = &userdomain.UserDomain{
-			Type: domain,
-		}
-	}
 
 	// 默认增加超级管理员的用户域，即超级管理员
 	// 这样超级管理员默认就拥有所有的权限
-	userDomains = append(userDomains, &userdomain.UserDomain{
-		Type: userdomain.TypeSuperAdmin,
-	})
+	// userDomains = append(userDomains, &userdomain.UserDomain{
+	// 	Type: userdomain.TypeSuperAdmin,
+	// })
 
 	permissions, err := p.PermissionsByContextFunc(p.DBCtx.Src, rule.Code, c)
 	if err != nil {
 		return nil, err
+	}
+
+	udLength := len(rule.BuiltInUserDomains) + len(permissions)
+
+	userDomains := make([]*userdomain.UserDomain, 0, udLength)
+	for _, domain := range rule.BuiltInUserDomains {
+		userDomains = append(userDomains, &userdomain.UserDomain{
+			Type: domain,
+		})
 	}
 
 	for _, p := range permissions {
@@ -213,16 +214,22 @@ func (p *Hub) listUserDomainsByContext(rule *Rule, c *context.Context) ([]*userd
 	return userDomains, nil
 }
 
-func (p *Hub) memDBKey(code int, c *context.Context) string {
-	return db.BaseKeyBuilder(fmt.Sprintf("permission:%d:context:%d:%d:%d", code, c.Type, c.Param1, c.Param2)).String()
+func (p *Hub) keyUser(uid int64) string {
+	return db.BaseKeyBuilder(fmt.Sprintf("permission:%d", uid)).String()
 }
 
-// stampKey 当permission表或者相关角色变动后，将更新stampKey HSET中的stamp，表示memdbKey需要被更新
-func (p *Hub) stampKey() string {
+func (p *Hub) keyContextWithPermission(code int, c *context.Context) string {
+	key := fmt.Sprintf("%d:%d:%d:%d", c.Type, c.Param1, c.Param2, code)
+	return db.BaseKeyBuilder(key).String()
+}
+
+// keyStamp 当permission表或者相关角色变动后，将更新 keyStamp HSET中的stamp，表示memDBKey需要被更新
+func (p *Hub) keyStamp() string {
 	return db.BaseKeyBuilder("permission", "stamp").String()
 }
-func (p *Hub) updateKeyStamp(code int, c *context.Context) error {
-	key := p.memDBKey(code, c)
-	err := p.DBCtx.MemDB.HSet(p.stampKey(), key, time.Now().UnixNano()).Err()
+
+func (p *Hub) updateStamp(code int, c *context.Context) error {
+	key := p.keyContextWithPermission(code, c)
+	err := p.DBCtx.MemDB.HSet(p.keyStamp(), key, time.Now().Unix()).Err()
 	return errors.Trace(err)
 }

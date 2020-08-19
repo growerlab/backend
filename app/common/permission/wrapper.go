@@ -22,8 +22,8 @@ func CheckCloneRepository(namespaceID *int64, repositoryID int64) error {
 
 func checkPermission(namespaceID *int64, ctx *context.Context, code int) error {
 	if namespaceID == nil || *namespaceID == 0 {
-		var visitor = int64(userdomain.NamespaceVisitor)
-		namespaceID = &visitor
+		namespaceID = new(int64)
+		*namespaceID = userdomain.NamespaceVisitor
 	}
 	return permHub.CheckCache(*namespaceID, ctx, code, true)
 }
