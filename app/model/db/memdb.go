@@ -66,19 +66,31 @@ func NewKeyBuilder(namespaceKey string) *KeyBuilder {
 func (b *KeyBuilder) PartMaker() *KeyPart {
 	var sb strings.Builder
 	sb.WriteString(b.namespaceKey)
+	sb.WriteString(sep)
 
 	return &KeyPart{
-		sb: &strings.Builder{},
+		sb: sb,
 	}
 }
 
+const sep = ":"
+
 type KeyPart struct {
-	sb *strings.Builder
+	sb strings.Builder
+}
+
+func NewKeyPart() *KeyPart {
+	return &KeyPart{}
 }
 
 func (b *KeyPart) Append(s ...string) *KeyPart {
-	for i := range s {
-		b.sb.WriteString(":")
+	if len(s) == 0 {
+		return b
+	}
+
+	b.sb.WriteString(s[0])
+	for i := range s[1:] {
+		b.sb.WriteString(sep)
 		b.sb.WriteString(s[i])
 	}
 	return b
