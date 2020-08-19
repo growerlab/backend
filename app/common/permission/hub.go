@@ -94,18 +94,18 @@ func (p *Hub) RegisterContexts(contexts []ContextDelegate) error {
 
 func (p *Hub) CheckCache(namespaceID int64, c *context.Context, code int, rebuild bool) error {
 	var (
-		keyUser           = p.keyUser(namespaceID)
-		keyWithPermission = p.keyContextWithPermission(code, c)
-		keyStamp          = p.keyStamp()
+		keyUser        = p.keyUser(namespaceID)
+		withPermission = p.keyContextWithPermission(code, c)
+		keyStamp       = p.keyStamp()
 	)
 
 	if rebuild {
-		lastUpdateStamp, err := p.DBCtx.MemDB.HGet(keyStamp, keyWithPermission).Int64()
+		lastUpdateStamp, err := p.DBCtx.MemDB.HGet(keyStamp, withPermission).Int64()
 		if err != nil && err != redis.Nil {
 			return errors.Trace(err)
 		}
 
-		existPermissionStamp, err := p.DBCtx.MemDB.HGet(keyUser, keyWithPermission).Int64()
+		existPermissionStamp, err := p.DBCtx.MemDB.HGet(keyUser, withPermission).Int64()
 		if err != nil && err != redis.Nil {
 			return errors.Trace(err)
 		}
@@ -126,7 +126,7 @@ func (p *Hub) CheckCache(namespaceID int64, c *context.Context, code int, rebuil
 		}
 	}
 
-	if b := p.DBCtx.MemDB.HExists(keyUser, keyWithPermission); !b.Val() {
+	if b := p.DBCtx.MemDB.HExists(keyUser, withPermission); !b.Val() {
 		return errors.New(errors.PermissionError(errors.NoPermission))
 	}
 	return nil
