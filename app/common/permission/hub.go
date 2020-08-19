@@ -46,11 +46,11 @@ type Hub struct {
 	DBCtx *context.DBContext
 }
 
-func NewPermissionHub(src sqlx.Queryer, memdb *redis.Client) *Hub {
+func NewPermissionHub(src sqlx.Queryer, memDB *db.MemDBClient) *Hub {
 	return &Hub{
 		DBCtx: &context.DBContext{
 			Src:   src,
-			MemDB: memdb,
+			MemDB: memDB,
 		},
 		ruleMap:                  make(map[int]*Rule),
 		userDomainHub:            make(map[int]UserDomainDelegate),
@@ -215,17 +215,17 @@ func (p *Hub) listUserDomainsByContext(rule *Rule, c *context.Context) ([]*userd
 }
 
 func (p *Hub) keyUser(uid int64) string {
-	return db.BaseKeyBuilder(fmt.Sprintf("permission:%d", uid)).String()
+	return p.DBCtx.MemDB.PartMaker().Append(fmt.Sprintf("permission:%d", uid)).String()
 }
 
 func (p *Hub) keyContextWithPermission(code int, c *context.Context) string {
 	key := fmt.Sprintf("%d:%d:%d:%d", c.Type, c.Param1, c.Param2, code)
-	return db.BaseKeyBuilder(key).String()
+	return p.DBCtx.MemDB.PartMaker().Append(key).String()
 }
 
 // keyStamp 当permission表或者相关角色变动后，将更新 keyStamp HSET中的stamp，表示memDBKey需要被更新
 func (p *Hub) keyStamp() string {
-	return db.BaseKeyBuilder("permission", "stamp").String()
+	return p.DBCtx.MemDB.PartMaker().Append("permission", "stamp").String()
 }
 
 func (p *Hub) updateStamp(code int, c *context.Context) error {

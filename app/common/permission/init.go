@@ -1,7 +1,6 @@
 package permission
 
 import (
-	"github.com/go-redis/redis/v7"
 	"github.com/growerlab/backend/app/common/context"
 	"github.com/growerlab/backend/app/common/userdomain"
 	"github.com/growerlab/backend/app/model/db"
@@ -14,7 +13,7 @@ func InitPermission() error {
 	return InitPermissionHub(db.DB, db.PermissionDB)
 }
 
-func InitPermissionHub(dbSrc sqlx.Queryer, memDB *redis.Client) error {
+func InitPermissionHub(dbSrc sqlx.Queryer, memDB *db.MemDBClient) error {
 	permHub = NewPermissionHub(dbSrc, memDB)
 
 	if err := initRules(); err != nil {

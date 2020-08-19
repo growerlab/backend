@@ -13,8 +13,8 @@ import (
 	"github.com/growerlab/backend/app/utils/conf"
 )
 
-var MemDB *redis.Client
-var PermissionDB *redis.Client
+var MemDB *MemDBClient
+var PermissionDB *MemDBClient
 
 func InitMemDB() error {
 	var config = conf.GetConf().Redis
@@ -29,7 +29,7 @@ func InitMemDB() error {
 	return err
 }
 
-func newPool(cfg *conf.Redis, db int) *redis.Client {
+func newPool(cfg *conf.Redis, db int) *MemDBClient {
 	addr := net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port))
 	idleTimeout := time.Duration(cfg.IdleTimeout) * time.Second
 
@@ -40,20 +40,43 @@ func newPool(cfg *conf.Redis, db int) *redis.Client {
 		MinIdleConns: cfg.MaxIdle,
 		IdleTimeout:  idleTimeout,
 	})
-	return client
+
+	memDB := &MemDBClient{
+		client,
+		NewKeyBuilder(conf.GetConf().Redis.Namespace),
+	}
+	return memDB
+}
+
+type MemDBClient struct {
+	*redis.Client
+	*KeyBuilder
 }
 
 type KeyBuilder struct {
+	namespaceKey string
+}
+
+func NewKeyBuilder(namespaceKey string) *KeyBuilder {
+	return &KeyBuilder{
+		namespaceKey: namespaceKey,
+	}
+}
+
+func (b *KeyBuilder) PartMaker() *KeyPart {
+	var sb strings.Builder
+	sb.WriteString(b.namespaceKey)
+
+	return &KeyPart{
+		sb: &strings.Builder{},
+	}
+}
+
+type KeyPart struct {
 	sb *strings.Builder
 }
 
-func NewKeyBuilder(base string) *KeyBuilder {
-	b := &KeyBuilder{sb: &strings.Builder{}}
-	b.sb.WriteString(base)
-	return b
-}
-
-func (b *KeyBuilder) Append(s ...string) *KeyBuilder {
+func (b *KeyPart) Append(s ...string) *KeyPart {
 	for i := range s {
 		b.sb.WriteString(":")
 		b.sb.WriteString(s[i])
@@ -61,10 +84,6 @@ func (b *KeyBuilder) Append(s ...string) *KeyBuilder {
 	return b
 }
 
-func (b *KeyBuilder) String() string {
+func (b *KeyPart) String() string {
 	return b.sb.String()
-}
-
-func BaseKeyBuilder(s ...string) *KeyBuilder {
-	return NewKeyBuilder(conf.GetConf().Redis.Namespace).Append(s...)
 }

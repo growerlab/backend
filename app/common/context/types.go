@@ -1,7 +1,7 @@
 package context
 
 import (
-	"github.com/go-redis/redis/v7"
+	"github.com/growerlab/backend/app/model/db"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -13,5 +13,5 @@ type Context struct {
 
 type DBContext struct {
 	Src   sqlx.Queryer
-	MemDB *redis.Client
+	MemDB *db.MemDBClient
 }

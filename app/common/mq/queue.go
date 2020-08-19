@@ -42,7 +42,7 @@ type Consumer interface {
 }
 
 type MessageQueue struct {
-	memDB  *redis.Client
+	memDB  *db.MemDBClient
 	stream *Stream
 
 	consumers       map[string]Consumer // 消费者
@@ -53,10 +53,10 @@ type MessageQueue struct {
 	releaseOnce sync.Once
 }
 
-func NewMessageQueue(c *redis.Client) *MessageQueue {
+func NewMessageQueue(c *db.MemDBClient) *MessageQueue {
 	return &MessageQueue{
 		memDB:           c,
-		stream:          NewStream(c),
+		stream:          NewStream(c.Client),
 		waitingMessages: make(chan *Payload, 1024),
 		pool:            grpool.NewPool(JobWorkers, JobQueue),
 		done:            make(chan struct{}),
@@ -95,7 +95,7 @@ func (m *MessageQueue) createStream(c Consumer) error {
 }
 
 func (m *MessageQueue) streamKey(name string) string {
-	return db.BaseKeyBuilder(name).String()
+	return m.memDB.KeyBuilder.PartMaker().Append(name).String()
 }
 
 func (m *MessageQueue) buildPayload(belongID string, msg *redis.XMessage) *Payload {
