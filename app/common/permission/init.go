@@ -1,15 +1,21 @@
 package permission
 
 import (
-	context2 "github.com/growerlab/backend/app/common/context"
+	"github.com/go-redis/redis/v7"
+	"github.com/growerlab/backend/app/common/context"
 	"github.com/growerlab/backend/app/common/userdomain"
 	"github.com/growerlab/backend/app/model/db"
+	"github.com/jmoiron/sqlx"
 )
 
 var permHub *Hub
 
 func InitPermission() error {
-	permHub = NewPermissionHub(db.DB, db.PermissionDB)
+	return InitPermissionHub(db.DB, db.PermissionDB)
+}
+
+func InitPermissionHub(dbSrc sqlx.Queryer, memDB *redis.Client) error {
+	permHub = NewPermissionHub(dbSrc, memDB)
 
 	if err := initRules(); err != nil {
 		return err
@@ -35,7 +41,7 @@ func initUserDomains() error {
 
 func initContexts() error {
 	contexts := make([]ContextDelegate, 0)
-	contexts = append(contexts, &context2.Repository{})
+	contexts = append(contexts, &context.Repository{})
 	return permHub.RegisterContexts(contexts)
 }
 
