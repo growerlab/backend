@@ -63,7 +63,7 @@ func NewKeyBuilder(namespaceKey string) *KeyBuilder {
 	}
 }
 
-func (b *KeyBuilder) PartMaker() *KeyPart {
+func (b *KeyBuilder) KeyMaker() *KeyPart {
 	var sb strings.Builder
 	sb.WriteString(b.namespaceKey)
 	sb.WriteString(sep)

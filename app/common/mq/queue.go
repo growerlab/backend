@@ -95,7 +95,7 @@ func (m *MessageQueue) createStream(c Consumer) error {
 }
 
 func (m *MessageQueue) streamKey(name string) string {
-	return m.memDB.KeyBuilder.PartMaker().Append(name).String()
+	return m.memDB.KeyBuilder.KeyMaker().Append(name).String()
 }
 
 func (m *MessageQueue) buildPayload(belongID string, msg *redis.XMessage) *Payload {
