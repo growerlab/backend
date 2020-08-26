@@ -10,10 +10,10 @@ var (
 )
 
 type Stream struct {
-	memDB *redis.Client
+	memDB redis.Cmdable
 }
 
-func NewStream(c *redis.Client) *Stream {
+func NewStream(c redis.Cmdable) *Stream {
 	return &Stream{memDB: c}
 }
 

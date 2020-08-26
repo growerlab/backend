@@ -56,7 +56,7 @@ type MessageQueue struct {
 func NewMessageQueue(c *db.MemDBClient) *MessageQueue {
 	return &MessageQueue{
 		memDB:           c,
-		stream:          NewStream(c.Client),
+		stream:          NewStream(c),
 		waitingMessages: make(chan *Payload, 1024),
 		pool:            grpool.NewPool(JobWorkers, JobQueue),
 		done:            make(chan struct{}),
