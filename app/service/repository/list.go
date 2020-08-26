@@ -32,7 +32,8 @@ func ListRepositories(ctx context.Context, owner string) ([]*repositoryModel.Rep
 
 	var result []*repositoryModel.Repository
 	for _, repo := range repositories {
-		if err := permission.CheckViewRepository(currentUserNSID, repo.NamespaceID); err == nil {
+		err := permission.CheckViewRepository(currentUserNSID, repo.NamespaceID)
+		if err == nil {
 			result = append(result, repo)
 		}
 	}

@@ -15,6 +15,7 @@ require (
 	github.com/jackc/pgx/v4 v4.1.2
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/pkg/errors v0.8.1
+	github.com/stretchr/testify v1.6.1
 	github.com/vektah/gqlparser v1.2.0
 	google.golang.org/appengine v1.6.5 // indirect
 	gopkg.in/asaskevich/govalidator.v9 v9.0.0-20180315120708-ccb8e960c48f

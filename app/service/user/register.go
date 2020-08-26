@@ -44,7 +44,7 @@ func validateRegisterUser(payload *service.NewUserPayload) error {
 	}
 
 	// email, username是否已经存在
-	exists, err := userModel.AreEmailOrUsernameInUser(db.DB, payload.Username, payload.Email)
+	exists, err := userModel.ExistsEmailOrUsername(db.DB, payload.Username, payload.Email)
 	if err != nil {
 		return err
 	}

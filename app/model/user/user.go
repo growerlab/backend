@@ -60,7 +60,7 @@ func AddUser(tx sqlx.Queryer, user *User) error {
 	return nil
 }
 
-func AreEmailOrUsernameInUser(src sqlx.Queryer, username, email string) (bool, error) {
+func ExistsEmailOrUsername(src sqlx.Queryer, username, email string) (bool, error) {
 	if len(username) > 0 {
 		user, err := getUser(src, sq.Eq{"username": username})
 		if err != nil {
