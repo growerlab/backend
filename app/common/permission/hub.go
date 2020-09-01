@@ -173,7 +173,7 @@ func (p *Hub) buildCache(rule *Rule, c *context.Context) error {
 	for key, keyCtxCode := range userContextSet {
 		_ = pipe.HSet(key, keyCtxCode, now.Unix())
 		_ = pipe.ExpireAt(key, todayEndTime)
-		_ = pipe.HSet(p.keyStamp(), keyCtxCode, 0)
+		_ = pipe.HSet(p.keyStamp(), keyCtxCode, now.Unix())
 	}
 	_, err = pipe.Exec()
 	if err != nil {
@@ -215,11 +215,11 @@ func (p *Hub) listUserDomainsByContext(rule *Rule, c *context.Context) ([]*userd
 }
 
 func (p *Hub) keyUser(uid int64) string {
-	return p.DBCtx.MemDB.KeyMaker().Append(fmt.Sprintf("permission:%d", uid)).String()
+	return p.DBCtx.MemDB.KeyMaker().Append(fmt.Sprintf("permission:user:%d", uid)).String()
 }
 
 func (p *Hub) keyContextWithPermission(code int, c *context.Context) string {
-	key := fmt.Sprintf("%d:%d:%d:%d", c.Type, c.Param1, c.Param2, code)
+	key := fmt.Sprintf("ctx:%d:%d:%d:code:%d", c.Type, c.Param1, c.Param2, code)
 	return p.DBCtx.MemDB.KeyMaker().Append(key).String()
 }
 

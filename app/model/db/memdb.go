@@ -73,7 +73,7 @@ func NewKeyBuilder(namespaceKey string) *KeyBuilder {
 }
 
 func (b *KeyBuilder) KeyMaker() *KeyPart {
-	var sb strings.Builder
+	var sb = new(strings.Builder)
 	sb.WriteString(b.namespaceKey)
 	sb.WriteString(KeySep)
 
@@ -83,7 +83,7 @@ func (b *KeyBuilder) KeyMaker() *KeyPart {
 }
 
 type KeyPart struct {
-	sb strings.Builder
+	sb *strings.Builder
 }
 
 func (b *KeyPart) Append(s ...string) *KeyPart {
