@@ -82,6 +82,13 @@ func (b *KeyBuilder) KeyMaker() *KeyPart {
 	}
 }
 
+// ignore namespace
+func (b *KeyBuilder) KeyMakerNoNS() *KeyPart {
+	return &KeyPart{
+		sb: new(strings.Builder),
+	}
+}
+
 type KeyPart struct {
 	sb *strings.Builder
 }
@@ -92,9 +99,9 @@ func (b *KeyPart) Append(s ...string) *KeyPart {
 	}
 
 	b.sb.WriteString(s[0])
-	for i := range s[1:] {
+	for _, k := range s[1:] {
 		b.sb.WriteString(KeySep)
-		b.sb.WriteString(s[i])
+		b.sb.WriteString(k)
 	}
 	return b
 }

@@ -92,20 +92,24 @@ func (p *Hub) RegisterContexts(contexts []ContextDelegate) error {
 	return nil
 }
 
+// CheckCache 检查权限
+// - rebuild时尽量只构建小颗粒度缓存
+// - 缓存结构：用户 -> 拥有的权限（context:code)
+// - 当缓存（master:permission:stamp）中的stamp发生改变后，用户权限缓存应被刷新
 func (p *Hub) CheckCache(namespaceID int64, c *context.Context, code int, rebuild bool) error {
 	var (
-		keyUser        = p.keyUser(namespaceID)
-		withPermission = p.keyContextWithPermission(code, c)
-		keyStamp       = p.keyStamp()
+		keyUser                = p.keyUser(namespaceID)
+		keyStamp               = p.keyStamp()
+		fieldContextPermission = p.keyFieldContextPermission(code, c)
 	)
 
 	if rebuild {
-		lastUpdateStamp, err := p.DBCtx.MemDB.HGet(keyStamp, withPermission).Int64()
+		lastUpdateStamp, err := p.DBCtx.MemDB.HGet(keyStamp, fieldContextPermission).Int64()
 		if err != nil && err != redis.Nil {
 			return errors.Trace(err)
 		}
 
-		existPermissionStamp, err := p.DBCtx.MemDB.HGet(keyUser, withPermission).Int64()
+		existPermissionStamp, err := p.DBCtx.MemDB.HGet(keyUser, fieldContextPermission).Int64()
 		if err != nil && err != redis.Nil {
 			return errors.Trace(err)
 		}
@@ -126,14 +130,13 @@ func (p *Hub) CheckCache(namespaceID int64, c *context.Context, code int, rebuil
 		}
 	}
 
-	if b := p.DBCtx.MemDB.HExists(keyUser, withPermission); !b.Val() {
+	if b := p.DBCtx.MemDB.HExists(keyUser, fieldContextPermission); !b.Val() {
 		return errors.New(errors.PermissionError(errors.NoPermission))
 	}
 	return nil
 }
 
 // buildCache 重新构建缓存
-// 这里之所以传rule，因为希望rebuild时，尽量只构建小一些的颗粒度缓存
 // - 每天凌晨12点自动过期
 func (p *Hub) buildCache(rule *Rule, c *context.Context) error {
 	userDomains, err := p.listUserDomainsByContext(rule, c)
@@ -161,8 +164,8 @@ func (p *Hub) buildCache(rule *Rule, c *context.Context) error {
 		//
 		for _, id := range uids {
 			key := p.keyUser(id)
-			withPermissionKey := p.keyContextWithPermission(rule.Code, c)
-			userContextSet[key] = withPermissionKey
+			fieldPermissionKey := p.keyFieldContextPermission(rule.Code, c)
+			userContextSet[key] = fieldPermissionKey
 		}
 	}
 
@@ -218,9 +221,9 @@ func (p *Hub) keyUser(uid int64) string {
 	return p.DBCtx.MemDB.KeyMaker().Append(fmt.Sprintf("permission:user:%d", uid)).String()
 }
 
-func (p *Hub) keyContextWithPermission(code int, c *context.Context) string {
+func (p *Hub) keyFieldContextPermission(code int, c *context.Context) string {
 	key := fmt.Sprintf("ctx:%d:%d:%d:code:%d", c.Type, c.Param1, c.Param2, code)
-	return p.DBCtx.MemDB.KeyMaker().Append(key).String()
+	return p.DBCtx.MemDB.KeyMakerNoNS().Append(key).String()
 }
 
 // keyStamp 当permission表或者相关角色变动后，将更新 keyStamp HSET中的stamp，表示memDBKey需要被更新
@@ -228,8 +231,8 @@ func (p *Hub) keyStamp() string {
 	return p.DBCtx.MemDB.KeyMaker().Append("permission", "stamp").String()
 }
 
-func (p *Hub) updateStamp(code int, c *context.Context) error {
-	key := p.keyContextWithPermission(code, c)
+func (p *Hub) UpdateStamp(code int, c *context.Context) error {
+	key := p.keyFieldContextPermission(code, c)
 	err := p.DBCtx.MemDB.HSet(p.keyStamp(), key, time.Now().Unix()).Err()
 	return errors.Trace(err)
 }
