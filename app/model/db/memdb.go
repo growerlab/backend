@@ -16,12 +16,10 @@ import (
 const KeySep = ":"
 
 var MemDB *MemDBClient
-var PermissionDB *MemDBClient
 
 func InitMemDB() error {
 	var config = conf.GetConf().Redis
 	MemDB = newPool(config, 0)
-	PermissionDB = newPool(config, 0)
 
 	// Test
 	if err := testMemDB(); err != nil {

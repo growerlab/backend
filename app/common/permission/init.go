@@ -10,7 +10,7 @@ import (
 var permHub *Hub
 
 func InitPermission() error {
-	return InitPermissionHub(db.DB, db.PermissionDB)
+	return InitPermissionHub(db.DB, db.MemDB)
 }
 
 func InitPermissionHub(dbSrc sqlx.Queryer, memDB *db.MemDBClient) error {
