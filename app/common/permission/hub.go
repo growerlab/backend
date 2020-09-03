@@ -104,7 +104,7 @@ func (p *Hub) CheckCache(namespaceID int64, c *context.Context, code int, rebuil
 	)
 
 	if rebuild {
-		lastUpdateStamp, err := p.DBCtx.MemDB.HGet(keyStamp, fieldContextPermission).Int64()
+		lastPermissionUpdateStamp, err := p.DBCtx.MemDB.HGet(keyStamp, fieldContextPermission).Int64()
 		if err != nil && err != redis.Nil {
 			return errors.Trace(err)
 		}
@@ -116,7 +116,7 @@ func (p *Hub) CheckCache(namespaceID int64, c *context.Context, code int, rebuil
 
 		mustRebuild := existPermissionStamp == 0
 		if !mustRebuild {
-			mustRebuild = lastUpdateStamp > existPermissionStamp
+			mustRebuild = lastPermissionUpdateStamp > existPermissionStamp
 		}
 		if mustRebuild {
 			// rebuild
@@ -147,7 +147,9 @@ func (p *Hub) buildCache(rule *Rule, c *context.Context) error {
 		return nil
 	}
 
-	userContextSet := make(map[string]string)
+	now := time.Now()
+	todayEndTime := timestamp.DayEnd(now)
+	userContextSet := make(map[string]map[string]interface{})
 
 	for _, u := range userDomains {
 		ud, ok := p.userDomainHub[u.Type]
@@ -163,20 +165,20 @@ func (p *Hub) buildCache(rule *Rule, c *context.Context) error {
 		}
 		//
 		for _, id := range uids {
-			key := p.keyUser(id)
+			userKey := p.keyUser(id)
 			fieldPermissionKey := p.keyFieldContextPermission(rule.Code, c)
-			userContextSet[key] = fieldPermissionKey
+			if _, ok := userContextSet[userKey]; !ok {
+				userContextSet[userKey] = make(map[string]interface{})
+			}
+			userContextSet[userKey][fieldPermissionKey] = now.Unix()
 		}
 	}
 
-	now := time.Now()
-	todayEndTime := timestamp.DayEnd(now)
-
 	pipe := p.DBCtx.MemDB.Pipeline()
-	for key, keyCtxCode := range userContextSet {
-		_ = pipe.HSet(key, keyCtxCode, now.Unix())
-		_ = pipe.ExpireAt(key, todayEndTime)
-		_ = pipe.HSet(p.keyStamp(), keyCtxCode, now.Unix())
+	for userKey, ctxWithStampSet := range userContextSet {
+		_ = pipe.HMSet(userKey, ctxWithStampSet)
+		_ = pipe.HMSet(p.keyStamp(), ctxWithStampSet)
+		_ = pipe.ExpireAt(userKey, todayEndTime)
 	}
 	_, err = pipe.Exec()
 	if err != nil {
@@ -234,5 +236,11 @@ func (p *Hub) keyStamp() string {
 func (p *Hub) UpdateStamp(code int, c *context.Context) error {
 	key := p.keyFieldContextPermission(code, c)
 	err := p.DBCtx.MemDB.HSet(p.keyStamp(), key, time.Now().Unix()).Err()
+	return errors.Trace(err)
+}
+
+func (p *Hub) FlushUserContexts(ud *userdomain.UserDomain) error {
+	keyUser := p.keyUser(ud.Param)
+	err := p.DBCtx.MemDB.Del(keyUser).Err()
 	return errors.Trace(err)
 }
