@@ -72,8 +72,10 @@ func NewKeyBuilder(namespaceKey string) *KeyBuilder {
 
 func (b *KeyBuilder) KeyMaker() *KeyPart {
 	var sb = new(strings.Builder)
-	sb.WriteString(b.namespaceKey)
-	sb.WriteString(KeySep)
+	if len(b.namespaceKey) > 0 {
+		sb.WriteString(b.namespaceKey)
+		sb.WriteString(KeySep)
+	}
 
 	return &KeyPart{
 		sb: sb,
