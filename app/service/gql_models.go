@@ -15,6 +15,7 @@ type NewRepositoryPayload struct {
 	NamespacePath string `json:"namespacePath"`
 	Name          string `json:"name"`
 	Public        bool   `json:"public"`
+	Description   string `json:"description"`
 }
 
 type NewUserPayload struct {

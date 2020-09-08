@@ -498,6 +498,7 @@ var parsedSchema = gqlparser.MustLoadSchema(
   namespacePath: String! # 目前仅可能是自己、未来可能有组织
   name: String!
   public: Boolean! # 是否公开的
+  description: String!
   #readme: Boolean! # 是否初始化README
   #gitignoreFile: String!  # 忽略的文件
   #license: String! # 授权
@@ -3416,6 +3417,12 @@ func (ec *executionContext) unmarshalInputNewRepositoryPayload(ctx context.Conte
 		case "public":
 			var err error
 			it.Public, err = ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+			it.Description, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
