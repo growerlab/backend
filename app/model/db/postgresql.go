@@ -32,7 +32,6 @@ func InitDatabase() error {
 	DB = &DBQuery{
 		dbBase: &dbBase{
 			Queryer: sqlxDB,
-			Execer:  sqlxDB,
 			debug:   config.Debug,
 			logger:  logger.LogWriter,
 		},
@@ -45,7 +44,7 @@ func InitDatabase() error {
 	return nil
 }
 
-func Transact(txFn func(*DBTx) error) (err error) {
+func Transact(txFn func(Queryer) error) (err error) {
 	tx := DB.Begin()
 
 	defer func() {
@@ -73,9 +72,13 @@ type Transaction interface {
 	Commit() error
 }
 
-type dbBase struct {
+type Queryer interface {
 	sqlx.Queryer
 	sqlx.Execer
+}
+
+type dbBase struct {
+	Queryer
 
 	// sql的操作
 	*sqlEvent
@@ -112,7 +115,7 @@ func (d *dbBase) QueryRowx(query string, args ...interface{}) *sqlx.Row {
 
 func (d *dbBase) Exec(query string, args ...interface{}) (sql.Result, error) {
 	d.Println(query, args...)
-	return d.Execer.Exec(query, args...)
+	return d.Queryer.Exec(query, args...)
 }
 
 // 带日志输出的db封装
@@ -128,12 +131,11 @@ func (d *DBQuery) Begin() *DBTx {
 	return &DBTx{
 		dbBase: &dbBase{
 			Queryer:  tx,
-			Execer:   tx,
 			debug:    d.dbBase.debug,
 			logger:   d.dbBase.logger,
 			sqlEvent: NewSqlEvent(),
 		},
-		Transaction: tx,
+		tx: tx,
 	}
 }
 
@@ -141,16 +143,16 @@ var _ sqlx.Queryer = (*DBTx)(nil)
 var _ sqlx.Execer = (*DBTx)(nil)
 
 type DBTx struct {
-	Transaction
 	*dbBase
+	tx Transaction
 }
 
 func (d *DBTx) Rollback() error {
 	d.Println("ROLLBACK")
-	return d.Transaction.Rollback()
+	return d.tx.Rollback()
 }
 
 func (d *DBTx) Commit() error {
 	d.Println("COMMIT")
-	return d.Transaction.Commit()
+	return d.tx.Commit()
 }
