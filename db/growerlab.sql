@@ -254,7 +254,7 @@ CREATE TABLE public.repository (
     created_at bigint NOT NULL,
     server_id integer NOT NULL,
     server_path character varying(255) NOT NULL,
-    public integer DEFAULT 1 NOT NULL
+    public boolean DEFAULT true
 );
 
 
@@ -314,13 +314,6 @@ COMMENT ON COLUMN public.repository.description IS '仓库描述';
 --
 
 COMMENT ON COLUMN public.repository.server_path IS '在服务器中的物理路径';
-
-
---
--- Name: COLUMN repository.public; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.repository.public IS '公共1，私有0';
 
 
 --
