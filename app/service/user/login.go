@@ -55,7 +55,7 @@ func Login(input *service.LoginUserPayload, ctx *gin.Context) (
 			Email:         user.Email,
 			PublicEmail:   user.PublicEmail,
 		}
-		ctx.SetCookie("token", sess.Token, 0, "/", ctx.Request.Host, false, false)
+		ctx.SetCookie("auth-user-token", sess.Token, 0, "/", ctx.Request.Host, false, false)
 		return err
 	})
 	if err != nil {

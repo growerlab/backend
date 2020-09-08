@@ -28,7 +28,7 @@ func GetUserToken(ctx *gin.Context) string {
 
 func getValueFromHeaderOrCookie(k string, ctx *gin.Context) string {
 	v := ctx.GetHeader(k)
-	if len(v) == 0 {
+	if len(v) < 5 {
 		v, _ = ctx.Cookie(k)
 	}
 	return v
