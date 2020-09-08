@@ -1,6 +1,10 @@
 package pwd
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestPassword(t *testing.T) {
 	gotPwd, err := GeneratePassword("hello pwd")
@@ -9,7 +13,5 @@ func TestPassword(t *testing.T) {
 	}
 
 	ok := ComparePassword(gotPwd, "hello pwd")
-	if !ok {
-		t.Errorf("pwd faild")
-	}
+	assert.Equal(t, true, ok, nil)
 }
