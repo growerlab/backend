@@ -40,7 +40,7 @@ func validateRegisterUser(payload *service.NewUserPayload) error {
 
 	// 不允许使用的关键字
 	if _, invalidUsername := userModel.InvalidUsernameSet[payload.Username]; invalidUsername {
-		return errors.New(errors.AlreadyExistsError(errors.User, ""))
+		return errors.New(errors.AlreadyExistsError(errors.User, errors.AlreadyExists))
 	}
 
 	// email, username是否已经存在
@@ -49,7 +49,7 @@ func validateRegisterUser(payload *service.NewUserPayload) error {
 		return err
 	}
 	if exists {
-		return errors.New(errors.AlreadyExistsError(errors.User, ""))
+		return errors.New(errors.AlreadyExistsError(errors.User, errors.AlreadyExists))
 	}
 	return nil
 }
