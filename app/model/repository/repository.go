@@ -44,7 +44,7 @@ func AddRepository(tx sqlx.Queryer, repo *Repository) error {
 
 	err := tx.QueryRowx(sql, args...).Scan(&repo.ID)
 	if err != nil {
-		return errors.New(errors.SQLError())
+		return errors.Wrap(err, errors.SQLError())
 	}
 	return nil
 }

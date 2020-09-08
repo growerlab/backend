@@ -194,7 +194,7 @@ func GetUserByUserToken(src sqlx.Queryer, userToken string) (*User, error) {
 
 	err := sqlx.Select(src, &users, sql, args...)
 	if err != nil {
-		return nil, errors.New(errors.SQLError())
+		return nil, errors.Wrap(err, errors.SQLError())
 	}
 	if len(users) > 0 {
 		return users[0], nil
