@@ -18,14 +18,21 @@ const KeySep = ":"
 var MemDB *MemDBClient
 
 func InitMemDB() error {
+	var err error
 	var config = conf.GetConf().Redis
-	MemDB = newPool(config, 0)
+
+	MemDB, err = DoInitMemDB(config, 0)
+	return err
+}
+
+func DoInitMemDB(cfg *conf.Redis, db int) (*MemDBClient, error) {
+	mem := newPool(cfg, db)
 
 	// Test
 	if err := testMemDB(); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return mem, nil
 }
 
 func testMemDB() error {
@@ -50,7 +57,7 @@ func newPool(cfg *conf.Redis, db int) *MemDBClient {
 
 	memDB := &MemDBClient{
 		client,
-		NewKeyBuilder(conf.GetConf().Redis.Namespace),
+		NewKeyBuilder(cfg.Namespace),
 	}
 	return memDB
 }
