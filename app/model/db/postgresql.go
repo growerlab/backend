@@ -21,10 +21,14 @@ var (
 
 func InitDatabase() error {
 	var config = conf.GetConf()
+	return DoInitDatabase(config.Database.URL, config.Debug)
+}
+
+func DoInitDatabase(databaseURL string, debug bool) error {
 	var err error
 	var sqlxDB *sqlx.DB
 
-	sqlxDB, err = sqlx.Connect("pgx", config.Database.URL)
+	sqlxDB, err = sqlx.Connect("pgx", databaseURL)
 	if err != nil {
 		return errors.Wrap(err, errors.SQLError())
 	}
@@ -32,7 +36,7 @@ func InitDatabase() error {
 	DB = &DBQuery{
 		dbBase: &dbBase{
 			Queryer: sqlxDB,
-			debug:   config.Debug,
+			debug:   debug,
 			logger:  logger.LogWriter,
 		},
 		db: sqlxDB,
@@ -40,7 +44,6 @@ func InitDatabase() error {
 
 	// pgsql placeholder
 	sq.StatementBuilder = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-
 	return nil
 }
 
