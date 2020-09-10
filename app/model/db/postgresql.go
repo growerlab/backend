@@ -19,21 +19,28 @@ var (
 	DB *DBQuery
 )
 
-func InitDatabase() error {
-	var config = conf.GetConf()
-	return DoInitDatabase(config.Database.URL, config.Debug)
+func init() {
+	// pgsql placeholder
+	sq.StatementBuilder = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 }
 
-func DoInitDatabase(databaseURL string, debug bool) error {
+func InitDatabase() error {
+	var err error
+	var config = conf.GetConf()
+	DB, err = DoInitDatabase(config.Database.URL, config.Debug)
+	return err
+}
+
+func DoInitDatabase(databaseURL string, debug bool) (*DBQuery, error) {
 	var err error
 	var sqlxDB *sqlx.DB
 
 	sqlxDB, err = sqlx.Connect("pgx", databaseURL)
 	if err != nil {
-		return errors.Wrap(err, errors.SQLError())
+		return nil, errors.Wrap(err, errors.SQLError())
 	}
 
-	DB = &DBQuery{
+	d := &DBQuery{
 		dbBase: &dbBase{
 			Queryer: sqlxDB,
 			debug:   debug,
@@ -41,10 +48,7 @@ func DoInitDatabase(databaseURL string, debug bool) error {
 		},
 		db: sqlxDB,
 	}
-
-	// pgsql placeholder
-	sq.StatementBuilder = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-	return nil
+	return d, nil
 }
 
 func Transact(txFn func(Queryer) error) (err error) {
