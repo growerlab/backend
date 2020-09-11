@@ -29,14 +29,14 @@ func DoInitMemDB(cfg *conf.Redis, db int) (*MemDBClient, error) {
 	mem := newPool(cfg, db)
 
 	// Test
-	if err := testMemDB(); err != nil {
+	if err := testMemDB(mem); err != nil {
 		return nil, err
 	}
 	return mem, nil
 }
 
-func testMemDB() error {
-	reply, err := MemDB.Ping().Result()
+func testMemDB(mem *MemDBClient) error {
+	reply, err := mem.Ping().Result()
 	if err != nil || reply != "PONG" {
 		return errors.New("memdb not ready")
 	}
