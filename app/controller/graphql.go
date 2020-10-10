@@ -63,13 +63,12 @@ func GraphQL(ctx *gin.Context) {
 		return retErr
 	})
 
-	graphqlOpts = append(graphqlOpts, errorOpt)
-
 	recoverOpt := handler.RecoverFunc(func(ctx context.Context, err interface{}) (userMessage error) {
 		logger.Error("graphql recover err: %v\n%+v", err, string(debug.Stack()))
 		return errors.New(errors.GraphQLError())
 	})
-	graphqlOpts = append(graphqlOpts, recoverOpt)
+
+	graphqlOpts = append(graphqlOpts, errorOpt, recoverOpt)
 
 	fn := handler.GraphQL(resolver.NewExecutableSchema(resolver.Config{Resolvers: &resolver.Resolver{}}), graphqlOpts...)
 	fn.ServeHTTP(ctx.Writer, ctx.Request)
