@@ -3,8 +3,8 @@ package namespace
 import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/growerlab/backend/app/common/errors"
+	"github.com/growerlab/backend/app/model/db"
 	"github.com/growerlab/backend/app/model/utils"
-	"github.com/jmoiron/sqlx"
 )
 
 var table = "namespace"
@@ -15,7 +15,7 @@ var columns = []string{
 	"type",
 }
 
-func AddNamespace(tx sqlx.Queryer, ns *Namespace) error {
+func AddNamespace(tx db.HookQueryer, ns *Namespace) error {
 	sql, args, _ := sq.Insert(table).
 		Columns(columns[1:]...).
 		Values(
@@ -33,19 +33,19 @@ func AddNamespace(tx sqlx.Queryer, ns *Namespace) error {
 	return nil
 }
 
-func GetNamespaceByPath(src sqlx.Queryer, path string) (*Namespace, error) {
+func GetNamespaceByPath(src db.HookQueryer, path string) (*Namespace, error) {
 	return getNamespaceByCond(src, sq.Eq{"path": path})
 }
 
-func GetNamespaceByOwnerID(src sqlx.Queryer, ownerID int64) (*Namespace, error) {
+func GetNamespaceByOwnerID(src db.HookQueryer, ownerID int64) (*Namespace, error) {
 	return getNamespaceByCond(src, sq.Eq{"owner_id": ownerID})
 }
 
-func GetNamespace(src sqlx.Queryer, id int64) (*Namespace, error) {
+func GetNamespace(src db.HookQueryer, id int64) (*Namespace, error) {
 	return getNamespaceByCond(src, sq.Eq{"id": id})
 }
 
-func getNamespaceByCond(src sqlx.Queryer, cond sq.Sqlizer) (*Namespace, error) {
+func getNamespaceByCond(src db.HookQueryer, cond sq.Sqlizer) (*Namespace, error) {
 	ns, err := listNamespaceByCond(src, cond)
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func getNamespaceByCond(src sqlx.Queryer, cond sq.Sqlizer) (*Namespace, error) {
 	return nil, nil
 }
 
-func ListNamespacesByOwner(src sqlx.Queryer, userType NamespaceType, ownerIDs ...int64) ([]*Namespace, error) {
+func ListNamespacesByOwner(src db.HookQueryer, userType NamespaceType, ownerIDs ...int64) ([]*Namespace, error) {
 	where := sq.And{
 		sq.Eq{"owner_id": ownerIDs},
 		sq.Eq{"type": userType},
@@ -64,11 +64,11 @@ func ListNamespacesByOwner(src sqlx.Queryer, userType NamespaceType, ownerIDs ..
 	return listNamespaceByCond(src, where)
 }
 
-func listNamespaceByCond(src sqlx.Queryer, cond sq.Sqlizer) ([]*Namespace, error) {
-	sql, args, _ := sq.Select(columns...).From(table).Where(cond).ToSql()
-
+func listNamespaceByCond(src db.HookQueryer, cond sq.Sqlizer) ([]*Namespace, error) {
+	sql := sq.Select(columns...).From(table).Where(cond)
 	result := make([]*Namespace, 0)
-	err := sqlx.Select(src, &result, sql, args...)
+
+	err := src.Select(&result, sql)
 	if err != nil {
 		return nil, errors.Wrap(err, errors.SQLError())
 	}

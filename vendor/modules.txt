@@ -100,6 +100,12 @@ github.com/vektah/gqlparser/lexer
 github.com/vektah/gqlparser/parser
 github.com/vektah/gqlparser/validator
 github.com/vektah/gqlparser/validator/rules
+# github.com/xwb1989/sqlparser v0.0.0-20180606152119-120387863bf2
+github.com/xwb1989/sqlparser
+github.com/xwb1989/sqlparser/dependency/bytes2
+github.com/xwb1989/sqlparser/dependency/hack
+github.com/xwb1989/sqlparser/dependency/querypb
+github.com/xwb1989/sqlparser/dependency/sqltypes
 # golang.org/x/crypto v0.0.0-20191219195013-becbf705a915
 golang.org/x/crypto/argon2
 golang.org/x/crypto/blake2b

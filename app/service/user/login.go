@@ -12,7 +12,6 @@ import (
 	"github.com/growerlab/backend/app/service"
 	"github.com/growerlab/backend/app/utils/pwd"
 	"github.com/growerlab/backend/app/utils/uuid"
-	"github.com/jmoiron/sqlx"
 )
 
 const TokenExpiredTime = 24 * time.Hour * 30 // 30天过期
@@ -28,7 +27,7 @@ func Login(input *service.LoginUserPayload, ctx *gin.Context) (
 ) {
 	clientIP := ctx.ClientIP()
 
-	err = db.Transact(func(tx db.Queryer) error {
+	err = db.Transact(func(tx db.SqlRunner) error {
 		user, err := Validate(tx, input.Email, input.Password)
 		if err != nil {
 			return err
@@ -64,7 +63,7 @@ func Login(input *service.LoginUserPayload, ctx *gin.Context) (
 	return
 }
 
-func Validate(src sqlx.Queryer, usernameOrEmail, password string) (user *userModel.User, err error) {
+func Validate(src db.HookQueryer, usernameOrEmail, password string) (user *userModel.User, err error) {
 	if strings.Contains(usernameOrEmail, "@") {
 		user, err = userModel.GetUserByEmail(src, usernameOrEmail)
 		if err != nil {

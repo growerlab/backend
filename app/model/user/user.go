@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/growerlab/backend/app/model/db"
+
 	sq "github.com/Masterminds/squirrel"
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/model/namespace"
 	"github.com/growerlab/backend/app/model/session"
 	"github.com/growerlab/backend/app/model/utils"
-	"github.com/jmoiron/sqlx"
 )
 
 var tableName = "user"
@@ -32,7 +33,7 @@ var columns = []string{
 	"namespace_id",
 }
 
-func AddUser(tx sqlx.Queryer, user *User) error {
+func AddUser(tx db.HookQueryer, user *User) error {
 	sql, args, _ := sq.Insert(tableNameMark).
 		Columns(columns[1:]...).
 		Values(
@@ -60,7 +61,7 @@ func AddUser(tx sqlx.Queryer, user *User) error {
 	return nil
 }
 
-func ExistsEmailOrUsername(src sqlx.Queryer, username, email string) (bool, error) {
+func ExistsEmailOrUsername(src db.HookQueryer, username, email string) (bool, error) {
 	if len(username) > 0 {
 		user, err := getUser(src, sq.Eq{"username": username})
 		if err != nil {
@@ -82,22 +83,22 @@ func ExistsEmailOrUsername(src sqlx.Queryer, username, email string) (bool, erro
 	return false, nil
 }
 
-func GetUserByEmail(src sqlx.Queryer, email string) (*User, error) {
+func GetUserByEmail(src db.HookQueryer, email string) (*User, error) {
 	user, err := getUser(src, sq.Eq{"email": email})
 	return user, err
 }
 
-func GetUserByUsername(src sqlx.Queryer, username string) (*User, error) {
+func GetUserByUsername(src db.HookQueryer, username string) (*User, error) {
 	user, err := getUser(src, sq.Eq{"username": username})
 	return user, err
 }
 
-func GetUser(src sqlx.Queryer, id int64) (*User, error) {
+func GetUser(src db.HookQueryer, id int64) (*User, error) {
 	user, err := getUser(src, sq.Eq{"id": id})
 	return user, err
 }
 
-func getUser(src sqlx.Queryer, cond sq.Sqlizer) (*User, error) {
+func getUser(src db.HookQueryer, cond sq.Sqlizer) (*User, error) {
 	users, err := listUsersByCond(src, columns, cond)
 	if err != nil {
 		return nil, err
@@ -108,21 +109,20 @@ func getUser(src sqlx.Queryer, cond sq.Sqlizer) (*User, error) {
 	return nil, nil
 }
 
-func listUsersByCond(src sqlx.Queryer, tableColumns []string, cond sq.Sqlizer) ([]*User, error) {
-	sql, args, _ := sq.Select(tableColumns...).
+func listUsersByCond(src db.HookQueryer, tableColumns []string, cond sq.Sqlizer) ([]*User, error) {
+	sql := sq.Select(tableColumns...).
 		From(tableNameMark).
-		Where(sq.And{cond, NormalUser}).
-		ToSql()
+		Where(sq.And{cond, NormalUser})
 
 	result := make([]*User, 0)
-	err := sqlx.Select(src, &result, sql, args...)
+	err := src.Select(&result, sql)
 	if err != nil {
 		return nil, errors.Wrap(err, errors.SQLError())
 	}
 	return result, nil
 }
 
-func ActivateUser(tx sqlx.Execer, userID int64) error {
+func ActivateUser(tx db.HookQueryer, userID int64) error {
 	sql, args, _ := sq.Update(tableNameMark).
 		Set("verified_at", time.Now().Unix()).
 		Where(sq.And{sq.Eq{"id": userID}, InactivateUser}).
@@ -135,22 +135,21 @@ func ActivateUser(tx sqlx.Execer, userID int64) error {
 	return nil
 }
 
-func ListAllUsers(src sqlx.Queryer, page, per uint64) ([]*User, error) {
+func ListAllUsers(src db.HookQueryer, page, per uint64) ([]*User, error) {
 	users := make([]*User, 0)
 
 	// TODO 如果用户量很大的时候，这样分页会有性能问题.. 希望能碰到那一天👀
-	sql, _, _ := sq.Select(columns...).
+	sql := sq.Select(columns...).
 		From(tableNameMark).
 		Where(NormalUser).
 		Limit(per).
-		Offset(page * per).
-		ToSql()
+		Offset(page * per)
 
-	err := sqlx.Select(src, &users, sql)
+	err := src.Select(&users, sql)
 	return users, errors.Wrap(err, errors.SQLError())
 }
 
-func UpdateLogin(tx sqlx.Execer, userID int64, clientIP string) error {
+func UpdateLogin(tx db.HookQueryer, userID int64, clientIP string) error {
 	where := sq.Eq{"id": userID}
 	valueMap := map[string]interface{}{
 		"last_login_at": time.Now().Unix(),
@@ -159,7 +158,7 @@ func UpdateLogin(tx sqlx.Execer, userID int64, clientIP string) error {
 	return update(tx, where, valueMap)
 }
 
-func UpdateNamespace(tx sqlx.Execer, userID int64, namespaceID int64) error {
+func UpdateNamespace(tx db.HookQueryer, userID int64, namespaceID int64) error {
 	where := sq.Eq{"id": userID}
 	valueMap := map[string]interface{}{
 		"namespace_id": namespaceID,
@@ -167,7 +166,7 @@ func UpdateNamespace(tx sqlx.Execer, userID int64, namespaceID int64) error {
 	return update(tx, where, valueMap)
 }
 
-func update(tx sqlx.Execer, cond sq.Sqlizer, valueMap map[string]interface{}) error {
+func update(tx db.HookQueryer, cond sq.Sqlizer, valueMap map[string]interface{}) error {
 	sql, args, _ := sq.Update(tableNameMark).
 		SetMap(valueMap).
 		Where(cond).
@@ -180,19 +179,18 @@ func update(tx sqlx.Execer, cond sq.Sqlizer, valueMap map[string]interface{}) er
 	return nil
 }
 
-func GetUserByUserToken(src sqlx.Queryer, userToken string) (*User, error) {
+func GetUserByUserToken(src db.HookQueryer, userToken string) (*User, error) {
 	tableName := session.TableName()
 	joinColumns := utils.SqlColumnsComplementTable(tableNameMark, columns...)
-	sql, args, _ := sq.Select(joinColumns...).
+	sql := sq.Select(joinColumns...).
 		From(tableNameMark).
 		Join(fmt.Sprintf("%s ON %s.token = ? AND %s.expired_at >= ?", tableName, tableName, tableName),
 			userToken, time.Now().Unix()).
-		Where(fmt.Sprintf("%s.id = %s.owner_id", tableNameMark, tableName)).
-		ToSql()
+		Where(fmt.Sprintf("%s.id = %s.owner_id", tableNameMark, tableName))
 
 	users := make([]*User, 0, 1)
 
-	err := sqlx.Select(src, &users, sql, args...)
+	err := src.Select(&users, sql)
 	if err != nil {
 		return nil, errors.Wrap(err, errors.SQLError())
 	}
@@ -202,7 +200,7 @@ func GetUserByUserToken(src sqlx.Queryer, userToken string) (*User, error) {
 	return nil, nil
 }
 
-func ListAdminUsers(src sqlx.Queryer) ([]*User, error) {
+func ListAdminUsers(src db.HookQueryer) ([]*User, error) {
 	where := sq.And{
 		sq.Eq{"is_admin": true},
 	}
@@ -217,7 +215,7 @@ func ListAdminUsers(src sqlx.Queryer) ([]*User, error) {
 	return users, nil
 }
 
-func fillNamespaceInUsers(src sqlx.Queryer, users []*User) error {
+func fillNamespaceInUsers(src db.HookQueryer, users []*User) error {
 	userIDs := make([]int64, 0)
 	userMap := make(map[int64]*User)
 	for _, u := range users {

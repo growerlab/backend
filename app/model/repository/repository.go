@@ -3,8 +3,8 @@ package repository
 import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/growerlab/backend/app/common/errors"
+	"github.com/growerlab/backend/app/model/db"
 	"github.com/growerlab/backend/app/model/utils"
-	"github.com/jmoiron/sqlx"
 )
 
 var (
@@ -24,7 +24,7 @@ var (
 	}
 )
 
-func AddRepository(tx sqlx.Queryer, repo *Repository) error {
+func AddRepository(tx db.HookQueryer, repo *Repository) error {
 	sql, args, _ := sq.Insert(table).
 		Columns(columns[1:]...).
 		Values(
@@ -49,7 +49,7 @@ func AddRepository(tx sqlx.Queryer, repo *Repository) error {
 	return nil
 }
 
-func AreNameInNamespace(src sqlx.Queryer, namespaceID int64, name string) (bool, error) {
+func AreNameInNamespace(src db.HookQueryer, namespaceID int64, name string) (bool, error) {
 	where := sq.And{
 		sq.Eq{"namespace_id": namespaceID},
 		sq.Eq{"path": name},
@@ -61,12 +61,12 @@ func AreNameInNamespace(src sqlx.Queryer, namespaceID int64, name string) (bool,
 	return len(result) > 0, nil
 }
 
-func ListRepositoriesByNamespace(src sqlx.Queryer, namespaceID int64) ([]*Repository, error) {
+func ListRepositoriesByNamespace(src db.HookQueryer, namespaceID int64) ([]*Repository, error) {
 	where := sq.And{sq.Eq{"namespace_id": namespaceID}}
 	return listRepositoriesByCond(src, columns, where)
 }
 
-func GetRepositoryByNsWithPath(src sqlx.Queryer, namespaceID int64, path string) (*Repository, error) {
+func GetRepositoryByNsWithPath(src db.HookQueryer, namespaceID int64, path string) (*Repository, error) {
 	where := sq.And{sq.Eq{"namespace_id": namespaceID, "path": path}}
 	repos, err := listRepositoriesByCond(src, columns, where)
 	if err != nil {
@@ -78,7 +78,7 @@ func GetRepositoryByNsWithPath(src sqlx.Queryer, namespaceID int64, path string)
 	return nil, nil
 }
 
-func GetRepository(src sqlx.Queryer, id int64) (*Repository, error) {
+func GetRepository(src db.HookQueryer, id int64) (*Repository, error) {
 	repos, err := listRepositoriesByCond(src, columns, sq.Eq{"id": id})
 	if err != nil {
 		return nil, err
@@ -89,15 +89,14 @@ func GetRepository(src sqlx.Queryer, id int64) (*Repository, error) {
 	return nil, nil
 }
 
-func listRepositoriesByCond(src sqlx.Queryer, tableColumns []string, cond sq.Sqlizer) ([]*Repository, error) {
+func listRepositoriesByCond(src db.HookQueryer, tableColumns []string, cond sq.Sqlizer) ([]*Repository, error) {
 	where := cond
-	sql, args, _ := sq.Select(tableColumns...).
+	sql := sq.Select(tableColumns...).
 		From(table).
-		Where(where).
-		ToSql()
+		Where(where)
 
 	result := make([]*Repository, 0)
-	err := sqlx.Select(src, &result, sql, args...)
+	err := src.Select(&result, sql)
 	if err != nil {
 		return nil, errors.Wrap(err, errors.SQLError())
 	}

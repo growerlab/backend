@@ -11,14 +11,13 @@ import (
 	"github.com/growerlab/backend/app/model/db"
 	permModel "github.com/growerlab/backend/app/model/permission"
 	"github.com/growerlab/backend/app/utils/timestamp"
-	"github.com/jmoiron/sqlx"
 )
 
 var (
 	ErrNotFoundRule = errors.New("not found permission rule")
 )
 
-type PermissionsFunc func(src sqlx.Queryer, code int, c *context.Context) ([]*permModel.Permission, error)
+type PermissionsFunc func(src db.HookQueryer, code int, c *context.Context) ([]*permModel.Permission, error)
 
 type Rule struct {
 	// Code 具体的权限
@@ -46,7 +45,7 @@ type Hub struct {
 	DBCtx *context.DBContext
 }
 
-func NewPermissionHub(src sqlx.Queryer, memDB *db.MemDBClient) *Hub {
+func NewPermissionHub(src db.HookQueryer, memDB *db.MemDBClient) *Hub {
 	return &Hub{
 		DBCtx: &context.DBContext{
 			Src:   src,

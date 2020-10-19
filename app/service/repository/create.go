@@ -14,7 +14,6 @@ import (
 	"github.com/growerlab/backend/app/service"
 	"github.com/growerlab/backend/app/utils/regex"
 	"github.com/growerlab/backend/app/utils/uuid"
-	"github.com/jmoiron/sqlx"
 )
 
 func CreateRepository(ctx context.Context, req *service.NewRepositoryPayload) (bool, error) {
@@ -27,7 +26,7 @@ func CreateRepository(ctx context.Context, req *service.NewRepositoryPayload) (b
 
 func DoCreateRepository(currentUser *user.User, req *service.NewRepositoryPayload) (bool, error) {
 	var err error
-	err = db.Transact(func(tx db.Queryer) error {
+	err = db.Transact(func(tx db.SqlRunner) error {
 		ns, err := validateAndPrepare(tx, currentUser.ID, req)
 		if err != nil {
 			return err
@@ -91,7 +90,7 @@ func buildRepository(
 // validate
 //	req.NamespacePath  TODO 这里暂时只验证namespace的owner_id 是否为用户，未来应该验证组织权限（比如是否可以选择这个组织创建仓库）
 //	req.Name 名称是否合法、是否重名
-func validateAndPrepare(src sqlx.Queryer, userID int64, req *service.NewRepositoryPayload) (ns *namespace.Namespace, err error) {
+func validateAndPrepare(src db.HookQueryer, userID int64, req *service.NewRepositoryPayload) (ns *namespace.Namespace, err error) {
 	req.NamespacePath = strings.TrimSpace(req.NamespacePath)
 	req.Name = strings.TrimSpace(req.Name)
 	if len(req.NamespacePath) == 0 {

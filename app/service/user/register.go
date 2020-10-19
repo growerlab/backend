@@ -92,7 +92,7 @@ func Register(payload *service.NewUserPayload, clientIP string) (bool, error) {
 		return false, err
 	}
 
-	err = db.Transact(func(tx db.Queryer) error {
+	err = db.Transact(func(tx db.SqlRunner) error {
 		user, err := buildUser(payload, clientIP)
 		if err != nil {
 			return err

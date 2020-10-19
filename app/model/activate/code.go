@@ -3,6 +3,8 @@ package activate
 import (
 	"time"
 
+	"github.com/growerlab/backend/app/model/db"
+
 	sq "github.com/Masterminds/squirrel"
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/jmoiron/sqlx"
@@ -38,7 +40,7 @@ func AddCode(tx sqlx.Execer, code *ActivationCode) error {
 	return nil
 }
 
-func GetCode(src sqlx.Queryer, code string) (*ActivationCode, error) {
+func GetCode(src db.HookQueryer, code string) (*ActivationCode, error) {
 	sql, args, _ := sq.Select(columns...).
 		From(tableName).
 		Where(sq.Eq{"code": code}).

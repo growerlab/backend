@@ -1,7 +1,6 @@
 package db
 
 import (
-	"database/sql"
 	"fmt"
 	"io"
 	"runtime/debug"
@@ -40,18 +39,20 @@ func DoInitDatabase(databaseURL string, debug bool) (*DBQuery, error) {
 		return nil, errors.Wrap(err, errors.SQLError())
 	}
 
+	db := &DBBase{
+		Queryer: sqlxDB,
+		debug:   debug,
+		logger:  logger.LogWriter,
+	}
+
 	d := &DBQuery{
-		dbBase: &dbBase{
-			Queryer: sqlxDB,
-			debug:   debug,
-			logger:  logger.LogWriter,
-		},
-		db: sqlxDB,
+		SqlRunner: NewSqlRunnerWithHook(db),
+		db:        sqlxDB,
 	}
 	return d, nil
 }
 
-func Transact(txFn func(Queryer) error) (err error) {
+func Transact(txFn func(SqlRunner) error) (err error) {
 	tx := DB.Begin()
 
 	defer func() {
@@ -68,7 +69,10 @@ func Transact(txFn func(Queryer) error) (err error) {
 			_ = tx.Rollback()
 			return
 		}
-		err = errors.Trace(tx.Commit())
+		err = tx.Commit()
+		if err != nil {
+			_ = tx.Rollback()
+		}
 	}()
 
 	return txFn(tx)
@@ -79,55 +83,16 @@ type Transaction interface {
 	Commit() error
 }
 
-type Queryer interface {
-	sqlx.Queryer
-	sqlx.Execer
-}
-
-type dbBase struct {
-	Queryer
-
-	// sql的操作
-	*sqlEvent
-
-	debug  bool
-	logger io.Writer
-}
-
-func (d *dbBase) Println(query string, args ...interface{}) {
-	if d.debug {
-		_, _ = fmt.Fprint(d.logger, fmt.Sprintf("%c[%d;%d;%dm%s%c[0m ", 0x1B, 1, 0, 36, query, 0x1B))
-		if len(args) > 0 {
-			_, _ = fmt.Fprint(d.logger, args, "\n")
-		} else {
-			_, _ = fmt.Fprint(d.logger, "\n")
-		}
-	}
-}
-
-func (d *dbBase) Query(query string, args ...interface{}) (*sql.Rows, error) {
-	d.Println(query, args...)
-	return d.Queryer.Query(query, args...)
-}
-
-func (d *dbBase) Queryx(query string, args ...interface{}) (*sqlx.Rows, error) {
-	d.Println(query, args...)
-	return d.Queryer.Queryx(query, args...)
-}
-
-func (d *dbBase) QueryRowx(query string, args ...interface{}) *sqlx.Row {
-	d.Println(query, args...)
-	return d.Queryer.QueryRowx(query, args...)
-}
-
-func (d *dbBase) Exec(query string, args ...interface{}) (sql.Result, error) {
-	d.Println(query, args...)
-	return d.Queryer.Exec(query, args...)
+type SqlRunner interface {
+	HookQueryer
+	Debug() bool
+	Logger() io.Writer
+	Println(query interface{}, args ...interface{})
 }
 
 // 带日志输出的db封装
 type DBQuery struct {
-	*dbBase
+	SqlRunner
 	db *sqlx.DB
 }
 
@@ -135,31 +100,42 @@ func (d *DBQuery) Begin() *DBTx {
 	d.Println("BEGIN")
 	tx := d.db.MustBegin()
 
+	db := &DBBase{
+		Queryer: tx,
+		debug:   d.SqlRunner.Debug(),
+		logger:  d.SqlRunner.Logger(),
+	}
+
 	return &DBTx{
-		dbBase: &dbBase{
-			Queryer:  tx,
-			debug:    d.dbBase.debug,
-			logger:   d.dbBase.logger,
-			sqlEvent: NewSqlEvent(),
-		},
-		tx: tx,
+		SqlRunner: NewSqlRunnerWithHook(db),
+		tx:        tx,
 	}
 }
 
-var _ sqlx.Queryer = (*DBTx)(nil)
-var _ sqlx.Execer = (*DBTx)(nil)
-
 type DBTx struct {
-	*dbBase
+	SqlRunner
 	tx Transaction
 }
 
 func (d *DBTx) Rollback() error {
-	d.Println("ROLLBACK")
+	d.SqlRunner.Println("ROLLBACK")
+
+	if hooker, ok := d.SqlRunner.(Hooker); ok {
+		defer hooker.Release()
+	}
 	return d.tx.Rollback()
 }
 
 func (d *DBTx) Commit() error {
-	d.Println("COMMIT")
+	d.SqlRunner.Println("COMMIT")
+
+	if hooker, ok := d.SqlRunner.(Hooker); ok {
+		defer hooker.Release()
+		defer hooker.AsyncProcess()
+		err := hooker.SyncProcess()
+		if err != nil {
+			return err
+		}
+	}
 	return d.tx.Commit()
 }

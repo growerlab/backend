@@ -4,7 +4,6 @@ import (
 	"github.com/growerlab/backend/app/common/context"
 	"github.com/growerlab/backend/app/common/userdomain"
 	"github.com/growerlab/backend/app/model/db"
-	"github.com/jmoiron/sqlx"
 )
 
 var permHub *Hub
@@ -13,7 +12,7 @@ func InitPermission() error {
 	return InitPermissionHub(db.DB, db.MemDB)
 }
 
-func InitPermissionHub(dbSrc sqlx.Queryer, memDB *db.MemDBClient) error {
+func InitPermissionHub(dbSrc db.HookQueryer, memDB *db.MemDBClient) error {
 	permHub = NewPermissionHub(dbSrc, memDB)
 
 	if err := initRules(); err != nil {

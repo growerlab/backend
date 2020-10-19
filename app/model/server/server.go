@@ -3,6 +3,8 @@ package server
 import (
 	"math/rand"
 
+	"github.com/growerlab/backend/app/model/db"
+
 	sq "github.com/Masterminds/squirrel"
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/jmoiron/sqlx"
@@ -21,7 +23,7 @@ var columns = []string{
 }
 
 // RandNormalServer 当有多个服务器时，随机返回一个服务器
-func RandNormalServer(src sqlx.Queryer) (*Server, error) {
+func RandNormalServer(src db.HookQueryer) (*Server, error) {
 	servers, err := ListServers(src, StatusNormal)
 	if err != nil {
 		return nil, err
@@ -36,7 +38,7 @@ func RandNormalServer(src sqlx.Queryer) (*Server, error) {
 	return servers[0], nil
 }
 
-func GetServer(src sqlx.Queryer, srvID int64) (*Server, error) {
+func GetServer(src db.HookQueryer, srvID int64) (*Server, error) {
 	sql, args, _ := sq.Select(columns...).
 		Where(sq.And{sq.Eq{"id": srvID}, SqlNormal}).
 		ToSql()
@@ -52,7 +54,7 @@ func GetServer(src sqlx.Queryer, srvID int64) (*Server, error) {
 	return data[0], nil
 }
 
-func ListServers(src sqlx.Queryer, statues ...statusType) ([]*Server, error) {
+func ListServers(src db.HookQueryer, statues ...statusType) ([]*Server, error) {
 	or := sq.Or{SqlStatusNormal}
 	where := sq.And{SqlNormal, &or}
 
@@ -69,13 +71,12 @@ func ListServers(src sqlx.Queryer, statues ...statusType) ([]*Server, error) {
 		}
 	}
 
-	sql, args, _ := sq.Select(columns...).
+	sql := sq.Select(columns...).
 		From(table).
-		Where(where).
-		ToSql()
+		Where(where)
 
 	result := make([]*Server, 0)
-	err := sqlx.Select(src, &result, sql, args...)
+	err := src.Select(&result, sql)
 	if err != nil {
 		return nil, errors.Wrap(err, errors.SQLError())
 	}

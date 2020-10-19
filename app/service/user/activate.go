@@ -24,7 +24,7 @@ func Activate(payload *service.ActivationCodePayload) (result bool, err error) {
 		return false, errors.New(errors.P(errors.ActivationCode, errors.Code, errors.Invalid))
 	}
 
-	err = db.Transact(func(tx db.Queryer) error {
+	err = db.Transact(func(tx db.SqlRunner) error {
 		result, err = DoActivate(tx, payload.Code)
 		return err
 	})
@@ -37,7 +37,7 @@ func Activate(payload *service.ActivationCodePayload) (result bool, err error) {
 // 生成模版
 // 发送邮件
 //
-func DoPreActivate(tx db.Queryer, userID int64) error {
+func DoPreActivate(tx db.SqlRunner, userID int64) error {
 	code := buildActivateCode(userID)
 	err := activate.AddCode(tx, code)
 	if err != nil {
@@ -55,7 +55,7 @@ func DoPreActivate(tx db.Queryer, userID int64) error {
 
 // 验证用户邮箱激活码
 //
-func DoActivate(tx db.Queryer, code string) (bool, error) {
+func DoActivate(tx db.SqlRunner, code string) (bool, error) {
 	acode, err := activate.GetCode(tx, code)
 	if err != nil {
 		return false, err

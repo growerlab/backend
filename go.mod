@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/99designs/gqlgen v0.10.2
-	github.com/Masterminds/squirrel v1.1.0
+	github.com/Masterminds/squirrel v1.4.0
 	github.com/gin-gonic/gin v1.4.0
 	github.com/go-redis/redis/v7 v7.0.0-beta.5
 	github.com/google/uuid v1.1.1
@@ -17,6 +17,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.6.1
 	github.com/vektah/gqlparser v1.2.0
+	github.com/xwb1989/sqlparser v0.0.0-20180606152119-120387863bf2
 	google.golang.org/appengine v1.6.5 // indirect
 	gopkg.in/asaskevich/govalidator.v9 v9.0.0-20180315120708-ccb8e960c48f
 	gopkg.in/yaml.v2 v2.2.4

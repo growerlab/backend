@@ -2,7 +2,6 @@ package context
 
 import (
 	"github.com/growerlab/backend/app/model/db"
-	"github.com/jmoiron/sqlx"
 )
 
 type Context struct {
@@ -12,6 +11,6 @@ type Context struct {
 }
 
 type DBContext struct {
-	Src   sqlx.Queryer
+	Src   db.HookQueryer
 	MemDB *db.MemDBClient
 }

@@ -4,7 +4,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/growerlab/backend/app/common/context"
 	"github.com/growerlab/backend/app/common/errors"
-	"github.com/jmoiron/sqlx"
+	"github.com/growerlab/backend/app/model/db"
 )
 
 var table = "permission"
@@ -21,7 +21,7 @@ var columns = []string{
 	"deleted_at",
 }
 
-func ListPermissionsByContext(src sqlx.Queryer, code int, c *context.Context) ([]*Permission, error) {
+func ListPermissionsByContext(src db.HookQueryer, code int, c *context.Context) ([]*Permission, error) {
 	where := sq.And{
 		sq.Eq{"code": code},
 		sq.Eq{"context_type": c.Type},
@@ -31,14 +31,13 @@ func ListPermissionsByContext(src sqlx.Queryer, code int, c *context.Context) ([
 	return listPermissionByCond(src, columns, where)
 }
 
-func listPermissionByCond(src sqlx.Queryer, cols []string, cond sq.Sqlizer) ([]*Permission, error) {
-	sql, args, _ := sq.Select(cols...).
+func listPermissionByCond(src db.HookQueryer, cols []string, cond sq.Sqlizer) ([]*Permission, error) {
+	sql := sq.Select(cols...).
 		From(table).
-		Where(cond).
-		ToSql()
+		Where(cond)
 
 	result := make([]*Permission, 0)
-	err := sqlx.Select(src, &result, sql, args...)
+	err := src.Select(&result, sql)
 	if err != nil {
 		return nil, errors.Wrap(err, errors.SQLError())
 	}

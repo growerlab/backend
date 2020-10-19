@@ -3,8 +3,8 @@ package session
 import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/growerlab/backend/app/common/errors"
+	"github.com/growerlab/backend/app/model/db"
 	"github.com/growerlab/backend/app/model/utils"
-	"github.com/jmoiron/sqlx"
 )
 
 const tableName = "session"
@@ -22,7 +22,7 @@ func TableName() string {
 	return tableName
 }
 
-func AddSession(tx sqlx.Queryer, sess *Session) error {
+func AddSession(tx db.HookQueryer, sess *Session) error {
 	sql, args, _ := sq.Insert(tableName).
 		Columns(columns[1:]...).
 		Values(
