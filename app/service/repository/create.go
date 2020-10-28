@@ -120,11 +120,11 @@ func validateAndPrepare(src sqlx.Queryer, userID int64, req *service.NewReposito
 	}
 
 	// 验证仓库名在当前namespace中是否已存在
-	exists, err := repository.AreNameInNamespace(src, ns.ID, req.Name)
+	exist, err := repository.NameExistInNamespace(src, ns.ID, req.Name)
 	if err != nil {
 		return nil, err
 	}
-	if exists {
+	if exist {
 		return nil, errors.New(errors.AlreadyExistsError(errors.Repository, errors.AlreadyExists))
 	}
 	return ns, nil

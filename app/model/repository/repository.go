@@ -49,7 +49,7 @@ func AddRepository(tx sqlx.Queryer, repo *Repository) error {
 	return nil
 }
 
-func AreNameInNamespace(src sqlx.Queryer, namespaceID int64, name string) (bool, error) {
+func NameExistInNamespace(src sqlx.Queryer, namespaceID int64, name string) (bool, error) {
 	where := sq.And{
 		sq.Eq{"namespace_id": namespaceID},
 		sq.Eq{"path": name},
