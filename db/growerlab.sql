@@ -156,7 +156,7 @@ CREATE TABLE `user` (
   `username` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '唯一性用户名（将用在url中）',
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '用户昵称',
   `public_email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '公开的邮箱地址',
-  `last_login_ip` varchar(46) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '''''' COMMENT '最后的登录ip（兼容ipv6长度）',
+  `last_login_ip` varchar(46) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '最后的登录ip（兼容ipv6长度）',
   `last_login_at` int DEFAULT NULL,
   `created_at` bigint NOT NULL,
   `deleted_at` int DEFAULT NULL,
@@ -179,4 +179,4 @@ CREATE TABLE `user` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-11-30  9:26:47
+-- Dump completed on 2021-11-30 20:53:49
