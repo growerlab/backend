@@ -11,7 +11,6 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/graphql-go/graphql v0.7.8
 	github.com/growerlab/argon2 v0.1.3
-	github.com/growerlab/codev-svc v0.0.0-20200120071136-d69a8f339a19
 	github.com/ivpusic/grpool v1.0.0
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/lib/pq v1.2.0 // indirect

@@ -44,15 +44,15 @@ func DoCreateRepository(currentUser *user.User, req *service.NewRepositoryPayloa
 			return err
 		}
 
-		// 真正创建仓库
-		api, err := NewApi(srv, repo)
-		if err != nil {
-			return err
-		}
-		err = api.Repository().Create()
-		if err != nil {
-			return errors.Wrap(err, errors.RepositoryError(errors.SvcServerNotReady))
-		}
+		// TODO: 真正创建仓库
+		// api, err := NewApi(srv, repo)
+		// if err != nil {
+		// 	return err
+		// }
+		// err = api.Repository().Create()
+		// if err != nil {
+		// 	return errors.Wrap(err, errors.RepositoryError(errors.SvcServerNotReady))
+		// }
 		return nil
 	})
 	if err != nil {
