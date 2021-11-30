@@ -2,7 +2,7 @@
 
 ### 数据库
 
-PostgreSQL v12.x
+MySql v8.0.27
 
 KeyDB 5.x
 

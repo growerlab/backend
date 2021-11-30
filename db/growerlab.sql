@@ -1,759 +1,182 @@
---
--- PostgreSQL database dump
---
-
--- Dumped from database version 12.0
--- Dumped by pg_dump version 12.0
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
-
-SET default_tablespace = '';
-
-SET default_table_access_method = heap;
-
---
--- Name: activate_code; Type: TABLE; Schema: public; Owner: growerlab
---
-
-CREATE TABLE public.activate_code (
-    id integer NOT NULL,
-    user_id integer NOT NULL,
-    code character varying(16) NOT NULL,
-    created_at bigint NOT NULL,
-    used_at bigint,
-    expired_at bigint NOT NULL
-);
-
-
-ALTER TABLE public.activate_code OWNER TO growerlab;
-
---
--- Name: TABLE activate_code; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON TABLE public.activate_code IS '用户激活码';
-
-
---
--- Name: activate_code_id_seq; Type: SEQUENCE; Schema: public; Owner: growerlab
---
-
-CREATE SEQUENCE public.activate_code_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.activate_code_id_seq OWNER TO growerlab;
-
---
--- Name: activate_code_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: growerlab
---
-
-ALTER SEQUENCE public.activate_code_id_seq OWNED BY public.activate_code.id;
-
-
---
--- Name: namespace; Type: TABLE; Schema: public; Owner: growerlab
---
-
-CREATE TABLE public.namespace (
-    id bigint NOT NULL,
-    path character varying(255) NOT NULL,
-    owner_id integer NOT NULL,
-    type integer NOT NULL
-);
-
-
-ALTER TABLE public.namespace OWNER TO growerlab;
-
---
--- Name: TABLE namespace; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON TABLE public.namespace IS ' 命名空间';
-
-
---
--- Name: COLUMN namespace.path; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.namespace.path IS '路径';
-
-
---
--- Name: COLUMN namespace.owner_id; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.namespace.owner_id IS '命名空间所有者（用户）';
-
-
---
--- Name: COLUMN namespace.type; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.namespace.type IS '1用户 2组织';
-
-
---
--- Name: namespace_id_seq; Type: SEQUENCE; Schema: public; Owner: growerlab
---
-
-CREATE SEQUENCE public.namespace_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.namespace_id_seq OWNER TO growerlab;
-
---
--- Name: namespace_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: growerlab
---
-
-ALTER SEQUENCE public.namespace_id_seq OWNED BY public.namespace.id;
-
-
---
--- Name: permission; Type: TABLE; Schema: public; Owner: growerlab
---
-
-CREATE TABLE public.permission (
-    id bigint NOT NULL,
-    namespace_id bigint NOT NULL,
-    context_type integer NOT NULL,
-    context_param_1 bigint NOT NULL,
-    context_param_2 bigint DEFAULT 0 NOT NULL,
-    user_domain_type integer NOT NULL,
-    user_domain_param bigint DEFAULT 0 NOT NULL,
-    created_at bigint NOT NULL,
-    deleted_at bigint,
-    code integer NOT NULL
-);
-
-
-ALTER TABLE public.permission OWNER TO growerlab;
-
---
--- Name: TABLE permission; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON TABLE public.permission IS '权限表';
-
-
---
--- Name: COLUMN permission.namespace_id; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.permission.namespace_id IS '权限所属命名空间（不依赖组织或个人，而是依赖命名空间）';
-
-
---
--- Name: COLUMN permission.context_type; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.permission.context_type IS '上下文类型';
-
-
---
--- Name: COLUMN permission.context_param_1; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.permission.context_param_1 IS '上下文参数1';
-
-
---
--- Name: COLUMN permission.context_param_2; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.permission.context_param_2 IS '上下文参数2';
-
-
---
--- Name: COLUMN permission.user_domain_type; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.permission.user_domain_type IS '用户域类型';
-
-
---
--- Name: COLUMN permission.user_domain_param; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.permission.user_domain_param IS '用户域参数';
-
-
---
--- Name: COLUMN permission.created_at; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.permission.created_at IS '创建时间';
-
-
---
--- Name: COLUMN permission.deleted_at; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.permission.deleted_at IS '删除时间';
-
-
---
--- Name: COLUMN permission.code; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.permission.code IS '权限';
-
-
---
--- Name: permission_id_seq; Type: SEQUENCE; Schema: public; Owner: growerlab
---
-
-CREATE SEQUENCE public.permission_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.permission_id_seq OWNER TO growerlab;
-
---
--- Name: permission_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: growerlab
---
-
-ALTER SEQUENCE public.permission_id_seq OWNED BY public.permission.id;
-
-
---
--- Name: repository; Type: TABLE; Schema: public; Owner: growerlab
---
-
-CREATE TABLE public.repository (
-    id bigint NOT NULL,
-    uuid character varying(16) NOT NULL,
-    path character varying(255) NOT NULL,
-    name character varying(255) NOT NULL,
-    namespace_id bigint NOT NULL,
-    owner_id bigint NOT NULL,
-    description text,
-    created_at bigint NOT NULL,
-    server_id integer NOT NULL,
-    server_path character varying(255) NOT NULL,
-    public boolean DEFAULT true
-);
-
-
-ALTER TABLE public.repository OWNER TO growerlab;
-
---
--- Name: TABLE repository; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON TABLE public.repository IS '仓库表';
-
-
---
--- Name: COLUMN repository.uuid; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.repository.uuid IS '仓库uuid（fork仓库相同）';
-
-
---
--- Name: COLUMN repository.path; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.repository.path IS '仓库路径';
-
-
---
--- Name: COLUMN repository.name; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.repository.name IS '仓库名';
-
-
---
--- Name: COLUMN repository.namespace_id; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.repository.namespace_id IS '命名空间id';
-
-
---
--- Name: COLUMN repository.owner_id; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.repository.owner_id IS '仓库创建者,fork后不变';
-
-
---
--- Name: COLUMN repository.description; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.repository.description IS '仓库描述';
-
-
---
--- Name: COLUMN repository.server_path; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.repository.server_path IS '在服务器中的物理路径';
-
-
---
--- Name: repository_id_seq; Type: SEQUENCE; Schema: public; Owner: growerlab
---
-
-CREATE SEQUENCE public.repository_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.repository_id_seq OWNER TO growerlab;
-
---
--- Name: repository_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: growerlab
---
-
-ALTER SEQUENCE public.repository_id_seq OWNED BY public.repository.id;
-
-
---
--- Name: server; Type: TABLE; Schema: public; Owner: growerlab
---
-
-CREATE TABLE public.server (
-    id bigint NOT NULL,
-    summary character varying(255) NOT NULL,
-    host character varying(255) NOT NULL,
-    port integer DEFAULT 9000 NOT NULL,
-    status integer DEFAULT 1 NOT NULL,
-    created_at bigint NOT NULL,
-    deleted_at bigint
-);
-
-
-ALTER TABLE public.server OWNER TO growerlab;
-
---
--- Name: COLUMN server.summary; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.server.summary IS '说明备注';
-
-
---
--- Name: COLUMN server.status; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.server.status IS '服务器状态（0关闭；1正常；2暂停）';
-
-
---
--- Name: COLUMN server.created_at; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.server.created_at IS '服务器创建时间';
-
-
---
--- Name: COLUMN server.deleted_at; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.server.deleted_at IS '是否被删除';
-
-
---
--- Name: server_id_seq; Type: SEQUENCE; Schema: public; Owner: growerlab
---
-
-CREATE SEQUENCE public.server_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.server_id_seq OWNER TO growerlab;
-
---
--- Name: server_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: growerlab
---
-
-ALTER SEQUENCE public.server_id_seq OWNED BY public.server.id;
-
-
---
--- Name: session; Type: TABLE; Schema: public; Owner: growerlab
---
-
-CREATE TABLE public.session (
-    id bigint NOT NULL,
-    owner_id bigint NOT NULL,
-    token character varying(36) NOT NULL,
-    created_at bigint NOT NULL,
-    expired_at bigint NOT NULL,
-    client_ip character varying(46) NOT NULL
-);
-
-
-ALTER TABLE public.session OWNER TO growerlab;
-
---
--- Name: COLUMN session.client_ip; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public.session.client_ip IS '用户当前登录的ip';
-
-
---
--- Name: session_id_seq; Type: SEQUENCE; Schema: public; Owner: growerlab
---
-
-CREATE SEQUENCE public.session_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.session_id_seq OWNER TO growerlab;
-
---
--- Name: session_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: growerlab
---
-
-ALTER SEQUENCE public.session_id_seq OWNED BY public.session.id;
-
-
---
--- Name: user; Type: TABLE; Schema: public; Owner: growerlab
---
-
-CREATE TABLE public."user" (
-    id bigint NOT NULL,
-    email character varying(255) NOT NULL,
-    encrypted_password character varying(255) NOT NULL,
-    username character varying(40) NOT NULL,
-    name character varying(255) NOT NULL,
-    public_email character varying(255) NOT NULL,
-    last_login_ip character varying(46) DEFAULT ''::character varying,
-    created_at bigint NOT NULL,
-    deleted_at bigint,
-    verified_at bigint,
-    last_login_at bigint,
-    register_ip character varying(46) NOT NULL,
-    is_admin boolean DEFAULT false NOT NULL,
-    namespace_id bigint DEFAULT 0 NOT NULL
-);
-
-
-ALTER TABLE public."user" OWNER TO growerlab;
-
---
--- Name: TABLE "user"; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON TABLE public."user" IS '用户表';
-
-
---
--- Name: COLUMN "user".email; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public."user".email IS '用户邮箱';
-
-
---
--- Name: COLUMN "user".encrypted_password; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public."user".encrypted_password IS '用户密码';
-
-
---
--- Name: COLUMN "user".username; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public."user".username IS '唯一性用户名（将用在url中）';
-
-
---
--- Name: COLUMN "user".name; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public."user".name IS '用户昵称';
-
-
---
--- Name: COLUMN "user".public_email; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public."user".public_email IS '公开的邮箱地址';
-
-
---
--- Name: COLUMN "user".last_login_ip; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public."user".last_login_ip IS '最后的登录ip（兼容ipv6长度）';
-
-
---
--- Name: COLUMN "user".register_ip; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public."user".register_ip IS '注册ip';
-
-
---
--- Name: COLUMN "user".namespace_id; Type: COMMENT; Schema: public; Owner: growerlab
---
-
-COMMENT ON COLUMN public."user".namespace_id IS '用户的用户域id';
-
-
---
--- Name: user_id_seq; Type: SEQUENCE; Schema: public; Owner: growerlab
---
-
-CREATE SEQUENCE public.user_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.user_id_seq OWNER TO growerlab;
-
---
--- Name: user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: growerlab
---
-
-ALTER SEQUENCE public.user_id_seq OWNED BY public."user".id;
-
-
---
--- Name: activate_code id; Type: DEFAULT; Schema: public; Owner: growerlab
---
-
-ALTER TABLE ONLY public.activate_code ALTER COLUMN id SET DEFAULT nextval('public.activate_code_id_seq'::regclass);
-
-
---
--- Name: namespace id; Type: DEFAULT; Schema: public; Owner: growerlab
---
-
-ALTER TABLE ONLY public.namespace ALTER COLUMN id SET DEFAULT nextval('public.namespace_id_seq'::regclass);
-
-
---
--- Name: permission id; Type: DEFAULT; Schema: public; Owner: growerlab
---
-
-ALTER TABLE ONLY public.permission ALTER COLUMN id SET DEFAULT nextval('public.permission_id_seq'::regclass);
-
-
---
--- Name: repository id; Type: DEFAULT; Schema: public; Owner: growerlab
---
-
-ALTER TABLE ONLY public.repository ALTER COLUMN id SET DEFAULT nextval('public.repository_id_seq'::regclass);
-
-
---
--- Name: server id; Type: DEFAULT; Schema: public; Owner: growerlab
---
-
-ALTER TABLE ONLY public.server ALTER COLUMN id SET DEFAULT nextval('public.server_id_seq'::regclass);
-
-
---
--- Name: session id; Type: DEFAULT; Schema: public; Owner: growerlab
---
-
-ALTER TABLE ONLY public.session ALTER COLUMN id SET DEFAULT nextval('public.session_id_seq'::regclass);
-
-
---
--- Name: user id; Type: DEFAULT; Schema: public; Owner: growerlab
---
-
-ALTER TABLE ONLY public."user" ALTER COLUMN id SET DEFAULT nextval('public.user_id_seq'::regclass);
-
-
---
--- Name: activate_code activate_code_pk; Type: CONSTRAINT; Schema: public; Owner: growerlab
---
-
-ALTER TABLE ONLY public.activate_code
-    ADD CONSTRAINT activate_code_pk PRIMARY KEY (id);
-
-
---
--- Name: namespace namespace_pk; Type: CONSTRAINT; Schema: public; Owner: growerlab
---
-
-ALTER TABLE ONLY public.namespace
-    ADD CONSTRAINT namespace_pk PRIMARY KEY (id);
-
-
---
--- Name: permission permission_pk; Type: CONSTRAINT; Schema: public; Owner: growerlab
---
-
-ALTER TABLE ONLY public.permission
-    ADD CONSTRAINT permission_pk PRIMARY KEY (id);
-
-
---
--- Name: repository repository_pk; Type: CONSTRAINT; Schema: public; Owner: growerlab
---
-
-ALTER TABLE ONLY public.repository
-    ADD CONSTRAINT repository_pk PRIMARY KEY (id);
-
-
---
--- Name: server server_pk; Type: CONSTRAINT; Schema: public; Owner: growerlab
---
-
-ALTER TABLE ONLY public.server
-    ADD CONSTRAINT server_pk PRIMARY KEY (id);
-
-
---
--- Name: session session_pk; Type: CONSTRAINT; Schema: public; Owner: growerlab
---
-
-ALTER TABLE ONLY public.session
-    ADD CONSTRAINT session_pk PRIMARY KEY (id);
-
-
---
--- Name: user user_pkey; Type: CONSTRAINT; Schema: public; Owner: growerlab
---
-
-ALTER TABLE ONLY public."user"
-    ADD CONSTRAINT user_pkey PRIMARY KEY (id);
-
-
---
--- Name: activate_code_code_uindex; Type: INDEX; Schema: public; Owner: growerlab
---
-
-CREATE UNIQUE INDEX activate_code_code_uindex ON public.activate_code USING btree (code);
-
-
---
--- Name: idx_ctx; Type: INDEX; Schema: public; Owner: growerlab
---
-
-CREATE INDEX idx_ctx ON public.permission USING btree (code, context_type, context_param_1, context_param_2);
-
-
---
--- Name: idx_host; Type: INDEX; Schema: public; Owner: growerlab
---
-
-CREATE INDEX idx_host ON public.server USING btree (host);
-
-
---
--- Name: idx_namespace; Type: INDEX; Schema: public; Owner: growerlab
---
-
-CREATE INDEX idx_namespace ON public.permission USING btree (namespace_id);
-
-
---
--- Name: idx_server; Type: INDEX; Schema: public; Owner: growerlab
---
-
-CREATE INDEX idx_server ON public.repository USING btree (server_id);
-
-
---
--- Name: idx_uuid; Type: INDEX; Schema: public; Owner: growerlab
---
-
-CREATE INDEX idx_uuid ON public.repository USING btree (uuid);
-
-
---
--- Name: namespace_owner_id_index; Type: INDEX; Schema: public; Owner: growerlab
---
-
-CREATE INDEX namespace_owner_id_index ON public.namespace USING btree (owner_id);
-
-
---
--- Name: namespace_owner_type_uniq; Type: INDEX; Schema: public; Owner: growerlab
---
-
-CREATE UNIQUE INDEX namespace_owner_type_uniq ON public.namespace USING btree (owner_id, type);
-
-
---
--- Name: namespace_path_uniq; Type: INDEX; Schema: public; Owner: growerlab
---
-
-CREATE UNIQUE INDEX namespace_path_uniq ON public.namespace USING btree (path);
-
-
---
--- Name: session_user_id_token_uniq; Type: INDEX; Schema: public; Owner: growerlab
---
-
-CREATE UNIQUE INDEX session_user_id_token_uniq ON public.session USING btree (owner_id, token);
-
-
---
--- Name: unq_namespace_path; Type: INDEX; Schema: public; Owner: growerlab
---
-
-CREATE UNIQUE INDEX unq_namespace_path ON public.repository USING btree (namespace_id, path);
-
-
---
--- Name: user_email_uindex; Type: INDEX; Schema: public; Owner: growerlab
---
-
-CREATE UNIQUE INDEX user_email_uindex ON public."user" USING btree (email);
-
-
---
--- Name: user_username_uindex; Type: INDEX; Schema: public; Owner: growerlab
---
-
-CREATE UNIQUE INDEX user_username_uindex ON public."user" USING btree (username);
-
-
---
--- PostgreSQL database dump complete
---
-
+-- MySQL dump 10.13  Distrib 8.0.26, for Linux (aarch64)
+--
+-- Host: localhost    Database: growerlab
+-- ------------------------------------------------------
+-- Server version	8.0.26-0ubuntu0.21.04.3
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `activate_code`
+--
+
+DROP TABLE IF EXISTS `activate_code`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `activate_code` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `code` varchar(16) NOT NULL DEFAULT '',
+  `created_at` bigint NOT NULL,
+  `used_at` bigint NOT NULL,
+  `expired_at` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unq_code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户激活码';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `namespace`
+--
+
+DROP TABLE IF EXISTS `namespace`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `namespace` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '路径',
+  `owner_id` int NOT NULL COMMENT '命名空间所有者（用户）',
+  `type` tinyint NOT NULL COMMENT '1用户 2组织',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unq_path` (`path`),
+  KEY `unq_owner` (`owner_id`,`type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='命名空间';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `permission`
+--
+
+DROP TABLE IF EXISTS `permission`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `permission` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `namespace_id` int NOT NULL COMMENT '权限所属命名空间（不依赖组织或个人，而是依赖命名空间）',
+  `context_type` int NOT NULL COMMENT '上下文类型',
+  `context_param_1` int NOT NULL COMMENT '上下文参数1',
+  `context_param_2` int NOT NULL COMMENT '上下文参数2',
+  `user_domain_type` int NOT NULL COMMENT '用户域类型',
+  `user_domain_param` int NOT NULL COMMENT '用户域参数',
+  `created_at` int NOT NULL COMMENT '创建时间',
+  `deleted_at` int DEFAULT NULL COMMENT '删除时间',
+  `code` int NOT NULL COMMENT '权限代号',
+  PRIMARY KEY (`id`),
+  KEY `idx_ctx` (`code`,`context_type`,`context_param_1`,`context_param_2`),
+  KEY `idx_namespace` (`namespace_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='权限表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `repository`
+--
+
+DROP TABLE IF EXISTS `repository`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `repository` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '仓库uuid（fork仓库相同）',
+  `fork` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否fork项目',
+  `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '仓库路径',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '仓库名',
+  `namespace_id` int NOT NULL COMMENT '仓库所属命名空间id',
+  `owner_id` int NOT NULL COMMENT '仓库创建者,fork后不变',
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '仓库描述',
+  `created_at` bigint NOT NULL,
+  `server_id` int NOT NULL COMMENT '所属服务器id',
+  `server_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '在服务器中的物理路径',
+  `public` tinyint(1) NOT NULL DEFAULT '1' COMMENT '是否公开',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unq_namespace_path` (`namespace_id`,`path`),
+  KEY `idx_server` (`server_id`),
+  KEY `idx_uuid` (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='仓库表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `server`
+--
+
+DROP TABLE IF EXISTS `server`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `server` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `summary` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '说明备注',
+  `host` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '服务器host',
+  `port` int NOT NULL DEFAULT '9000',
+  `state` tinyint(1) NOT NULL DEFAULT '1' COMMENT '服务器状态 0关闭 1正常 2暂停',
+  `created_at` bigint NOT NULL,
+  `deleted_at` bigint DEFAULT NULL COMMENT '是否被删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_host` (`host`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `session`
+--
+
+DROP TABLE IF EXISTS `session`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `session` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `owner_id` int NOT NULL,
+  `token` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
+  `created_at` bigint NOT NULL,
+  `expired_at` bigint NOT NULL,
+  `client_ip` varchar(46) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '用户当前登录的ip',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unq_owner` (`owner_id`,`token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `user`
+--
+
+DROP TABLE IF EXISTS `user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `user` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '用户邮箱',
+  `encrypted_password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '用户密码',
+  `username` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '唯一性用户名（将用在url中）',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '用户昵称',
+  `public_email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '公开的邮箱地址',
+  `last_login_ip` varchar(46) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '''''' COMMENT '最后的登录ip（兼容ipv6长度）',
+  `last_login_at` int DEFAULT NULL,
+  `created_at` bigint NOT NULL,
+  `deleted_at` int DEFAULT NULL,
+  `verified_at` int DEFAULT NULL,
+  `register_ip` varchar(46) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '注册ip',
+  `is_admin` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否管理员',
+  `namespace_id` int NOT NULL COMMENT '用户的用户域id',
+  PRIMARY KEY (`id`),
+  KEY `unq_email` (`email`),
+  KEY `unq_username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2021-11-30  9:26:47
