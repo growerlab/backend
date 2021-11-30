@@ -2,7 +2,7 @@
 
 ### 数据库
 
-MySql v8.0.27
+MySql v8.0.x
 
 KeyDB 5.x
 
@@ -11,10 +11,14 @@ KeyDB 5.x
 创建数据库名称，数据库用户，用户密码均为 growerlab 的数据库
 
 ```
-create database growerlab;
-create user growerlab with encrypted password 'growerlab';
-grant all privileges on database growerlab to growerlab;
+CREATE USER 'growerlab'@'localhost' IDENTIFIED BY 'growerlab';
+GRANT DELETE, EXECUTE, SELECT, CREATE ROUTINE, ALTER ROUTINE, CREATE VIEW, GRANT OPTION, REFERENCES, TRIGGER, UPDATE, DROP, CREATE, LOCK TABLES, EVENT, INDEX, ALTER, SHOW VIEW, INSERT, CREATE TEMPORARY TABLES 
+    ON `growerlab`.* TO 'growerlab'@'localhost';
+UPDATE mysql.user SET max_questions = 0, max_updates = 0, max_connections = 0 WHERE User = 'growerlab' AND Host = 'localhost';
+CREATE DATABASE `growerlab`;
+USE `growerlab`;
 ```
+
 
 #### 初始化数据库表结构
 
