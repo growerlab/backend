@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jmoiron/sqlx"
+
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/model/activate"
 	"github.com/growerlab/backend/app/model/db"
@@ -24,7 +26,7 @@ func Activate(payload *service.ActivationCodePayload) (result bool, err error) {
 		return false, errors.New(errors.P(errors.ActivationCode, errors.Code, errors.Invalid))
 	}
 
-	err = db.Transact(func(tx db.Queryer) error {
+	err = db.Transact(func(tx sqlx.Ext) error {
 		result, err = DoActivate(tx, payload.Code)
 		return err
 	})
@@ -37,7 +39,7 @@ func Activate(payload *service.ActivationCodePayload) (result bool, err error) {
 // 生成模版
 // 发送邮件
 //
-func DoPreActivate(tx db.Queryer, userID int64) error {
+func DoPreActivate(tx sqlx.Ext, userID int64) error {
 	code := buildActivateCode(userID)
 	err := activate.AddCode(tx, code)
 	if err != nil {
@@ -55,7 +57,7 @@ func DoPreActivate(tx db.Queryer, userID int64) error {
 
 // 验证用户邮箱激活码
 //
-func DoActivate(tx db.Queryer, code string) (bool, error) {
+func DoActivate(tx sqlx.Ext, code string) (bool, error) {
 	acode, err := activate.GetCode(tx, code)
 	if err != nil {
 		return false, err

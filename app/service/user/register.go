@@ -10,6 +10,7 @@ import (
 	"github.com/growerlab/backend/app/service"
 	"github.com/growerlab/backend/app/utils/pwd"
 	"github.com/growerlab/backend/app/utils/regex"
+	"github.com/jmoiron/sqlx"
 	"gopkg.in/asaskevich/govalidator.v9"
 )
 
@@ -92,7 +93,7 @@ func Register(payload *service.NewUserPayload, clientIP string) (bool, error) {
 		return false, err
 	}
 
-	err = db.Transact(func(tx db.Queryer) error {
+	err = db.Transact(func(tx sqlx.Ext) error {
 		user, err := buildUser(payload, clientIP)
 		if err != nil {
 			return err

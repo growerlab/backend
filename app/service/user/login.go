@@ -28,7 +28,7 @@ func Login(input *service.LoginUserPayload, ctx *gin.Context) (
 ) {
 	clientIP := ctx.ClientIP()
 
-	err = db.Transact(func(tx db.Queryer) error {
+	err = db.Transact(func(tx sqlx.Ext) error {
 		user, err := Validate(tx, input.Email, input.Password)
 		if err != nil {
 			return err

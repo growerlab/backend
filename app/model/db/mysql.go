@@ -14,11 +14,9 @@ import (
 )
 
 var (
-	// 带sql日志输出的封装
+	// DB 带sql日志输出的封装
 	DB *DBQuery
 )
-
-type Tx = sqlx.Ext
 
 func InitDatabase() error {
 	var err error
@@ -44,7 +42,7 @@ func DoInitDatabase(databaseURL string, debug bool) (*DBQuery, error) {
 	return d, nil
 }
 
-func Transact(txFn func(tx Tx) error) (err error) {
+func Transact(txFn func(tx sqlx.Ext) error) (err error) {
 	d := DB.Ext.(*sqlx.DB)
 	txa := d.MustBegin()
 
