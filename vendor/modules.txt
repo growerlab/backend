@@ -24,6 +24,8 @@ github.com/go-redis/redis/v7/internal/hashtag
 github.com/go-redis/redis/v7/internal/pool
 github.com/go-redis/redis/v7/internal/proto
 github.com/go-redis/redis/v7/internal/util
+# github.com/go-sql-driver/mysql v1.6.0
+github.com/go-sql-driver/mysql
 # github.com/golang/protobuf v1.3.2
 github.com/golang/protobuf/proto
 # github.com/google/uuid v1.1.1
@@ -45,24 +47,6 @@ github.com/hashicorp/golang-lru
 github.com/hashicorp/golang-lru/simplelru
 # github.com/ivpusic/grpool v1.0.0
 github.com/ivpusic/grpool
-# github.com/jackc/chunkreader/v2 v2.0.0
-github.com/jackc/chunkreader/v2
-# github.com/jackc/pgconn v1.1.0
-github.com/jackc/pgconn
-github.com/jackc/pgconn/internal/ctxwatch
-github.com/jackc/pgconn/stmtcache
-# github.com/jackc/pgio v1.0.0
-github.com/jackc/pgio
-# github.com/jackc/pgpassfile v1.0.0
-github.com/jackc/pgpassfile
-# github.com/jackc/pgproto3/v2 v2.0.0
-github.com/jackc/pgproto3/v2
-# github.com/jackc/pgtype v1.0.2
-github.com/jackc/pgtype
-# github.com/jackc/pgx/v4 v4.1.2
-github.com/jackc/pgx/v4
-github.com/jackc/pgx/v4/internal/sanitize
-github.com/jackc/pgx/v4/stdlib
 # github.com/jmoiron/sqlx v1.2.0
 github.com/jmoiron/sqlx
 github.com/jmoiron/sqlx/reflectx
@@ -103,27 +87,9 @@ github.com/vektah/gqlparser/validator/rules
 # golang.org/x/crypto v0.0.0-20191219195013-becbf705a915
 golang.org/x/crypto/argon2
 golang.org/x/crypto/blake2b
-golang.org/x/crypto/pbkdf2
 # golang.org/x/sys v0.0.0-20191223224216-5a3cf8467b4e
 golang.org/x/sys/cpu
 golang.org/x/sys/unix
-# golang.org/x/text v0.3.2
-golang.org/x/text/cases
-golang.org/x/text/internal
-golang.org/x/text/internal/language
-golang.org/x/text/internal/language/compact
-golang.org/x/text/internal/tag
-golang.org/x/text/language
-golang.org/x/text/runes
-golang.org/x/text/secure/bidirule
-golang.org/x/text/secure/precis
-golang.org/x/text/transform
-golang.org/x/text/unicode/bidi
-golang.org/x/text/unicode/norm
-golang.org/x/text/width
-# golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7
-golang.org/x/xerrors
-golang.org/x/xerrors/internal
 # gopkg.in/asaskevich/govalidator.v9 v9.0.0-20180315120708-ccb8e960c48f
 gopkg.in/asaskevich/govalidator.v9
 # gopkg.in/go-playground/validator.v8 v8.18.2
