@@ -2,7 +2,7 @@ debug: true
 website_url: http://localhost
 port: 8081
 db:
-  url: growerlab:growerlab@tcp(localhost:3306)/growerlab?parseTime=true&charset=utf8mb4
+  url: growerlab:growerlab@tcp(localhost:3306)/growerlab
 redis:
   host: 127.0.0.1
   port: 6379
