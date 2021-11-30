@@ -9,7 +9,7 @@ type Server struct {
 	Summary   string `db:"summary"`
 	Host      string `db:"host"`
 	Port      int    `db:"port"`
-	Status    int    `db:"status"`
+	State     int    `db:"state"`
 	CreatedAt int64  `db:"created_at"`
 	DeletedAt *int64 `db:"deleted_at"`
 }

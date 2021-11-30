@@ -15,7 +15,7 @@ var columns = []string{
 	"summary",
 	"host",
 	"port",
-	"status",
+	"state",
 	"created_at",
 	"deleted_at",
 }
