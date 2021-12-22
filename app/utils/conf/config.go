@@ -2,15 +2,16 @@ package conf
 
 import (
 	"io/ioutil"
+	"log"
 	"net/url"
+	"os"
 
 	"github.com/growerlab/backend/app/common/errors"
 	"gopkg.in/yaml.v2"
 )
 
-const (
-	DefaultConfigPath = "conf/config.yaml"
-)
+const DefaultConfigPath = "conf/config.yaml"
+const DefaultENV = "local"
 
 var (
 	config *Config
@@ -64,13 +65,28 @@ func GetConf() *Config {
 }
 
 func LoadConfig() error {
+	var foundEnv bool
+	var envConfig = make(map[string]*Config)
+
 	confBody, err := ioutil.ReadFile(DefaultConfigPath)
 	if err != nil {
 		return errors.Trace(err)
 	}
-	err = yaml.Unmarshal(confBody, &config)
+	err = yaml.Unmarshal(confBody, &envConfig)
 	if err != nil {
 		return errors.Trace(err)
 	}
+
+	env := os.Getenv("ENV")
+	if env == "" {
+		env = DefaultENV
+	}
+
+	config, foundEnv = envConfig[env]
+	if !foundEnv {
+		return errors.Errorf("config for env '%s'", env)
+	}
+
+	log.Println("Loaded config for env:", env)
 	return nil
 }
