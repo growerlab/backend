@@ -13,7 +13,8 @@ func BuildPushEmailMessage(payload *EmailPayload) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
-	e := NewEmail()
-	_, err = e.courier.Add(EmailName, DefaultField, string(body))
+	// e := NewEmail()
+	_, err = MQ.Add(EmailName, DefaultField, string(body))
+	// _, err = e.courier.Add(EmailName, DefaultField, string(body))
 	return err
 }

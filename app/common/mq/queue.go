@@ -1,16 +1,15 @@
 package mq
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
 
-	"github.com/ivpusic/grpool"
-
-	"github.com/growerlab/backend/app/utils/logger"
-
 	"github.com/go-redis/redis/v7"
 	"github.com/growerlab/backend/app/model/db"
+	"github.com/growerlab/backend/app/utils/logger"
+	"github.com/ivpusic/grpool"
 )
 
 const (
@@ -27,9 +26,20 @@ const (
 )
 
 type Payload struct {
-	ConsumerName string // 所属消息ID
-	ID           string
-	Values       map[string]interface{}
+	Consumer string // 所属消息ID
+	ID       string
+	Values   map[string]any
+}
+
+func (p *Payload) Get[T](fd string) *T  {
+	t := new(T)
+	if v, ok := p.Values[fd]; ok {
+		raw := []byte(v.(string))
+		if err := json.Unmarshal(raw, t); err != nil {
+			return t
+		}
+	}
+	return nil
 }
 
 type Consumer interface {
@@ -100,9 +110,9 @@ func (m *MessageQueue) streamKey(name string) string {
 
 func (m *MessageQueue) buildPayload(belongID string, msg *redis.XMessage) *Payload {
 	payload := &Payload{
-		ConsumerName: belongID,
-		ID:           msg.ID,
-		Values:       msg.Values,
+		Consumer: belongID,
+		ID:       msg.ID,
+		Values:   msg.Values,
 	}
 	return payload
 }
@@ -118,9 +128,9 @@ func (m *MessageQueue) Run() error {
 
 				// 延迟的目的是降低内存数据库的压力
 				if count == 0 {
-					time.Sleep(3 * time.Second)
+					time.Sleep(1 * time.Second)
 				} else {
-					time.Sleep(100 * time.Millisecond)
+					time.Sleep(50 * time.Millisecond)
 				}
 			}
 		}
@@ -144,9 +154,9 @@ func (m *MessageQueue) delivery(msg *Payload) {
 			logger.Error("[message queue] delivery err: %v", e)
 		}
 	}()
-	consumer, ok := m.consumers[msg.ConsumerName]
+	consumer, ok := m.consumers[msg.Consumer]
 	if !ok {
-		logger.Error("[message queue] not found consumer: %s", msg.ConsumerName)
+		logger.Error("[message queue] not found consumer: %s", msg.Consumer)
 		return
 	}
 	m.pool.JobQueue <- func() {
@@ -155,7 +165,7 @@ func (m *MessageQueue) delivery(msg *Payload) {
 			logger.Error("[message queue] consumer consume was err: %v", err)
 			return
 		} else { // err == nil
-			streamKey := m.streamKey(msg.ConsumerName)
+			streamKey := m.streamKey(msg.Consumer)
 			_, err = m.stream.Ack(streamKey, DefaultGroup, msg.ID)
 			if err != nil {
 				logger.Error("[message queue] ack was err: %s - %s - %v", streamKey, msg.ID, err)

@@ -21,14 +21,10 @@ type EmailPayload struct {
 var _ mq.Consumer = (*Email)(nil)
 
 func NewEmail() *Email {
-	return &Email{
-		EventBase: NewEventBase(),
-	}
+	return &Email{}
 }
 
-type Email struct {
-	EventBase
-}
+type Email struct {}
 
 func (e *Email) Name() string {
 	return EmailName
