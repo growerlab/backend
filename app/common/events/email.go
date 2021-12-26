@@ -1,9 +1,9 @@
 package events
 
 import (
-	"encoding/json"
+	// "encoding/json"
 
-	"github.com/growerlab/backend/app/common/errors"
+	// "github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/common/mq"
 )
 
@@ -24,17 +24,16 @@ func NewEmail() *Email {
 	return &Email{}
 }
 
-type Email struct {}
+type Email struct{}
 
 func (e *Email) Name() string {
 	return EmailName
 }
 
 func (e *Email) Consume(payload *mq.Payload) error {
-	p := new(EmailPayload)
-	err := json.Unmarshal([]byte(payload.Values[DefaultField].(string)), p)
-	if err != nil {
-		return errors.Trace(err)
+	p := mq.GetInPayload[EmailPayload](payload, DefaultField)
+	if p == nil {
+		return nil
 	}
 	return e.Send(p)
 }

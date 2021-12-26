@@ -1,7 +1,6 @@
 package mq
 
 import (
-	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
@@ -28,16 +27,12 @@ const (
 type Payload struct {
 	Consumer string // 所属消息ID
 	ID       string
-	Values   map[string]any
+	Values   map[string]interface{}
 }
 
-func (p *Payload) Get[T](fd string) *T  {
-	t := new(T)
+func (p *Payload) Get(fd string) interface{} {
 	if v, ok := p.Values[fd]; ok {
-		raw := []byte(v.(string))
-		if err := json.Unmarshal(raw, t); err != nil {
-			return t
-		}
+		return v
 	}
 	return nil
 }
