@@ -1,9 +1,6 @@
 package events
 
 import (
-	// "encoding/json"
-
-	// "github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/common/mq"
 )
 
