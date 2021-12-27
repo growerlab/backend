@@ -78,6 +78,6 @@ func (g *GitEvent) Consume(payload *mq.Payload) error {
 	return nil
 }
 
-func (g *GitEvent) AsyncPushGitEvent(gitEvent *GitEventPayload) error {
+func (g *GitEvent) AsyncPushGitEvent(gitEvent any) error {
 	return async(g.Name(), g.DefaultField(), gitEvent)
 }
