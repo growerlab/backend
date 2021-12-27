@@ -48,7 +48,7 @@ type GitEventPayload struct {
 }
 
 type AsyncPushGitEvent interface {
-	AsyncPushGitEvent(gitEvent *GitEventPayload) error
+	AsyncPushGitEvent(gitEvent any) error
 }
 
 var _ mq.Consumer = (*GitEvent)(nil)
