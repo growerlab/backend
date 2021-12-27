@@ -6,7 +6,7 @@ import (
 	"github.com/growerlab/backend/app/common/mq"
 )
 
-func async[T any](name, field string, t *T) error {
+func async(name, field string, t any) error {
 	body, err := json.Marshal(t)
 	if err != nil {
 		return errors.Trace(err)
