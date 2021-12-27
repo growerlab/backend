@@ -56,6 +56,10 @@ var _ mq.Consumer = (*GitEvent)(nil)
 type GitEvent struct {
 }
 
+func newGitEventConsumer() mq.Consumer {
+	return &GitEvent{}
+}
+
 func NewGitEvent() AsyncPushGitEvent {
 	return &GitEvent{}
 }
