@@ -4,10 +4,6 @@ import (
 	"github.com/growerlab/backend/app/common/mq"
 )
 
-const (
-	EmailName = "send_email"
-)
-
 type EmailPayload struct {
 	From   string `json:"from,omitempty"`
 	To     string `json:"to,omitempty"`
@@ -17,25 +13,41 @@ type EmailPayload struct {
 
 var _ mq.Consumer = (*Email)(nil)
 
-func NewEmail() *Email {
+type AsyncSender interface {
+	AsyncSendEmail(payload *EmailPayload) error
+}
+
+func newEmailConsumer() mq.Consumer {
+	return &Email{}
+}
+
+func NewEmail() AsyncSender {
 	return &Email{}
 }
 
 type Email struct{}
 
 func (e *Email) Name() string {
-	return EmailName
+	return "send_email"
+}
+
+func (e *Email) DefaultField() string {
+	return "default"
 }
 
 func (e *Email) Consume(payload *mq.Payload) error {
-	p := mq.GetInPayload[EmailPayload](payload, DefaultField)
+	p := getPayload[EmailPayload](payload, e.DefaultField())
 	if p == nil {
 		return nil
 	}
-	return e.Send(p)
+	return e.SyncSendEmail(p)
 }
 
-func (e *Email) Send(payload *EmailPayload) error {
-	// TODO 发送邮件的具体逻辑(调用其他的smtp发送库)
+func (e *Email) SyncSendEmail(payload *EmailPayload) error {
+	// TODO 发送邮件的具体逻辑(调用其他的smtp/api发送库)
 	return nil
+}
+
+func (e *Email) AsyncSendEmail(payload *EmailPayload) error {
+	return async(e.Name(), e.DefaultField(), payload)
 }

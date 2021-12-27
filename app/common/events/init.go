@@ -15,7 +15,7 @@ func InitMQ() error {
 	})
 
 	consumers := []mq.Consumer{
-		NewEmail(),
+		newEmailConsumer(),
 	}
 	err := MQ.Register(consumers...)
 	if err != nil {
