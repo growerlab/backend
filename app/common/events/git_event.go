@@ -2,7 +2,9 @@ package events
 
 import (
 	"fmt"
+
 	"github.com/growerlab/backend/app/common/mq"
+	"github.com/pkg/errors"
 )
 
 type PushSession struct {
@@ -48,7 +50,7 @@ type GitEventPayload struct {
 }
 
 type AsyncPushGitEvent interface {
-	AsyncPushGitEvent(gitEvent any) error
+	AsyncPushGitEvent(gitEvent interface{}) error
 }
 
 var _ mq.Consumer = (*GitEvent)(nil)
@@ -73,15 +75,16 @@ func (*GitEvent) DefaultField() string {
 }
 
 func (g *GitEvent) Consume(payload *mq.Payload) error {
-	gitEventPayload := getPayload[GitEventPayload](payload, g.DefaultField())
-	if payload == nil {
-		return nil
+	gitEventPayload := new(GitEventPayload)
+	err := getPayload(payload, g.DefaultField(), gitEventPayload)
+	if err != nil {
+		return errors.WithStack(err)
 	}
 	// TODO 消费消息
 	fmt.Println(gitEventPayload)
 	return nil
 }
 
-func (g *GitEvent) AsyncPushGitEvent(gitEvent any) error {
+func (g *GitEvent) AsyncPushGitEvent(gitEvent interface{}) error {
 	return async(g.Name(), g.DefaultField(), gitEvent)
 }

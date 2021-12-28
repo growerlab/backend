@@ -1,6 +1,6 @@
 module github.com/growerlab/backend
 
-go 1.18
+go 1.17
 
 require (
 	github.com/99designs/gqlgen v0.10.2

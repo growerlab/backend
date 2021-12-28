@@ -2,6 +2,7 @@ package events
 
 import (
 	"github.com/growerlab/backend/app/common/mq"
+	"github.com/pkg/errors"
 )
 
 type EmailPayload struct {
@@ -36,9 +37,10 @@ func (e *Email) DefaultField() string {
 }
 
 func (e *Email) Consume(payload *mq.Payload) error {
-	p := getPayload[EmailPayload](payload, e.DefaultField())
-	if p == nil {
-		return nil
+	p := new(EmailPayload)
+	err := getPayload(payload, e.DefaultField(), p)
+	if err == nil {
+		return errors.WithStack(err)
 	}
 	return e.SyncSendEmail(p)
 }

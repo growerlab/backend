@@ -2,11 +2,12 @@ package events
 
 import (
 	"encoding/json"
+
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/common/mq"
 )
 
-func async(name, field string, t any) error {
+func async(name, field string, t interface{}) error {
 	body, err := json.Marshal(t)
 	if err != nil {
 		return errors.Trace(err)
@@ -15,12 +16,11 @@ func async(name, field string, t any) error {
 	return err
 }
 
-func getPayload[T any](pd *mq.Payload, fd string) *T {
-	t := new(T)
+func getPayload(pd *mq.Payload, fd string, out interface{}) error {
 	if v := pd.Get(fd); v != nil {
 		raw := []byte(v.(string))
-		if err := json.Unmarshal(raw, t); err != nil {
-			return t
+		if err := json.Unmarshal(raw, out); err != nil {
+			return err
 		}
 	}
 	return nil
