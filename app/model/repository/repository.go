@@ -24,7 +24,7 @@ var (
 	}
 )
 
-func AddRepository(tx sqlx.Queryer, repo *Repository) error {
+func AddRepository(tx sqlx.Ext, repo *Repository) error {
 	sql, args, _ := sq.Insert(table).
 		Columns(columns[1:]...).
 		Values(

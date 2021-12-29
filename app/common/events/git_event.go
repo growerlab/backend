@@ -3,8 +3,8 @@ package events
 import (
 	"fmt"
 
+	"github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/common/mq"
-	"github.com/pkg/errors"
 )
 
 type PushSession struct {
@@ -78,7 +78,7 @@ func (g *GitEvent) Consume(payload *mq.Payload) error {
 	gitEventPayload := new(GitEventPayload)
 	err := getPayload(payload, g.DefaultField(), gitEventPayload)
 	if err != nil {
-		return errors.WithStack(err)
+		return errors.Trace(err)
 	}
 	// TODO 消费消息
 	fmt.Println(gitEventPayload)

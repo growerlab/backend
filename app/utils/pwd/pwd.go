@@ -2,14 +2,14 @@ package pwd
 
 import (
 	"github.com/growerlab/argon2"
-	"github.com/pkg/errors"
+	"github.com/growerlab/backend/app/common/errors"
 )
 
 var argon2Cfg = argon2.DefaultConfig()
 
 func GeneratePassword(src string) (pwd string, err error) {
 	raw, err := argon2Cfg.Hash([]byte(src), nil)
-	return string(raw.Encode()), errors.WithStack(err)
+	return string(raw.Encode()), errors.Trace(err)
 }
 
 func ComparePassword(hashedPwd string, inputPwd string) bool {
