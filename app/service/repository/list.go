@@ -1,28 +1,25 @@
 package repository
 
 import (
-	"context"
+	"github.com/gin-gonic/gin"
+	"github.com/growerlab/backend/app/service/common/session"
 
 	"github.com/growerlab/backend/app/common/errors"
 	"github.com/growerlab/backend/app/common/permission"
 	"github.com/growerlab/backend/app/model/db"
-	"github.com/growerlab/backend/app/model/namespace"
+	namespaceModel "github.com/growerlab/backend/app/model/namespace"
 	repositoryModel "github.com/growerlab/backend/app/model/repository"
-	"github.com/growerlab/backend/app/service"
 )
 
-func ListRepositories(ctx context.Context, owner string) ([]*repositoryModel.Repository, error) {
-	_, currentUserNSID, err := service.CurrentUser(ctx)
-	if err != nil {
-		return nil, err
-	}
+func ListRepositories(c *gin.Context, namespace string) ([]*repositoryModel.Repository, error) {
+	currentUserNSID := session.New(c).UserNamespace()
 
-	ns, err := namespace.GetNamespaceByPath(db.DB, owner)
+	ns, err := namespaceModel.GetNamespaceByPath(db.DB, namespace)
 	if err != nil {
 		return nil, err
 	}
 	if ns == nil {
-		return nil, errors.New(errors.NotFoundError(errors.Namespace))
+		return nil, errors.NotFoundError(errors.Namespace)
 	}
 
 	repositories, err := repositoryModel.ListRepositoriesByNamespace(db.DB, ns.ID)

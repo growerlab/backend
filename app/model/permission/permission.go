@@ -40,7 +40,7 @@ func listPermissionByCond(src sqlx.Queryer, cols []string, cond sq.Sqlizer) ([]*
 	result := make([]*Permission, 0)
 	err := sqlx.Select(src, &result, sql, args...)
 	if err != nil {
-		return nil, errors.Wrap(err, errors.SQLError())
+		return nil, errors.SQLError(err)
 	}
 	return result, nil
 }

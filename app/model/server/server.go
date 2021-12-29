@@ -44,7 +44,7 @@ func GetServer(src sqlx.Queryer, srvID int64) (*Server, error) {
 	data := make([]*Server, 0, 1)
 	err := sqlx.Select(src, &data, sql, args...)
 	if err != nil {
-		return nil, errors.Wrap(err, errors.SQLError())
+		return nil, errors.SQLError(err)
 	}
 	if len(data) == 0 {
 		return nil, nil
@@ -77,7 +77,7 @@ func ListServers(src sqlx.Queryer, statues ...statusType) ([]*Server, error) {
 	result := make([]*Server, 0)
 	err := sqlx.Select(src, &result, sql, args...)
 	if err != nil {
-		return nil, errors.Wrap(err, errors.SQLError())
+		return nil, errors.SQLError(err)
 	}
 	return result, nil
 }

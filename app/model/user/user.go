@@ -55,7 +55,7 @@ func AddUser(tx sqlx.Queryer, user *User) error {
 
 	err := tx.QueryRowx(sql, args...).Scan(&user.ID)
 	if err != nil {
-		return errors.Wrap(err, errors.SQLError())
+		return errors.SQLError(err)
 	}
 	return nil
 }
@@ -117,7 +117,7 @@ func listUsersByCond(src sqlx.Queryer, tableColumns []string, cond sq.Sqlizer) (
 	result := make([]*User, 0)
 	err := sqlx.Select(src, &result, sql, args...)
 	if err != nil {
-		return nil, errors.Wrap(err, errors.SQLError())
+		return nil, errors.SQLError(err)
 	}
 	return result, nil
 }
@@ -130,7 +130,7 @@ func ActivateUser(tx sqlx.Execer, userID int64) error {
 
 	_, err := tx.Exec(sql, args...)
 	if err != nil {
-		return errors.Wrap(err, errors.SQLError())
+		return errors.SQLError(err)
 	}
 	return nil
 }
@@ -147,7 +147,7 @@ func ListAllUsers(src sqlx.Queryer, page, per uint64) ([]*User, error) {
 		ToSql()
 
 	err := sqlx.Select(src, &users, sql)
-	return users, errors.Wrap(err, errors.SQLError())
+	return users, errors.SQLError(err)
 }
 
 func UpdateLogin(tx sqlx.Execer, userID int64, clientIP string) error {
@@ -175,7 +175,7 @@ func update(tx sqlx.Execer, cond sq.Sqlizer, valueMap map[string]interface{}) er
 
 	_, err := tx.Exec(sql, args...)
 	if err != nil {
-		return errors.Wrap(err, errors.SQLError())
+		return errors.SQLError(err)
 	}
 	return nil
 }
@@ -194,7 +194,7 @@ func GetUserByUserToken(src sqlx.Queryer, userToken string) (*User, error) {
 
 	err := sqlx.Select(src, &users, sql, args...)
 	if err != nil {
-		return nil, errors.Wrap(err, errors.SQLError())
+		return nil, errors.SQLError(err)
 	}
 	if len(users) > 0 {
 		return users[0], nil

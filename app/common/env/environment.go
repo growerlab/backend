@@ -6,6 +6,10 @@ import (
 	"github.com/growerlab/backend/app/common/errors"
 )
 
+const (
+	VarUserToken = "user-token"
+)
+
 var (
 	ErrNotExists = errors.New("not exists")
 )

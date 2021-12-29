@@ -132,7 +132,7 @@ func (d *Deleter) Exec() error {
 
 	_, err = d.builder.RunWith(d.src).Exec()
 	if err != nil {
-		return errors.Wrap(err, errors.SQLError())
+		return errors.SQLError(err)
 	}
 
 	// hook after
@@ -166,7 +166,7 @@ func (m *Model) BatchInsert(size int, getValuesFn func(int) []interface{}) error
 			builder = builder.Values(values...)
 		}
 		_, err := builder.RunWith(m.src).Exec()
-		return errors.Wrap(err, errors.SQLError())
+		return errors.SQLError(err)
 	}
 
 	for i := 0; i < size; i++ {
@@ -231,7 +231,7 @@ func (u *Updater) Exec() error {
 
 	_, err = u.builder.RunWith(u.src).Exec()
 	if err != nil {
-		return errors.Wrap(err, errors.SQLError())
+		return errors.SQLError(err)
 	}
 
 	// hook after
@@ -255,5 +255,5 @@ func (s *Selector) Query(dest interface{}) error {
 		return errors.Trace(err)
 	}
 	err = sqlx.Select(s.src, dest, query, args...)
-	return errors.Wrap(err, errors.SQLError())
+	return errors.SQLError(err)
 }

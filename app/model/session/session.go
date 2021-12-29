@@ -36,5 +36,5 @@ func AddSession(tx sqlx.Queryer, sess *Session) error {
 		ToSql()
 
 	err := tx.QueryRowx(sql, args...).Scan(&sess.ID)
-	return errors.Wrap(err, errors.SQLError())
+	return errors.SQLError(err)
 }

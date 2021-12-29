@@ -7,7 +7,6 @@ import (
 	"github.com/growerlab/backend/app/model/db"
 	nsModel "github.com/growerlab/backend/app/model/namespace"
 	userModel "github.com/growerlab/backend/app/model/user"
-	"github.com/growerlab/backend/app/service"
 	"github.com/growerlab/backend/app/utils/pwd"
 	"github.com/growerlab/backend/app/utils/regex"
 	"github.com/jmoiron/sqlx"
@@ -22,26 +21,49 @@ const (
 	UsernameLenMax = 40
 )
 
-func validateRegisterUser(payload *service.NewUserPayload) error {
+type ActivationCodePayload struct {
+	Code string `json:"code"`
+}
+
+type LoginUserPayload struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type NewUserPayload struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Username string `json:"username"`
+}
+
+type UserLoginResult struct {
+	Token         string `json:"token"`
+	NamespacePath string `json:"namespacePath"`
+	Email         string `json:"email"`
+	Name          string `json:"name"`
+	PublicEmail   string `json:"publicEmail"`
+}
+
+func validateRegisterUser(payload *NewUserPayload) error {
 	if !govalidator.IsEmail(payload.Email) {
-		return errors.New(errors.P(errors.User, errors.Email, errors.Invalid))
+		return errors.P(errors.User, errors.Email, errors.Invalid)
 	}
 	if !govalidator.IsByteLength(payload.Password, PasswordLenMin, PasswordLenMax) {
-		return errors.New(errors.P(errors.User, errors.Password, errors.InvalidLength))
+		return errors.P(errors.User, errors.Password, errors.InvalidLength)
 	}
 	if !govalidator.IsByteLength(payload.Username, UsernameLenMin, UsernameLenMax) {
-		return errors.New(errors.P(errors.User, errors.Username, errors.InvalidLength))
+		return errors.P(errors.User, errors.Username, errors.InvalidLength)
 	}
 	if !regex.Match(payload.Username, regex.UsernameRegex) {
-		return errors.New(errors.P(errors.User, errors.Username, errors.Invalid))
+		return errors.P(errors.User, errors.Username, errors.Invalid)
 	}
 	if !regex.Match(payload.Password, regex.PasswordRegex) {
-		return errors.New(errors.P(errors.User, errors.Password, errors.Invalid))
+		return errors.P(errors.User, errors.Password, errors.Invalid)
 	}
 
 	// 不允许使用的关键字
 	if _, invalidUsername := userModel.InvalidUsernameSet[payload.Username]; invalidUsername {
-		return errors.New(errors.AlreadyExistsError(errors.User, errors.AlreadyExists))
+		return errors.AlreadyExistsError(errors.User, errors.AlreadyExists)
 	}
 
 	// email, username是否已经存在
@@ -50,12 +72,12 @@ func validateRegisterUser(payload *service.NewUserPayload) error {
 		return err
 	}
 	if exists {
-		return errors.New(errors.AlreadyExistsError(errors.User, errors.AlreadyExists))
+		return errors.AlreadyExistsError(errors.User, errors.AlreadyExists)
 	}
 	return nil
 }
 
-func buildUser(payload *service.NewUserPayload, clientIP string) (*userModel.User, error) {
+func buildUser(payload *NewUserPayload, clientIP string) (*userModel.User, error) {
 	password, err := pwd.GeneratePassword(payload.Password)
 	if err != nil {
 		return nil, err
@@ -81,16 +103,15 @@ func buildNamespace(user *userModel.User) *nsModel.Namespace {
 	}
 }
 
-// 用户注册
+// Register 用户注册
 // 1. 将用户信息添加到数据库中
 // 2. 发送验证邮件（这里可以考虑使用KeyDB来建立邮件发送队列，避免重启进程后，发送任务丢失）
 // 3. Done
-//
-func Register(payload *service.NewUserPayload, clientIP string) (bool, error) {
+func Register(payload *NewUserPayload, clientIP string) error {
 	var err error
 	err = validateRegisterUser(payload)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	err = db.Transact(func(tx sqlx.Ext) error {
@@ -124,8 +145,5 @@ func Register(payload *service.NewUserPayload, clientIP string) (bool, error) {
 		}
 		return nil
 	})
-	if err != nil {
-		return false, err
-	}
-	return true, nil
+	return err
 }

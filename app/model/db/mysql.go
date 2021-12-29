@@ -31,7 +31,7 @@ func DoInitDatabase(databaseURL string, debug bool) (*DBQuery, error) {
 
 	sqlxDB, err = sqlx.Connect("mysql", databaseURL)
 	if err != nil {
-		return nil, errors.Wrap(err, errors.SQLError())
+		return nil, errors.SQLError(err)
 	}
 
 	d := &DBQuery{

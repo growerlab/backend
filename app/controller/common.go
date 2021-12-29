@@ -3,33 +3,48 @@ package controller
 import (
 	"net/http"
 
+	"github.com/growerlab/backend/app/utils/logger"
+
 	"github.com/gin-gonic/gin"
+	"github.com/growerlab/backend/app/common/errors"
 )
 
 const (
 	MaxGraphQLRequestBody = int64(1 << 20) // 1MB
 )
 
-const (
-	AuthUserToken = "auth-user-token"
-)
-
-func LimitGraphQLRequestBody(ctx *gin.Context) {
+func LimitGETRequestBody(ctx *gin.Context) {
+	if ctx.Request.Method != http.MethodGet {
+		return
+	}
 	if ctx.Request.ContentLength > MaxGraphQLRequestBody {
 		ctx.AbortWithStatus(http.StatusRequestEntityTooLarge)
 		return
 	}
 }
 
-func GetUserToken(ctx *gin.Context) string {
-	token := getValueFromHeaderOrCookie(AuthUserToken, ctx)
-	return token
-}
+func Render(c *gin.Context, payload interface{}, err error) {
+	if err != nil {
+		cerr := errors.Cause(err)
+		if e, ok := cerr.(*errors.Result); ok {
+			c.AbortWithStatusJSON(e.StatusCode, cerr)
 
-func getValueFromHeaderOrCookie(k string, ctx *gin.Context) string {
-	v := ctx.GetHeader(k)
-	if len(v) < 5 {
-		v, _ = ctx.Cookie(k)
+			if e2 := errors.Cause(e.Err); e2 != nil {
+				logger.Error("render2: %+v\n", e2)
+			}
+		} else {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, cerr)
+		}
+		logger.Error("render: %+v\n", cerr)
+
+		return
 	}
-	return v
+	if payload != nil {
+		c.AbortWithStatusJSON(http.StatusOK, payload)
+		return
+	}
+
+	c.AbortWithStatusJSON(http.StatusOK, &errors.Result{
+		Code: "ok",
+	})
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/growerlab/backend/app/model/db"
 	sessionModel "github.com/growerlab/backend/app/model/session"
 	userModel "github.com/growerlab/backend/app/model/user"
-	"github.com/growerlab/backend/app/service"
 	"github.com/growerlab/backend/app/utils/pwd"
 	"github.com/growerlab/backend/app/utils/uuid"
 	"github.com/jmoiron/sqlx"
@@ -17,19 +16,18 @@ import (
 
 const TokenExpiredTime = 24 * time.Hour * 30 // 30天过期
 
-// 用户登录
+// Login 用户登录
 //  用户邮箱是否已验证
 //	更新用户最后的登录时间/IP
 //	生成用户登录token
-//
-func Login(input *service.LoginUserPayload, ctx *gin.Context) (
-	result *service.UserLoginResult,
+func Login(ctx *gin.Context, req *LoginUserPayload) (
+	result *UserLoginResult,
 	err error,
 ) {
 	clientIP := ctx.ClientIP()
 
 	err = db.Transact(func(tx sqlx.Ext) error {
-		user, err := Validate(tx, input.Email, input.Password)
+		user, err := Validate(tx, req.Email, req.Password)
 		if err != nil {
 			return err
 		}
@@ -48,7 +46,7 @@ func Login(input *service.LoginUserPayload, ctx *gin.Context) (
 
 		// namespace
 		ns := user.Namespace()
-		result = &service.UserLoginResult{
+		result = &UserLoginResult{
 			Token:         sess.Token,
 			NamespacePath: ns.Path,
 			Name:          user.Name,
@@ -78,15 +76,15 @@ func Validate(src sqlx.Queryer, usernameOrEmail, password string) (user *userMod
 	}
 
 	if user == nil {
-		return nil, errors.New(errors.NotFoundError(errors.User))
+		return nil, errors.NotFoundError(errors.User)
 	}
 	if !user.Verified() {
-		return nil, errors.New(errors.AccessDenied(errors.User, errors.NotActivated))
+		return nil, errors.AccessDenied(errors.User, errors.NotActivated)
 	}
 
 	ok := pwd.ComparePassword(user.EncryptedPassword, password)
 	if !ok {
-		return nil, errors.New(errors.InvalidParameterError(errors.User, errors.Password, errors.NotEqual))
+		return nil, errors.InvalidParameterError(errors.User, errors.Password, errors.NotEqual)
 	}
 	return user, nil
 }

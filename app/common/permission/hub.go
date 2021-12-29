@@ -131,7 +131,7 @@ func (p *Hub) CheckCache(namespaceID int64, c *context.Context, code int, rebuil
 	}
 
 	if b := p.DBCtx.MemDB.HExists(keyUser, fieldContextPermission); !b.Val() {
-		return errors.New(errors.PermissionError(errors.NoPermission))
+		return errors.PermissionError(errors.NoPermission)
 	}
 	return nil
 }

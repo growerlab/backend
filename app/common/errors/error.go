@@ -57,50 +57,86 @@ const (
 	NoPermission = "NoPermission"
 )
 
+var httpCodeSet = map[string]int{
+	invalidParameter:  400,
+	notFoundError:     404,
+	graphQLError:      400,
+	alreadyExists:     409,
+	accessDeniedError: 403,
+	sqlError:          500,
+	unauthorized:      401,
+	permissionError:   403,
+	repositoryError:   500,
+}
+
+type Result struct {
+	Err        error
+	Code       string `json:"code"`
+	StatusCode int    `json:"_"`
+	Message    string `json:"message"`
+}
+
+func (e *Result) Error() string {
+	return e.Message
+}
+
+func (e *Result) Cause() error {
+	return e
+}
+
 var P = InvalidParameterError
 
-func InvalidParameterError(model, field, reason string) string {
-	return mustCode(invalidParameter, model, field, reason)
+func InvalidParameterError(model, field, reason string) error {
+	return mustCode(nil, invalidParameter, model, field, reason)
 }
 
-func NotFoundError(model string) string {
-	return mustCode(notFoundError, model)
+func NotFoundError(model string) error {
+	return mustCode(nil, notFoundError, model)
 }
 
-func AlreadyExistsError(model, reason string) string {
-	return mustCode(alreadyExists, model, reason)
+func AlreadyExistsError(model, reason string) error {
+	return mustCode(nil, alreadyExists, model, reason)
 }
 
-func SQLError() string {
-	return mustCode(sqlError)
+func SQLError(err error) error {
+	return mustCode(err, sqlError)
 }
 
-func GraphQLError() string {
-	return mustCode(graphQLError)
+func GraphQLError() error {
+	return mustCode(nil, graphQLError)
 }
 
-func Unauthorize() string {
-	return mustCode(unauthorized)
+func Unauthorize() error {
+	return mustCode(nil, unauthorized)
 }
 
-func AccessDenied(model, reason string) string {
-	return mustCode(accessDeniedError, model, reason)
+func AccessDenied(model, reason string) error {
+	return mustCode(nil, accessDeniedError, model, reason)
 }
 
-func PermissionError(reason string) string {
-	return mustCode(permissionError, reason)
+func PermissionError(reason string) error {
+	return mustCode(nil, permissionError, reason)
 }
 
-func RepositoryError(reason string) string {
-	return mustCode(repositoryError, reason)
+func RepositoryError(reason string) error {
+	return mustCode(nil, repositoryError, reason)
 }
 
 // 必须调用该方法生成<xxx>字符串，便于前端解析数据
-func mustCode(parts ...string) string {
+func mustCode(err error, parts ...string) error {
 	if len(parts) == 0 {
 		panic("parts is required")
 	}
-	return fmt.Sprintf("<%s>", strings.Join(parts, "."))
+	hc, ok := httpCodeSet[parts[0]]
+	if !ok {
+		hc = 500
+	}
+	return Trace(&Result{
+		Err:        err,
+		Code:       parts[0],
+		StatusCode: hc,
+		Message:    fmt.Sprintf("<%s>", strings.Join(parts, ".")),
+	})
 }
 
 // 封装（避免在项目中使用时，引用多个包）

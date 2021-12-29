@@ -1,6 +1,0 @@
-type Namespace {
-  id: ID!
-  path: String!
-  ownerId: Int!
-  Type: Int!
-}

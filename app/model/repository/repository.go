@@ -44,7 +44,7 @@ func AddRepository(tx sqlx.Ext, repo *Repository) error {
 
 	err := tx.QueryRowx(sql, args...).Scan(&repo.ID)
 	if err != nil {
-		return errors.Wrap(err, errors.SQLError())
+		return errors.SQLError(err)
 	}
 	return nil
 }
@@ -99,7 +99,7 @@ func listRepositoriesByCond(src sqlx.Queryer, tableColumns []string, cond sq.Sql
 	result := make([]*Repository, 0)
 	err := sqlx.Select(src, &result, sql, args...)
 	if err != nil {
-		return nil, errors.Wrap(err, errors.SQLError())
+		return nil, errors.SQLError(err)
 	}
 	return result, nil
 }

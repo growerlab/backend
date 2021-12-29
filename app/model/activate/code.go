@@ -33,7 +33,7 @@ func AddCode(tx sqlx.Execer, code *ActivationCode) error {
 
 	_, err := tx.Exec(sql, args...)
 	if err != nil {
-		return errors.Wrap(err, errors.SQLError())
+		return errors.SQLError(err)
 	}
 	return nil
 }
@@ -48,7 +48,7 @@ func GetCode(src sqlx.Queryer, code string) (*ActivationCode, error) {
 	var data = make([]*ActivationCode, 0)
 	err := sqlx.Select(src, &data, sql, args...)
 	if err != nil {
-		return nil, errors.Wrap(err, errors.SQLError())
+		return nil, errors.SQLError(err)
 	}
 	if len(data) > 0 {
 		return data[0], nil
@@ -65,7 +65,7 @@ func ActivateCode(tx sqlx.Execer, code string) error {
 
 	_, err := tx.Exec(sql, args...)
 	if err != nil {
-		return errors.Wrap(err, errors.SQLError())
+		return errors.SQLError(err)
 	}
 	return nil
 }
