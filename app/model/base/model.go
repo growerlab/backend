@@ -83,6 +83,63 @@ func (m *Model) Update(set map[string]interface{}, term sq.Sqlizer) *Updater {
 	}
 }
 
+func (m *Model) Delete(term sq.Sqlizer) *Deleter {
+	where := sq.And{}
+	where = append(where, term)
+
+	// 提取出删除条件
+	values := make(map[string]interface{})
+	switch term.(type) {
+	case sq.And:
+		ands := term.(sq.And)
+		for i := range ands {
+			if eq, ok := ands[i].(sq.Eq); ok {
+				for k, v := range eq {
+					values[k] = v
+				}
+			}
+		}
+	case sq.Eq:
+		eq := term.(sq.Eq)
+		for k, v := range eq {
+			values[k] = v
+		}
+	}
+
+	builder := sq.Delete(m.table).Where(where)
+
+	return &Deleter{
+		src:     m.src,
+		table:   m.table,
+		values:  values,
+		builder: builder,
+	}
+}
+
+type Deleter struct {
+	src     sqlx.Ext
+	table   string
+	values  map[string]interface{}
+	builder sq.DeleteBuilder
+}
+
+func (d *Deleter) Exec() error {
+	// hook before
+	err := hook.Effect(d.src, d.table, ActionDelete, TenseBefore, d.values)
+	if err != nil {
+		return err
+	}
+
+	_, err = d.builder.RunWith(d.src).Exec()
+	if err != nil {
+		return errors.Wrap(err, errors.SQLError())
+	}
+
+	// hook after
+	err = hook.Effect(d.src, d.table, ActionDelete, TenseAfter, d.values)
+	return err
+}
+
 func (m *Model) Insert(values []interface{}) *Inserter {
 	if len(values) == 0 {
 		panic("'values' must required")
@@ -144,7 +201,7 @@ func (i *Inserter) Exec() error {
 	// hook before
 	err := hook.Effect(i.src, i.table, ActionCreate, TenseBefore, set)
 	if err != nil {
-		return errors.Trace(err)
+		return err
 	}
 
 	i.builder = i.builder.Values(i.values...)
@@ -155,7 +212,7 @@ func (i *Inserter) Exec() error {
 
 	// hook after
 	err = hook.Effect(i.src, i.table, ActionCreate, TenseAfter, set)
-	return errors.Trace(err)
+	return err
 }
 
 type Updater struct {
