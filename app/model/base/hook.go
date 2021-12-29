@@ -34,7 +34,7 @@ type Act struct {
 	Tense             Tense                // 动作的时态（fefore、after）
 	Table             string               // 订阅的表
 	Columns           []string             // 订阅的列
-	CallbackFn        func(*Context) error // 执行回调,interface{}表示传入的model
+	CallbackFn        func(*Context) error // 执行回调
 	IgnoreCallBackErr bool                 // 当执行回调失败，是否终止事务
 }
 
