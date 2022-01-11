@@ -38,10 +38,10 @@ type NewUserPayload struct {
 
 type UserLoginResult struct {
 	Token         string `json:"token"`
-	NamespacePath string `json:"namespacePath"`
+	NamespacePath string `json:"namespace_path"`
 	Email         string `json:"email"`
 	Name          string `json:"name"`
-	PublicEmail   string `json:"publicEmail"`
+	PublicEmail   string `json:"public_email"`
 }
 
 func validateRegisterUser(payload *NewUserPayload) error {
