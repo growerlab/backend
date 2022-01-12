@@ -14,18 +14,21 @@ import (
 func Run(addr string) error {
 	engine := gin.Default()
 
+	engine.Use(controller.CORSForLocal)
+
 	apiV1 := engine.Group("/api/v1", controller.LimitGETRequestBody)
 	repositories := apiV1.Group("/repositories")
 	{
 		repositories.POST("/:namespace/create", controller.CreateRepository)
 		repositories.GET("/:namespace/list", controller.Repositories)
-		repositories.GET("/:namespace/:name", controller.Repository)
+		repositories.GET("/:namespace/detail/:name", controller.Repository)
 	}
-	users := apiV1.Group("/users")
+
+	users := apiV1.Group("/auth")
 	{
 		users.POST("/register", controller.RegisterUser)
 		users.POST("/activate", controller.ActivateUser)
-		users.GET("/login", controller.LoginUser)
+		users.POST("/login", controller.LoginUser)
 	}
 
 	return runServer(addr, engine)

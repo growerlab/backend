@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/growerlab/backend/app/utils/conf"
 	"github.com/growerlab/backend/app/utils/logger"
 
 	"github.com/gin-gonic/gin"
@@ -47,4 +48,20 @@ func Render(c *gin.Context, payload interface{}, err error) {
 	c.AbortWithStatusJSON(http.StatusOK, &errors.Result{
 		Code: "ok",
 	})
+}
+
+// CORSForLocal 处理本地访问的CORS
+func CORSForLocal(c *gin.Context) {
+	if c.Request.Method != http.MethodOptions {
+		return
+	}
+	if !conf.GetConf().Debug {
+		return
+	}
+	reqAccessHeaders := c.Request.Header.Get("Access-Control-Request-Headers")
+
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
+	c.Header("Access-Control-Allow-Headers", reqAccessHeaders)
+	c.AbortWithStatus(200)
 }

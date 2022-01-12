@@ -77,11 +77,11 @@ type Result struct {
 }
 
 func (e *Result) Error() string {
-	return e.Message
+	return fmt.Sprintf("%s:%s", e.Message, e.Err.Error())
 }
 
 func (e *Result) Cause() error {
-	return e
+	return e.Err
 }
 
 var P = InvalidParameterError

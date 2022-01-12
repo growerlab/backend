@@ -1,6 +1,8 @@
 package app
 
 import (
+	"log"
+
 	"github.com/growerlab/backend/app/common/events"
 	"github.com/growerlab/backend/app/common/notify"
 	"github.com/growerlab/backend/app/common/permission"
@@ -22,6 +24,7 @@ func init() {
 
 func onStart(fn func() error) {
 	if err := fn(); err != nil {
+		log.Printf("%+v\n", err)
 		panic(err)
 	}
 }

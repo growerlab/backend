@@ -25,4 +25,5 @@ dev:
   <<: *base
 
 production:
+  debug: false
   <<: *base
