@@ -30,6 +30,10 @@ func ActivateUser(c *gin.Context) {
 
 func LoginUser(c *gin.Context) {
 	var input user.LoginUserPayload
+	if err := c.BindJSON(&input); err != nil {
+		Render(c, nil, err)
+		return
+	}
 	result, err := user.Login(c, &input)
 	Render(c, result, err)
 }
