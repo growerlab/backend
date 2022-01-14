@@ -24,11 +24,11 @@ func Run(addr string) error {
 		repositories.GET("/:namespace/detail/:name", controller.Repository)
 	}
 
-	users := apiV1.Group("/auth")
+	auth := apiV1.Group("/auth")
 	{
-		users.POST("/register", controller.RegisterUser)
-		users.POST("/activate", controller.ActivateUser)
-		users.POST("/login", controller.LoginUser)
+		auth.POST("/register", controller.RegisterUser)
+		auth.POST("/activate", controller.ActivateUser)
+		auth.POST("/login", controller.LoginUser)
 	}
 
 	return runServer(addr, engine)
