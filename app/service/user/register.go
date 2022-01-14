@@ -25,11 +25,6 @@ type ActivationCodePayload struct {
 	Code string `json:"code"`
 }
 
-type LoginUserPayload struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
 type NewUserPayload struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`

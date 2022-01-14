@@ -15,54 +15,14 @@ import (
 )
 
 const TokenExpiredTime = 24 * time.Hour * 30 // 30天过期
+const tokenField = "auth-user-token"
 
-// Login 用户登录
-//  用户邮箱是否已验证
-//	更新用户最后的登录时间/IP
-//	生成用户登录token
-func Login(ctx *gin.Context, req *LoginUserPayload) (
-	result *UserLoginResult,
-	err error,
-) {
-	clientIP := ctx.ClientIP()
-
-	err = db.Transact(func(tx sqlx.Ext) error {
-		user, err := Validate(tx, req.Email, req.Password)
-		if err != nil {
-			return err
-		}
-
-		err = userModel.UpdateLogin(tx, user.ID, clientIP)
-		if err != nil {
-			return err
-		}
-
-		// 生成TOKEN返回给客户端
-		sess := buildSession(user.ID, clientIP)
-		err = sessionModel.AddSession(tx, sess)
-		if err != nil {
-			return err
-		}
-
-		// namespace
-		ns := user.Namespace()
-		result = &UserLoginResult{
-			Token:         sess.Token,
-			NamespacePath: ns.Path,
-			Name:          user.Name,
-			Email:         user.Email,
-			PublicEmail:   user.PublicEmail,
-		}
-		ctx.SetCookie("auth-user-token", sess.Token, 0, "/", ctx.Request.Host, false, false)
-		return err
-	})
-	if err != nil {
-		return nil, err
-	}
-	return
+type LoginUserPayload struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
-func Validate(src sqlx.Queryer, usernameOrEmail, password string) (user *userModel.User, err error) {
+func (r *LoginUserPayload) validate(src sqlx.Queryer, usernameOrEmail, password string) (user *userModel.User, err error) {
 	if strings.Contains(usernameOrEmail, "@") {
 		user, err = userModel.GetUserByEmail(src, usernameOrEmail)
 		if err != nil {
@@ -87,6 +47,52 @@ func Validate(src sqlx.Queryer, usernameOrEmail, password string) (user *userMod
 		return nil, errors.InvalidParameterError(errors.User, errors.Password, errors.NotEqual)
 	}
 	return user, nil
+}
+
+// Login 用户登录
+//  用户邮箱是否已验证
+//	更新用户最后的登录时间/IP
+//	生成用户登录token
+func Login(ctx *gin.Context, req *LoginUserPayload) (
+	result *UserLoginResult,
+	err error,
+) {
+	clientIP := ctx.ClientIP()
+
+	user, err := req.validate(db.DB, req.Email, req.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Transact(func(tx sqlx.Ext) error {
+		err = userModel.UpdateLogin(tx, user.ID, clientIP)
+		if err != nil {
+			return err
+		}
+
+		// 生成TOKEN返回给客户端
+		sess := buildSession(user.ID, clientIP)
+		err = sessionModel.AddSession(tx, sess)
+		if err != nil {
+			return err
+		}
+
+		// namespace
+		ns := user.Namespace()
+		result = &UserLoginResult{
+			Token:         sess.Token,
+			NamespacePath: ns.Path,
+			Name:          user.Name,
+			Email:         user.Email,
+			PublicEmail:   user.PublicEmail,
+		}
+		ctx.SetCookie(tokenField, sess.Token, 0, "/", ctx.Request.Host, false, false)
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+	return
 }
 
 func buildSession(userID int64, clientIP string) *sessionModel.Session {
