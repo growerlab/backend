@@ -29,7 +29,7 @@ func ActivateUser(c *gin.Context) {
 }
 
 func LoginUser(c *gin.Context) {
-	var input user.LoginUserPayload
+	var input user.LoginBasicAuth
 	if err := c.BindJSON(&input); err != nil {
 		Render(c, nil, err)
 		return
