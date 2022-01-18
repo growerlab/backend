@@ -70,18 +70,20 @@ var httpCodeSet = map[string]int{
 }
 
 type Result struct {
-	Err        error
+	Err        error  `json:"-"`
 	Code       string `json:"code"`
-	StatusCode int    `json:"_"`
+	StatusCode int    `json:"-"`
 	Message    string `json:"message"`
 }
 
 func (e *Result) Error() string {
-	return fmt.Sprintf("%s:%s", e.Message, e.Err.Error())
-}
-
-func (e *Result) Cause() error {
-	return e.Err
+	var sb = strings.Builder{}
+	sb.WriteString(e.Message)
+	if e.Err != nil {
+		sb.WriteString(": ")
+		sb.WriteString(e.Err.Error())
+	}
+	return sb.String()
 }
 
 var P = InvalidParameterError

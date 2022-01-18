@@ -44,7 +44,7 @@ func runServer(addr string, engine *gin.Engine) error {
 
 	// 平滑关闭
 	notify.Subscribe(func() {
-		timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		timeoutCtx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 		server.Shutdown(timeoutCtx)
 	})

@@ -12,6 +12,7 @@ import (
 	"github.com/growerlab/backend/app/utils/pwd"
 	"github.com/growerlab/backend/app/utils/uuid"
 	"github.com/jmoiron/sqlx"
+	"gopkg.in/asaskevich/govalidator.v9"
 )
 
 const TokenExpiredTime = 24 * time.Hour * 30 // 30天过期
@@ -28,7 +29,7 @@ func Login(ctx *gin.Context, req *LoginBasicAuth) (
 	loginService := NewLoginService(ctx.ClientIP(), req)
 	result, err = loginService.Do(db.DB)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, err
 	}
 	loginService.SetCookie(ctx)
 	return
@@ -62,7 +63,6 @@ func (l *LoginService) Do(src sqlx.Ext) (
 	result *UserLoginResult,
 	err error,
 ) {
-
 	user, err := l.prepare(src)
 	if err != nil {
 		return nil, err
@@ -96,6 +96,13 @@ func (l *LoginService) Do(src sqlx.Ext) (
 }
 
 func (r *LoginService) prepare(src sqlx.Queryer) (user *userModel.User, err error) {
+	switch true {
+	case !govalidator.IsByteLength(r.auth.Email, 1, 255):
+		return nil, errors.InvalidParameterError(errors.User, errors.Email, errors.Empty)
+	case !govalidator.IsByteLength(r.auth.Password, PasswordLenMin, PasswordLenMax):
+		return nil, errors.InvalidParameterError(errors.User, errors.Password, errors.InvalidLength)
+	}
+
 	if strings.Contains(r.auth.Email, "@") {
 		user, err = userModel.GetUserByEmail(src, r.auth.Email)
 		if err != nil {
