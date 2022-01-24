@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	PasswordLenMin = 8
+	PasswordLenMin = 7
 	PasswordLenMax = 32
 
 	UsernameLenMin = 4

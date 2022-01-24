@@ -43,8 +43,7 @@ func DoInitDatabase(databaseURL string, debug bool) (*DBQuery, error) {
 }
 
 func Transact(txFn func(tx sqlx.Ext) error) (err error) {
-	d := DB.Ext.(*sqlx.DB)
-	txa := d.MustBegin()
+	txa := DB.MustBegin()
 
 	defer func() {
 		if p := recover(); p != nil {
@@ -103,4 +102,19 @@ func (d *DBQuery) QueryRowx(query string, args ...interface{}) *sqlx.Row {
 func (d *DBQuery) Exec(query string, args ...interface{}) (sql.Result, error) {
 	d.Println(query, args...)
 	return d.Ext.Exec(query, args...)
+}
+
+func (d *DBQuery) MustBegin() *DBQuery {
+	d.Println("begin")
+	return &DBQuery{Ext: d.Ext.(*sqlx.DB).MustBegin(), debug: d.debug, logger: d.logger}
+}
+
+func (d *DBQuery) Commit() error {
+	d.Println("commit")
+	return d.Ext.(*sqlx.Tx).Commit()
+}
+
+func (d *DBQuery) Rollback() error {
+	d.Println("rollback")
+	return d.Ext.(*sqlx.Tx).Rollback()
 }

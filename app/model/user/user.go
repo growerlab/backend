@@ -181,13 +181,13 @@ func update(tx sqlx.Execer, cond sq.Sqlizer, valueMap map[string]interface{}) er
 }
 
 func GetUserByUserToken(src sqlx.Queryer, userToken string) (*User, error) {
-	tableName := session.TableName()
+	sessTableName := session.TableName
 	joinColumns := utils.SqlColumnsComplementTable(tableNameMark, columns...)
 	sql, args, _ := sq.Select(joinColumns...).
 		From(tableNameMark).
-		Join(fmt.Sprintf("%s ON %s.token = ? AND %s.expired_at >= ?", tableName, tableName, tableName),
+		Join(fmt.Sprintf("%s ON %s.token = ? AND %s.expired_at >= ?", sessTableName, sessTableName, sessTableName),
 			userToken, time.Now().Unix()).
-		Where(fmt.Sprintf("%s.id = %s.owner_id", tableNameMark, tableName)).
+		Where(fmt.Sprintf("%s.id = %s.owner_id", tableNameMark, sessTableName)).
 		ToSql()
 
 	users := make([]*User, 0, 1)

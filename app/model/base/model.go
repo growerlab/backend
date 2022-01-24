@@ -11,28 +11,23 @@ import (
 type Model struct {
 	src sqlx.Ext
 
-	table   string
-	alias   string
-	columns []string
+	table string
+	alias string
 
 	defaultTerms       sq.And
-	ignoreDefaultTerms bool
+	ignoreDefaultTerms bool // 是否忽略默认条件
 }
 
-func NewModel(src sqlx.Ext, table string) *Model {
+func NewModel(src sqlx.Ext, table string, defaultTerms sq.And) *Model {
 	return &Model{
-		src:   src,
-		table: table,
+		src:          src,
+		table:        table,
+		defaultTerms: defaultTerms,
 	}
 }
 
 func (m *Model) Alias(a string) *Model {
 	m.alias = a
-	return m
-}
-
-func (m *Model) Columns(columns []string) *Model {
-	m.columns = columns
 	return m
 }
 
@@ -50,11 +45,11 @@ func (m *Model) Select(term sq.Sqlizer) *Selector {
 	}
 
 	table := m.getTable()
-	builder := sq.Select(m.columns...).From(table).Where(where)
-
+	builder := sq.Select().From(table).Where(where)
 	return &Selector{
-		src:     m.src,
-		builder: builder,
+		SelectBuilder: builder,
+		src:           m.src,
+		tableName:     table,
 	}
 }
 
@@ -140,28 +135,29 @@ func (d *Deleter) Exec() error {
 	return err
 }
 
-func (m *Model) Insert(values []interface{}) *Inserter {
-	if len(values) == 0 {
-		panic("'values' must required")
+func (m *Model) Insert(columns []string, values []interface{}) *Inserter {
+	if len(values) == 0 || len(columns) == 0 {
+		panic("'columns' or 'values' must required")
 	}
 
-	builder := sq.Insert(m.table).Columns(m.columns...)
+	builder := sq.Insert(m.table).Columns(columns...)
 
 	return &Inserter{
 		src:     m.src,
 		table:   m.table,
+		columns: columns,
 		values:  values,
 		builder: builder,
 	}
 }
 
 // BatchInsert 批量插入，不会触发hook
-func (m *Model) BatchInsert(size int, getValuesFn func(int) []interface{}) error {
+func (m *Model) BatchInsert(columns []string, size int, getValuesFn func(int) []interface{}) error {
 	const maxValues = 1000
 	valueBucket := make([][]interface{}, 0, maxValues)
 
 	batchInsertFunc := func(mulValues [][]interface{}) error {
-		builder := sq.Insert(m.table).Columns(m.columns...)
+		builder := sq.Insert(m.table).Columns(columns...)
 		for _, values := range mulValues {
 			builder = builder.Values(values...)
 		}
@@ -191,8 +187,7 @@ type Inserter struct {
 	builder sq.InsertBuilder
 }
 
-func (i *Inserter) Exec() error {
-
+func (i *Inserter) Exec() (int64, error) {
 	// 单个插入数据
 	set := make(map[string]interface{})
 	for v := range i.values {
@@ -201,18 +196,18 @@ func (i *Inserter) Exec() error {
 	// hook before
 	err := hook.Effect(i.src, i.table, ActionCreate, TenseBefore, set)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	i.builder = i.builder.Values(i.values...)
-	_, err = i.builder.RunWith(i.src).Exec()
+	result, err := sq.ExecWith(i.src, i.builder)
 	if err != nil {
-		return errors.Wrap(err, "insert error")
+		return 0, errors.Wrap(err, "insert error")
 	}
 
 	// hook after
 	err = hook.Effect(i.src, i.table, ActionCreate, TenseAfter, set)
-	return err
+	return result.LastInsertId()
 }
 
 type Updater struct {
@@ -240,17 +235,19 @@ func (u *Updater) Exec() error {
 }
 
 type Selector struct {
-	src     sqlx.Ext
-	builder sq.SelectBuilder
+	sq.SelectBuilder
+	src       sqlx.Ext
+	tableName string
 }
 
 func (s *Selector) BuildSQL(fn func(builder sq.SelectBuilder) sq.SelectBuilder) *Selector {
-	s.builder = fn(s.builder)
-	return s
+	// s.builder = fn(s.builder)
+	panic("not support")
+	// return s
 }
 
 func (s *Selector) Query(dest interface{}) error {
-	query, args, err := s.builder.ToSql()
+	query, args, err := s.ToSql()
 	if err != nil {
 		return errors.Trace(err)
 	}

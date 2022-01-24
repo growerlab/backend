@@ -76,7 +76,7 @@ func (l *LoginService) Do(src sqlx.Ext) (
 
 		// 生成TOKEN返回给客户端
 		l.session = l.buildAuthSession(user.ID, l.ip)
-		err = sessionModel.AddSession(tx, l.session)
+		err = sessionModel.New(tx).Add(l.session)
 		if err != nil {
 			return err
 		}

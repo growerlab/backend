@@ -1,13 +1,10 @@
 package session
 
 import (
-	sq "github.com/Masterminds/squirrel"
 	"github.com/growerlab/backend/app/common/errors"
-	"github.com/growerlab/backend/app/model/utils"
-	"github.com/jmoiron/sqlx"
 )
 
-const tableName = "session"
+const TableName = "session"
 
 var columns = []string{
 	"id",
@@ -18,23 +15,15 @@ var columns = []string{
 	"expired_at",
 }
 
-func TableName() string {
-	return tableName
-}
-
-func AddSession(tx sqlx.Queryer, sess *Session) error {
-	sql, args, _ := sq.Insert(tableName).
-		Columns(columns[1:]...).
-		Values(
-			sess.OwnerID,
-			sess.Token,
-			sess.ClientIP,
-			sess.CreatedAt,
-			sess.ExpiredAt,
-		).
-		Suffix(utils.SqlReturning("id")).
-		ToSql()
-
-	err := tx.QueryRowx(sql, args...).Scan(&sess.ID)
+func (m *model) Add(sess *Session) error {
+	values := []interface{}{
+		sess.OwnerID,
+		sess.Token,
+		sess.ClientIP,
+		sess.CreatedAt,
+		sess.ExpiredAt,
+	}
+	var err error
+	sess.ID, err = m.Insert(columns[1:], values).Exec()
 	return errors.SQLError(err)
 }

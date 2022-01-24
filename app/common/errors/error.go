@@ -101,7 +101,7 @@ func AlreadyExistsError(model, reason string) error {
 }
 
 func SQLError(err error) error {
-	return mustCode(err, sqlError)
+	return mustErr(err, sqlError)
 }
 
 func GraphQLError() error {
@@ -122,6 +122,13 @@ func PermissionError(reason string) error {
 
 func RepositoryError(reason string) error {
 	return mustCode(nil, repositoryError, reason)
+}
+
+func mustErr(err error, parts ...string) error {
+	if err == nil {
+		return nil
+	}
+	return mustCode(err, parts...)
 }
 
 // 必须调用该方法生成<xxx>字符串，便于前端解析数据

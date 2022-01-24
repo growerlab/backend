@@ -31,7 +31,7 @@ type Context struct {
 type Act struct {
 	Name              string               // 可以自定义一个名字
 	Action            Action               // 订阅的动作
-	Tense             Tense                // 动作的时态（fefore、after）
+	Tense             Tense                // 动作的时态（before、after）
 	Table             string               // 订阅的表
 	Columns           []string             // 订阅的列
 	CallbackFn        func(*Context) error // 执行回调
