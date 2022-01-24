@@ -92,7 +92,7 @@ func (l *LoginService) Do(src sqlx.Ext) (
 		}
 		return nil
 	})
-	return nil, err
+	return result, err
 }
 
 func (r *LoginService) prepare(src sqlx.Queryer) (user *userModel.User, err error) {
