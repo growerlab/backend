@@ -60,7 +60,6 @@ func Transact(txFn func(tx sqlx.Ext) error) (err error) {
 			_ = txa.Rollback()
 			return
 		}
-		DB.Println("commit")
 		err = errors.Trace(txa.Commit())
 	}()
 	return txFn(txa)
