@@ -1,3 +1,10 @@
+/* database user */
+CREATE USER 'growerlab'@'localhost' IDENTIFIED BY 'growerlab';
+ALTER USER 'growerlab'@'localhost' WITH MAX_QUERIES_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0;
+GRANT DELETE, SELECT, EXECUTE, CREATE ROUTINE, ALTER ROUTINE, GRANT OPTION, REFERENCES, CREATE VIEW, TRIGGER, UPDATE, DROP, CREATE, LOCK TABLES, EVENT, INDEX, ALTER, SHOW VIEW, INSERT, CREATE TEMPORARY TABLES ON `growerlab`.* TO 'growerlab'@'localhost';
+
+
+/* admin user */
 INSERT INTO namespace (id, path, owner_id, type) VALUES (1, 'admin', 1, 1);
 
 INSERT INTO `user` (id, email, encrypted_password, username, name, public_email,
